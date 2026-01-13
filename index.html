@@ -111,6 +111,10 @@
                     <i class="fas fa-receipt"></i>
                     <span>הוצאות</span>
                 </a>
+                <a href="#notices" class="menu-item" data-section="notices">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>הודעות לדיירים</span>
+                </a>
                 <a href="#reports" class="menu-item" data-section="reports">
                     <i class="fas fa-file-alt"></i>
                     <span>דוחות</span>
@@ -581,6 +585,120 @@
                     <div class="summary-row">
                         <span>סה"כ הוצאות שנתי:</span>
                         <strong class="total-amount" id="yearlyExpenseTotal">₪0</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notices Section (הודעות לדיירים) -->
+            <section id="noticesSection" class="content-section">
+                <div class="section-header">
+                    <h1><i class="fas fa-bullhorn"></i> הודעות לדיירים</h1>
+                    <p class="section-subtitle">צור הודעות למען הדיירים להדפסה על לוח המודעות</p>
+                </div>
+
+                <!-- Create Notice Card -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-plus-circle"></i> צור הודעה חדשה</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="noticeForm">
+                            <!-- Notice Type -->
+                            <div class="form-group">
+                                <label for="noticeType">סוג הודעה *</label>
+                                <select id="noticeType" class="form-select" required>
+                                    <option value="">-- בחר סוג הודעה --</option>
+                                    <option value="payment">הודעת תשלום</option>
+                                    <option value="general">הודעה כללית</option>
+                                    <option value="maintenance">הודעת תחזוקה</option>
+                                    <option value="meeting">הודעת אסיפה</option>
+                                    <option value="urgent">הודעה דחופה</option>
+                                </select>
+                            </div>
+
+                            <!-- Subject -->
+                            <div class="form-group">
+                                <label for="noticeSubject">נושא ההודעה *</label>
+                                <input type="text" id="noticeSubject" class="form-input" placeholder="לדוגמה: תשלום ועד בית לחודש ינואר" required>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="form-group">
+                                <label for="noticeContent">תוכן ההודעה *</label>
+                                <textarea id="noticeContent" class="form-textarea" rows="8" placeholder="כתוב את תוכן ההודעה כאן..." required></textarea>
+                            </div>
+
+                            <!-- Options -->
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="noticeIncludeSignature" checked>
+                                    <span>הוסף חתימה אוטומטית (מפרטי הועד)</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="noticeIncludeDate" checked>
+                                    <span>הוסף תאריך</span>
+                                </label>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" id="previewNoticeBtn">
+                                    <i class="fas fa-eye"></i> תצוגה מקדימה
+                                </button>
+                                <button type="button" class="btn btn-success" id="generateNoticePdfBtn">
+                                    <i class="fas fa-file-pdf"></i> הורד PDF
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="printNoticeBtn">
+                                    <i class="fas fa-print"></i> הדפס
+                                </button>
+                                <button type="reset" class="btn btn-cancel">
+                                    <i class="fas fa-times"></i> נקה טופס
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Notice Preview -->
+                <div class="card" id="noticePreviewCard" style="display: none;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-eye"></i> תצוגה מקדימה</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="noticePreview" class="notice-preview" style="background: white; padding: 3rem; border: 2px solid #e5e7eb; min-height: 400px; font-family: 'Arial', sans-serif;">
+                            <!-- Preview will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Notices History -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> הודעות קודמות</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>תאריך</th>
+                                        <th>סוג</th>
+                                        <th>נושא</th>
+                                        <th>פעולות</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="noticesHistoryTableBody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; padding: 2rem; color: #6b7280;">
+                                            אין הודעות קודמות
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1527,9 +1645,9 @@
             <i class="fas fa-receipt"></i>
             <span>הוצאות</span>
         </button>
-        <button class="nav-item" onclick="showTab('settings')" data-tab="settings">
-            <i class="fas fa-cog"></i>
-            <span>הגדרות</span>
+        <button class="nav-item" onclick="showTab('notices')" data-tab="notices">
+            <i class="fas fa-bullhorn"></i>
+            <span>הודעות</span>
         </button>
     </nav>
 
