@@ -333,10 +333,10 @@
                                 <th><input type="checkbox" id="selectAll"></th>
                                 <th>דירה</th>
                                 <th>שם הדייר</th>
+                                <th>טלפון</th>
+                                <th>אימייל</th>
                                 <th>סכום חודשי</th>
-                                <th>תשלומים</th>
-                                <th>סטטוס</th>
-                                <th style="text-align: center;">⋮</th>
+                                <th>פעולות</th>
                             </tr>
                         </thead>
                         <tbody id="tenantsTableBody">
@@ -1645,39 +1645,11 @@
             <i class="fas fa-receipt"></i>
             <span>הוצאות</span>
         </button>
-        <button class="nav-item" onclick="openMoreMenu()" data-tab="more">
-            <i class="fas fa-ellipsis-h"></i>
-            <span>עוד</span>
+        <button class="nav-item" onclick="showTab('notices')" data-tab="notices">
+            <i class="fas fa-bullhorn"></i>
+            <span>הודעות</span>
         </button>
     </nav>
-
-    <!-- More Menu Modal -->
-    <div class="more-menu-overlay" id="moreMenuOverlay" onclick="closeMoreMenu()"></div>
-    <div class="more-menu" id="moreMenu">
-        <div class="more-menu-header">
-            <h3>תפריט נוסף</h3>
-            <button class="close-more-menu" onclick="closeMoreMenu()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="more-menu-items">
-            <button class="more-menu-item" onclick="showTab('notices'); closeMoreMenu();">
-                <i class="fas fa-bullhorn"></i>
-                <span>הודעות</span>
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="more-menu-item" onclick="showTab('reports'); closeMoreMenu();">
-                <i class="fas fa-chart-bar"></i>
-                <span>דוחות</span>
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="more-menu-item" onclick="showTab('settings'); closeMoreMenu();">
-                <i class="fas fa-cog"></i>
-                <span>הגדרות</span>
-                <i class="fas fa-chevron-left"></i>
-            </button>
-        </div>
-    </div>
 
     <!-- JavaScript -->
     <script src="js/app.js"></script>

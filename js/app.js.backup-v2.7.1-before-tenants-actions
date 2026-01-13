@@ -570,63 +570,35 @@ function renderTenantsTable() {
         return;
     }
     
-    tbody.innerHTML = filteredTenants.map(tenant => {
-        const paidMonths = appState.payments.filter(p => 
-            p.tenantId === tenant.id && 
-            p.year === new Date().getFullYear()
-        ).length;
-        const totalMonths = 12;
-        const statusIcon = tenant.status === 'active' ? '💚' : 
-                          tenant.status === 'debt' ? '⚠️' : '✅';
-        
-        return `
+    tbody.innerHTML = filteredTenants.map(tenant => `
         <tr>
             <td><input type="checkbox" class="tenant-checkbox" data-id="${tenant.id}" ${appState.selectedTenants.has(tenant.id) ? 'checked' : ''}></td>
             <td>${tenant.apartment}</td>
             <td><strong>${tenant.name}</strong></td>
+            <td>${tenant.phone}</td>
+            <td>${tenant.email || '-'}</td>
             <td>₪${tenant.monthlyAmount}</td>
-            <td>${paidMonths}/${totalMonths}</td>
-            <td style="text-align: center; font-size: 1.5rem;">${statusIcon}</td>
-            <td style="text-align: center;">
-                <div class="tenant-actions-wrapper" style="position: relative; display: inline-block;">
-                    <button class="tenant-actions-btn" onclick="toggleTenantActions('${tenant.id}', event)" title="פעולות">
-                        <i class="fas fa-ellipsis-v"></i>
+            <td>
+                <div class="table-actions">
+                    <button class="action-btn" style="background: #10b981; color: white;" onclick="navigateToPayments('${tenant.id}')" title="עבור לתשלומים של דייר זה">
+                        <i class="fas fa-money-bill-wave"></i>
                     </button>
-                    <div class="tenant-actions-menu" id="tenantActions-${tenant.id}" style="display: none;">
-                        <button onclick="editTenant('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-edit"></i>
-                            <span>ערוך דייר</span>
-                        </button>
-                        <button onclick="navigateToPayments('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <span>רשום תשלום</span>
-                        </button>
-                        <button onclick="openMonthlyTracking('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>מעקב חודשי</span>
-                        </button>
-                        <button onclick="openAnnualPaymentForTenant('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>תשלום שנתי</span>
-                        </button>
-                        <button onclick="viewTenantReports('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>דוחות</span>
-                        </button>
-                        <button onclick="openWhatsappForTenant('${tenant.id}'); closeTenantActions();">
-                            <i class="fab fa-whatsapp"></i>
-                            <span>WhatsApp</span>
-                        </button>
-                        <button onclick="deleteTenant('${tenant.id}'); closeTenantActions();" style="color: #ef4444;">
-                            <i class="fas fa-trash"></i>
-                            <span>מחק</span>
-                        </button>
-                    </div>
+                    <button class="action-btn" style="background: #6366f1; color: white;" onclick="openMonthlyTracking('${tenant.id}')" title="מעקב חודשי">
+                        <i class="fas fa-calendar-check"></i>
+                    </button>
+                    <button class="action-btn view" onclick="viewTenant('${tenant.id}')" title="צפה">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn edit" onclick="editTenant('${tenant.id}')" title="ערוך">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteTenant('${tenant.id}')" title="מחק">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </td>
         </tr>
-        `;
-    }).join('');
+    `).join('');
     
     // Update checkbox listeners
     updateCheckboxListeners();
@@ -3491,72 +3463,6 @@ function closeMoreMenu() {
         // Re-enable body scroll
         document.body.style.overflow = '';
     }
-}
-
-// ===================================
-// Tenant Actions Menu
-// ===================================
-
-let currentOpenActionsMenu = null;
-
-function toggleTenantActions(tenantId, event) {
-    event.stopPropagation();
-    
-    const menu = document.getElementById(`tenantActions-${tenantId}`);
-    if (!menu) return;
-    
-    // Close any other open menus
-    if (currentOpenActionsMenu && currentOpenActionsMenu !== menu) {
-        currentOpenActionsMenu.style.display = 'none';
-    }
-    
-    // Toggle current menu
-    if (menu.style.display === 'none' || menu.style.display === '') {
-        menu.style.display = 'block';
-        currentOpenActionsMenu = menu;
-    } else {
-        menu.style.display = 'none';
-        currentOpenActionsMenu = null;
-    }
-}
-
-function closeTenantActions() {
-    if (currentOpenActionsMenu) {
-        currentOpenActionsMenu.style.display = 'none';
-        currentOpenActionsMenu = null;
-    }
-}
-
-// Close menu when clicking outside
-document.addEventListener('click', function(event) {
-    if (currentOpenActionsMenu && !event.target.closest('.tenant-actions-wrapper')) {
-        closeTenantActions();
-    }
-});
-
-// Helper function for annual payment for specific tenant
-function openAnnualPaymentForTenant(tenantId) {
-    const tenant = appState.tenants.find(t => t.id === tenantId);
-    if (!tenant) return;
-    
-    // Open annual payment modal with pre-selected tenant
-    openAnnualPaymentModal();
-    // You can add logic to pre-select this tenant if needed
-}
-
-// Helper function for tenant reports
-function viewTenantReports(tenantId) {
-    // Navigate to reports section and filter by tenant
-    showTab('reports');
-    // Add filtering logic if needed
-}
-
-// Helper function for WhatsApp with tenant
-function openWhatsappForTenant(tenantId) {
-    const tenant = appState.tenants.find(t => t.id === tenantId);
-    if (!tenant) return;
-    
-    openWhatsappModal(tenant, 'billing');
 }
 
 // Event listeners for notices

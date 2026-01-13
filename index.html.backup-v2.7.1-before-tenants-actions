@@ -333,10 +333,10 @@
                                 <th><input type="checkbox" id="selectAll"></th>
                                 <th>דירה</th>
                                 <th>שם הדייר</th>
+                                <th>טלפון</th>
+                                <th>אימייל</th>
                                 <th>סכום חודשי</th>
-                                <th>תשלומים</th>
-                                <th>סטטוס</th>
-                                <th style="text-align: center;">⋮</th>
+                                <th>פעולות</th>
                             </tr>
                         </thead>
                         <tbody id="tenantsTableBody">
