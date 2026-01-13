@@ -2293,7 +2293,7 @@ body.dark-theme .status-overdue {
     }
     
     /* Hide hamburger menu on mobile */
-    .menu-toggle {
+    .mobile-menu-toggle {
         display: none !important;
     }
     

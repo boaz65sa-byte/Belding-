@@ -777,6 +777,29 @@
                         </div>
                     </div>
 
+                    <!-- PWA Installation -->
+                    <div class="settings-card" id="pwaInstallCard" style="display: none;">
+                        <h3><i class="fas fa-mobile-alt"></i> התקן כאפליקציה</h3>
+                        <p>התקן את המערכת כאפליקציה במכשיר שלך לגישה מהירה!</p>
+                        <div class="pwa-benefits" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
+                            <div class="pwa-benefit" style="text-align: center;">
+                                <i class="fas fa-bolt" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;"></i>
+                                <div style="font-size: 0.85rem;">גישה מהירה</div>
+                            </div>
+                            <div class="pwa-benefit" style="text-align: center;">
+                                <i class="fas fa-wifi" style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;"></i>
+                                <div style="font-size: 0.85rem;">עובד ללא אינטרנט</div>
+                            </div>
+                            <div class="pwa-benefit" style="text-align: center;">
+                                <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--info-color); margin-bottom: 0.5rem;"></i>
+                                <div style="font-size: 0.85rem;">חוויית אפליקציה</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-success" id="installPwaBtn" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                            <i class="fas fa-download"></i> התקן עכשיו
+                        </button>
+                    </div>
+
                     <!-- About System -->
                     <div class="settings-card about-card">
                         <h3><i class="fas fa-info-circle"></i> אודות המערכת</h3>
@@ -1625,56 +1648,7 @@
             });
         }
         
-        // Install prompt for PWA
-        let deferredPrompt;
-        
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent the mini-infobar from appearing on mobile
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Show install button or notification
-            console.log('💾 האפליקציה ניתנת להתקנה!');
-            
-            // Optional: Show custom install prompt
-            const showInstallPromotion = () => {
-                const installMsg = document.createElement('div');
-                installMsg.innerHTML = `
-                    <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--primary-color); color: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10000; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                        <div style="flex: 1;">
-                            <strong>התקן את האפליקציה</strong>
-                            <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">שמור במסך הבית לגישה מהירה</p>
-                        </div>
-                        <button id="installBtn" style="background: white; color: var(--primary-color); border: none; padding: 10px 20px; border-radius: 5px; font-weight: 600; cursor: pointer;">התקן</button>
-                        <button id="dismissBtn" style="background: transparent; color: white; border: 1px solid white; padding: 10px 15px; border-radius: 5px; cursor: pointer;">לא עכשיו</button>
-                    </div>
-                `;
-                document.body.appendChild(installMsg);
-                
-                document.getElementById('installBtn').addEventListener('click', async () => {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        console.log(`תוצאת התקנה: ${outcome}`);
-                        deferredPrompt = null;
-                        installMsg.remove();
-                    }
-                });
-                
-                document.getElementById('dismissBtn').addEventListener('click', () => {
-                    installMsg.remove();
-                });
-            };
-            
-            // Show promotion after 10 seconds
-            setTimeout(showInstallPromotion, 10000);
-        });
-        
-        // Track installation
-        window.addEventListener('appinstalled', () => {
-            console.log('🎉 האפליקציה הותקנה בהצלחה!');
-            deferredPrompt = null;
-        });
+        // Note: PWA installation code is in js/app.js
     </script>
 </body>
 </html>

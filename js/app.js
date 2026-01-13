@@ -3094,6 +3094,69 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ===================================
+// PWA Installation
+// ===================================
+
+let deferredPrompt;
+
+// Listen for the beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    // Show the install card
+    const installCard = document.getElementById('pwaInstallCard');
+    if (installCard) {
+        installCard.style.display = 'block';
+    }
+});
+
+// Install button click handler
+document.addEventListener('DOMContentLoaded', function() {
+    const installBtn = document.getElementById('installPwaBtn');
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                showToast('האפליקציה כבר מותקנת או שהדפדפן לא תומך בהתקנה', 'info');
+                return;
+            }
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                showToast('🎉 האפליקציה מותקנת! תמצא אותה במסך הבית', 'success');
+                // Hide the install card
+                const installCard = document.getElementById('pwaInstallCard');
+                if (installCard) {
+                    installCard.style.display = 'none';
+                }
+            } else {
+                showToast('ההתקנה בוטלה', 'info');
+            }
+            
+            // Clear the deferredPrompt
+            deferredPrompt = null;
+        });
+    }
+});
+
+// Listen for successful installation
+window.addEventListener('appinstalled', () => {
+    showToast('🎉 האפליקציה הותקנה בהצלחה!', 'success');
+    // Hide the install card
+    const installCard = document.getElementById('pwaInstallCard');
+    if (installCard) {
+        installCard.style.display = 'none';
+    }
+    deferredPrompt = null;
+});
+
 function isCurrentYear(dateString) {
     const date = new Date(dateString);
     const now = new Date();
