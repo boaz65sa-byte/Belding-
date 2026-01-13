@@ -1,0 +1,80 @@
+{
+  "name": "מערכת ניהול דיירים מתקדמת",
+  "short_name": "ניהול דיירים",
+  "description": "מערכת מקצועית לניהול דיירים, תשלומים ודוחות - גרסה 2.6.2 עם תפריט תחתון מודרני למובייל",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "דיירים",
+      "short_name": "דיירים",
+      "description": "צפה ונהל דיירים",
+      "url": "/?view=tenants",
+      "icons": [{ "src": "icon-512.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "תשלומים",
+      "short_name": "תשלומים",
+      "description": "רישום תשלום חדש",
+      "url": "/?view=payments",
+      "icons": [{ "src": "icon-512.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "דוחות",
+      "short_name": "דוחות",
+      "description": "צפה בדוחות וסטטיסטיקות",
+      "url": "/?view=reports",
+      "icons": [{ "src": "icon-512.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "scope": "/",
+  "iarc_rating_id": "",
+  "version": "2.6.2",
+  "author": {
+    "name": "בועז סעדה",
+    "email": "",
+    "url": ""
+  }
+}
