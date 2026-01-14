@@ -1219,6 +1219,42 @@
                         <input type="text" id="expensePaidBy" class="form-input" placeholder="שם">
                     </div>
                 </div>
+                
+                <!-- Recurring Expense Settings -->
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isRecurringExpense" style="margin-left: 8px;">
+                        הוצאה קבועה (חוזרת)
+                    </label>
+                </div>
+                
+                <div id="recurringExpenseSettings" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseFrequency">תדירות *</label>
+                            <select id="expenseFrequency" class="form-select">
+                                <option value="">-- בחר תדירות --</option>
+                                <option value="weekly">שבועי</option>
+                                <option value="biweekly">דו-שבועי</option>
+                                <option value="monthly">חודשי</option>
+                                <option value="quarterly">רבעוני (כל 3 חודשים)</option>
+                                <option value="semiannual">חצי שנתי (כל 6 חודשים)</option>
+                                <option value="annual">שנתי</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseStartDate">תאריך התחלה</label>
+                            <input type="date" id="expenseStartDate" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="expenseReminder" style="margin-left: 8px;" checked>
+                            תזכורת לפני המועד (3 ימים)
+                        </label>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label for="expenseNotes">הערות</label>
@@ -1686,12 +1722,17 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="modal-actions" style="margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="addExpense()">
-                        <i class="fas fa-plus"></i> הוסף הוצאה חדשה בקטגוריה זו
-                    </button>
-                    <button class="btn btn-cancel" onclick="hideModal('categoryExpensesModal')">
-                        <i class="fas fa-arrow-right"></i> חזור
+                <div class="modal-actions" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <button class="btn btn-primary" onclick="addExpense()">
+                            <i class="fas fa-plus"></i> הוסף הוצאה חדשה בקטגוריה זו
+                        </button>
+                        <button class="btn btn-cancel" onclick="hideModal('categoryExpensesModal')">
+                            <i class="fas fa-arrow-right"></i> חזור
+                        </button>
+                    </div>
+                    <button class="btn btn-danger" id="deleteCategoryBtn" style="display: none;" title="מחק קטגוריה זו">
+                        <i class="fas fa-trash"></i> מחק קטגוריה
                     </button>
                 </div>
             </div>

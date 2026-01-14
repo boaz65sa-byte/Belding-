@@ -1766,6 +1766,39 @@ body.dark-theme .status-overdue {
     transition: transform var(--transition-base);
 }
 
+.expense-category-card.custom-category {
+    position: relative;
+}
+
+.delete-category-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.expense-category-card.custom-category:hover .delete-category-btn {
+    opacity: 1;
+}
+
+.delete-category-btn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
 .expense-category-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);

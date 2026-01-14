@@ -19,7 +19,7 @@
 // ===================================
 
 const APP_CONFIG = {
-    version: '2.8.4',
+    version: '2.9.0',
     author: 'בועז סעדה',
     copyright: '© 2024 בועז סעדה',
     lastUpdate: '13/01/2026',
@@ -2363,6 +2363,20 @@ function setupEventListeners() {
         }
     });
     
+    // Recurring expense toggle
+    document.getElementById('isRecurringExpense')?.addEventListener('change', function() {
+        const recurringSettings = document.getElementById('recurringExpenseSettings');
+        const frequencySelect = document.getElementById('expenseFrequency');
+        
+        if (this.checked) {
+            recurringSettings.style.display = 'block';
+            frequencySelect.required = true;
+        } else {
+            recurringSettings.style.display = 'none';
+            frequencySelect.required = false;
+        }
+    });
+    
     document.getElementById('expenseForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = new FormData();
@@ -2383,6 +2397,17 @@ function setupEventListeners() {
         formData.append('amount', document.getElementById('expenseAmount').value);
         formData.append('paidBy', document.getElementById('expensePaidBy').value);
         formData.append('notes', document.getElementById('expenseNotes').value);
+        
+        // Add recurring expense data
+        const isRecurring = document.getElementById('isRecurringExpense').checked;
+        formData.append('isRecurring', isRecurring);
+        
+        if (isRecurring) {
+            formData.append('frequency', document.getElementById('expenseFrequency').value);
+            formData.append('startDate', document.getElementById('expenseStartDate').value);
+            formData.append('reminder', document.getElementById('expenseReminder').checked);
+        }
+        
         saveExpense(formData);
     });
     document.getElementById('expenseSearchInput')?.addEventListener('input', renderExpensesTable);
@@ -2817,7 +2842,10 @@ function renderExpensesTable() {
         <tr>
             <td>${formatDate(expense.date)}</td>
             <td>${getCategoryNameHe(expense.category)}</td>
-            <td>${expense.description}</td>
+            <td>
+                ${expense.description}
+                ${expense.isRecurring ? `<span style="color: #3b82f6; margin-right: 8px;" title="הוצאה קבועה - ${getFrequencyLabel(expense.frequency)}">🔄</span>` : ''}
+            </td>
             <td><strong>₪${expense.amount}</strong></td>
             <td>${expense.paidBy || '-'}</td>
             <td>
@@ -2875,13 +2903,18 @@ function updateExpenseSummary() {
             const color = colors[customCategories.indexOf(cat) % colors.length];
             
             const cardHtml = `
-                <div class="expense-category-card" onclick="editExpensesByCategory('${cat}')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
-                    <div class="category-icon" style="background: ${color};">
-                        <i class="fas fa-folder"></i>
-                    </div>
-                    <div class="category-info">
-                        <h4>${cat} <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
-                        <p class="category-amount">₪${total.toLocaleString()}</p>
+                <div class="expense-category-card custom-category" style="position: relative; cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <button class="delete-category-btn" onclick="event.stopPropagation(); deleteCategory('${cat}')" title="מחק קטגוריה">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div onclick="editExpensesByCategory('${cat}')">
+                        <div class="category-icon" style="background: ${color};">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4>${cat} <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <p class="category-amount">₪${total.toLocaleString()}</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2952,6 +2985,10 @@ function saveExpense(formData) {
         amount: parseFloat(formData.get('amount')),
         paidBy: formData.get('paidBy'),
         notes: formData.get('notes'),
+        isRecurring: formData.get('isRecurring') === 'true',
+        frequency: formData.get('frequency') || null,
+        startDate: formData.get('startDate') || null,
+        reminder: formData.get('reminder') === 'true',
     };
     
     // Add receipt image if exists
@@ -2974,7 +3011,9 @@ function saveExpense(formData) {
             createdAt: new Date().toISOString(),
         };
         appState.expenses.push(newExpense);
-        addActivity(`נוספה הוצאה: ${expenseData.description} - ₪${expenseData.amount}`, 'add');
+        
+        const recurringText = expenseData.isRecurring ? ` (${getFrequencyLabel(expenseData.frequency)})` : '';
+        addActivity(`נוספה הוצאה: ${expenseData.description}${recurringText} - ₪${expenseData.amount}`, 'add');
         
         // Check if this is a new category
         checkAndPromptNewCategory(expenseData.category);
@@ -3001,6 +3040,19 @@ function deleteExpense(id) {
         renderExpensesTable();
         showToast('ההוצאה נמחקה בהצלחה', 'success');
     }
+}
+
+// Helper function to get frequency label in Hebrew
+function getFrequencyLabel(frequency) {
+    const labels = {
+        weekly: 'שבועי',
+        biweekly: 'דו-שבועי',
+        monthly: 'חודשי',
+        quarterly: 'רבעוני',
+        semiannual: 'חצי שנתי',
+        annual: 'שנתי'
+    };
+    return labels[frequency] || frequency;
 }
 
 // Check if category is new and prompt to add category card
@@ -3110,6 +3162,125 @@ function addNewCategoryCard(category) {
 window.closeNewCategoryModal = closeNewCategoryModal;
 window.addNewCategoryCard = addNewCategoryCard;
 
+// Delete custom category
+function deleteCategory(category) {
+    const existingCategories = ['electricity', 'elevator', 'cleaning', 'gardening', 'maintenance', 'antenna', 'water', 'other'];
+    
+    // Don't allow deleting default categories
+    if (existingCategories.includes(category)) {
+        showToast('לא ניתן למחוק קטגוריה קבועה', 'warning');
+        return;
+    }
+    
+    // Count expenses in this category
+    const categoryExpenses = appState.expenses.filter(e => e.category === category);
+    
+    if (categoryExpenses.length === 0) {
+        // No expenses, just remove
+        showToast(`קטגוריה "${category}" נמחקה`, 'success');
+        updateExpenseSummary();
+        return;
+    }
+    
+    // Show confirmation modal
+    const confirmHtml = `
+        <div class="custom-confirm-modal" id="deleteCategoryModal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                max-width: 500px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            ">
+                <h3 style="margin-bottom: 1rem; color: #ef4444;">⚠️ מחיקת קטגוריה</h3>
+                <p style="margin-bottom: 1rem; color: #6b7280; font-size: 1.1rem;">
+                    האם אתה בטוח שברצונך למחוק את הקטגוריה <strong>"${category}"</strong>?
+                </p>
+                <p style="margin-bottom: 1.5rem; color: #6b7280;">
+                    בקטגוריה זו יש <strong>${categoryExpenses.length} הוצאות</strong>.
+                </p>
+                <p style="margin-bottom: 2rem; color: #f59e0b; font-weight: 500;">
+                    📦 ההוצאות יועברו לקטגוריה "אחר"
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button onclick="confirmDeleteCategory('${category}')" style="
+                        padding: 0.75rem 1.5rem;
+                        background: #ef4444;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        font-weight: 500;
+                    ">
+                        🗑️ כן, מחק
+                    </button>
+                    <button onclick="closeDeleteCategoryModal()" style="
+                        padding: 0.75rem 1.5rem;
+                        background: #e5e7eb;
+                        color: #1f2937;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        font-weight: 500;
+                    ">
+                        ❌ ביטול
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', confirmHtml);
+}
+
+function closeDeleteCategoryModal() {
+    const modal = document.getElementById('deleteCategoryModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function confirmDeleteCategory(category) {
+    // Move all expenses to "other" category
+    appState.expenses.forEach(expense => {
+        if (expense.category === category) {
+            expense.category = 'other';
+        }
+    });
+    
+    // Save and update
+    saveDataToStorage();
+    addActivity(`נמחקה קטגוריה: ${category}`, 'delete');
+    
+    // Close modal
+    closeDeleteCategoryModal();
+    
+    // Update UI
+    updateExpenseSummary();
+    renderExpensesTable();
+    
+    showToast(`קטגוריה "${category}" נמחקה והוצאות הועברו ל"אחר"`, 'success');
+}
+
+// Make functions global
+window.deleteCategory = deleteCategory;
+window.closeDeleteCategoryModal = closeDeleteCategoryModal;
+window.confirmDeleteCategory = confirmDeleteCategory;
+
 // ===================================
 // Edit Expenses by Category
 // ===================================
@@ -3117,9 +3288,25 @@ window.addNewCategoryCard = addNewCategoryCard;
 function editExpensesByCategory(category) {
     const categoryExpenses = appState.expenses.filter(e => e.category === category);
     const categoryNameHe = getCategoryNameHe(category);
+    const existingCategories = ['electricity', 'elevator', 'cleaning', 'gardening', 'maintenance', 'antenna', 'water', 'other'];
+    const isCustomCategory = !existingCategories.includes(category);
     
     // Update modal title
     document.getElementById('categoryExpensesTitle').textContent = categoryNameHe;
+    
+    // Show/hide delete button for custom categories only
+    const deleteCategoryBtn = document.getElementById('deleteCategoryBtn');
+    if (deleteCategoryBtn) {
+        if (isCustomCategory) {
+            deleteCategoryBtn.style.display = 'inline-flex';
+            deleteCategoryBtn.onclick = () => {
+                hideModal('categoryExpensesModal');
+                deleteCategory(category);
+            };
+        } else {
+            deleteCategoryBtn.style.display = 'none';
+        }
+    }
     
     // Render expenses in the modal table
     const tableBody = document.getElementById('categoryExpensesTableBody');
