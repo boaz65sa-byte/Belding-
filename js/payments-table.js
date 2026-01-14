@@ -159,9 +159,12 @@ function exportPaymentsTableToExcel() {
             current.setMonth(current.getMonth() + 1);
         }
         
-        // Build CSV
-        let csv = 'דייר / חודש';
-        months.forEach(m => csv += `,${m.label}`);
+        // Build CSV with 3 rows per tenant (check, amount, date)
+        let csv = '';
+        
+        // Header row 1: Month labels
+        csv += 'דייר / חודש,';
+        months.forEach(m => csv += `${m.label},`);
         csv += '\\n';
         
         // Sort tenants
@@ -169,10 +172,10 @@ function exportPaymentsTableToExcel() {
             return parseInt(a.apartment) - parseInt(b.apartment);
         });
         
-        // Add data rows
+        // Add 3 rows for each tenant
         sortedTenants.forEach(tenant => {
-            csv += `${tenant.name} (דירה ${tenant.apartment})`;
-            
+            // Row 1: Tenant name + check marks
+            csv += `${tenant.name} (דירה ${tenant.apartment}),`;
             months.forEach(m => {
                 const payment = appState.payments.find(p => {
                     if (p.tenantId !== tenant.id) return false;
@@ -180,16 +183,40 @@ function exportPaymentsTableToExcel() {
                     return paymentDate.getFullYear() === m.year && 
                            (paymentDate.getMonth() + 1) === m.month;
                 });
-                
+                csv += payment ? '✓,' : ',';
+            });
+            csv += '\\n';
+            
+            // Row 2: Empty + amounts
+            csv += ',';
+            months.forEach(m => {
+                const payment = appState.payments.find(p => {
+                    if (p.tenantId !== tenant.id) return false;
+                    const paymentDate = new Date(p.date);
+                    return paymentDate.getFullYear() === m.year && 
+                           (paymentDate.getMonth() + 1) === m.month;
+                });
+                csv += payment ? `₪${payment.amount},` : ',';
+            });
+            csv += '\\n';
+            
+            // Row 3: Empty + dates
+            csv += ',';
+            months.forEach(m => {
+                const payment = appState.payments.find(p => {
+                    if (p.tenantId !== tenant.id) return false;
+                    const paymentDate = new Date(p.date);
+                    return paymentDate.getFullYear() === m.year && 
+                           (paymentDate.getMonth() + 1) === m.month;
+                });
                 if (payment) {
                     const paymentDate = new Date(payment.date);
                     const dateStr = `${paymentDate.getDate()}/${paymentDate.getMonth() + 1}`;
-                    csv += `,✅ ₪${payment.amount} (${dateStr})`;
+                    csv += `${dateStr},`;
                 } else {
-                    csv += `,`;
+                    csv += ',';
                 }
             });
-            
             csv += '\\n';
         });
         
@@ -214,11 +241,8 @@ function exportPaymentsTableToExcel() {
 }
 
 // Export to PDF
-function exportPaymentsTableToPDF() {
+async function exportPaymentsTableToPDF() {
     try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape', 'mm', 'a4');
-        
         const startDateStr = document.getElementById('paymentsTableStartDate').value;
         const endDateStr = document.getElementById('paymentsTableEndDate').value;
         
@@ -227,27 +251,46 @@ function exportPaymentsTableToPDF() {
             return;
         }
         
-        // Add title
-        doc.setFont('Helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.text('טבלת תשלומים שנתית', 148, 15, { align: 'center' });
+        const container = document.getElementById('paymentsTableContainer');
+        if (!container || !container.querySelector('table')) {
+            showToast('אין טבלה להדפסה - לחץ על "הצג טבלה"', 'warning');
+            return;
+        }
         
-        // Add date range
-        doc.setFont('Helvetica', 'normal');
-        doc.setFontSize(10);
-        doc.text(`תקופה: ${startDateStr} עד ${endDateStr}`, 148, 23, { align: 'center' });
+        showToast('יוצר PDF... אנא המתן', 'info');
         
-        // Note about implementation
-        doc.setFontSize(9);
-        doc.text('הטבלה המלאה תוצג בהדפסה רגילה', 148, 30, { align: 'center' });
-        doc.text('לחץ על "הדפסה" לקבלת טבלה מלאה', 148, 37, { align: 'center' });
+        // Use html2canvas to capture the table
+        const canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        });
         
-        // Add footer
-        doc.setFontSize(8);
-        doc.text('מערכת ניהול דיירים - בועז סעדה', 148, 200, { align: 'center' });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        const imgWidth = 297; // A4 landscape width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Add image to PDF
+        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // If table is too tall, add pages
+        let heightLeft = imgHeight;
+        let position = 0;
+        const pageHeight = 210; // A4 landscape height in mm
+        
+        while (heightLeft >= pageHeight) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
         
         doc.save(`טבלת_תשלומים_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('PDF יוצא בהצלחה! (להדפסה מלאה השתמש בכפתור "הדפסה")', 'success');
+        showToast('PDF יוצא בהצלחה!', 'success');
         
     } catch (error) {
         console.error('שגיאה ביצירת PDF:', error);

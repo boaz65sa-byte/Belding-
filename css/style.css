@@ -2903,23 +2903,73 @@ body.dark-mode .payments-table-actions {
 
 /* Print Styles */
 @media print {
+    /* Hide navigation and actions */
+    .sidebar,
+    .header,
+    .mobile-bottom-nav,
+    .section-header,
     .payments-table-actions,
     .payments-table-header .date-range-selector,
-    .tenant-tabs {
+    .tenant-tabs,
+    .filter-bar,
+    .more-menu,
+    .more-menu-overlay {
         display: none !important;
     }
     
+    /* Show only the payments table tab content */
+    #paymentsTableTab {
+        display: block !important;
+    }
+    
+    /* Adjust table for printing */
     .annual-payments-table {
-        font-size: 8pt;
+        font-size: 7pt;
+        width: 100%;
+        page-break-inside: avoid;
     }
     
     .annual-payments-table th,
     .annual-payments-table td {
-        padding: 0.25rem;
+        padding: 0.2rem;
+        border: 1px solid #000 !important;
     }
     
+    .annual-payments-table th {
+        background: #e5e7eb !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    /* Keep colors for paid/unpaid cells */
+    .payment-cell.paid {
+        background: #d1fae5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .payment-cell.unpaid {
+        background: #fee2e2 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    /* Set page to landscape */
     @page {
         size: landscape;
-        margin: 1cm;
+        margin: 0.5cm;
+    }
+    
+    /* Ensure content fits on page */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .annual-payments-table-container {
+        margin: 0;
+        padding: 0;
+        overflow: visible;
     }
 }

@@ -19,7 +19,7 @@
 // ===================================
 
 const APP_CONFIG = {
-    version: '2.8.0',
+    version: '2.8.2',
     author: 'בועז סעדה',
     copyright: '© 2024 בועז סעדה',
     lastUpdate: '13/01/2026',
@@ -34,6 +34,7 @@ let appState = {
     payments: [],
     expenses: [],
     activities: [],
+    notices: [],
     settings: {
         buildingName: 'בניין הדוגמה',
         defaultAmount: 500,
@@ -130,6 +131,7 @@ function loadDataFromStorage() {
             appState.payments = parsed.payments || [];
             appState.expenses = parsed.expenses || [];
             appState.activities = parsed.activities || [];
+            appState.notices = parsed.notices || [];
             
             console.log('✅ נטענו:', appState.tenants.length, 'דיירים,', appState.payments.length, 'תשלומים');
             
@@ -167,6 +169,7 @@ function saveDataToStorage() {
             payments: appState.payments,
             expenses: appState.expenses,
             activities: appState.activities,
+            notices: appState.notices || [],
             lastSaved: new Date().toISOString(),
         };
         
@@ -1715,6 +1718,7 @@ function createBackup() {
             expenses: appState.expenses,
             activities: appState.activities,
             settings: appState.settings,
+            notices: appState.notices || [], // הודעות
         }
     };
     
@@ -2068,15 +2072,19 @@ function restoreFromFile(file) {
             if (confirm('האם אתה בטוח? פעולה זו תחליף את כל הנתונים הקיימים!')) {
                 appState.tenants = backup.data.tenants;
                 appState.payments = backup.data.payments || [];
+                appState.expenses = backup.data.expenses || [];
                 appState.activities = backup.data.activities || [];
+                appState.notices = backup.data.notices || [];
                 appState.settings = { ...appState.settings, ...backup.data.settings };
                 
                 saveDataToStorage();
                 renderTenantsTable();
+                renderPaymentsTable();
+                renderExpensesTable();
                 updateAllStatistics();
                 renderDashboard();
                 
-                showToast('הנתונים שוחזרו בהצלחה!', 'success');
+                showToast('הנתונים שוחזרו בהצלחה! (דיירים, תשלומים, הוצאות, הודעות, הגדרות)', 'success');
                 addActivity('שוחזרו נתונים מגיבוי', 'restore');
                 hideModal('backupModal');
             }
@@ -2106,11 +2114,14 @@ function clearAllData() {
     
     appState.tenants = [];
     appState.payments = [];
+    appState.expenses = [];
     appState.activities = [];
+    appState.notices = [];
     
     saveDataToStorage();
     renderTenantsTable();
     renderPaymentsTable();
+    renderExpensesTable();
     updateAllStatistics();
     renderDashboard();
     
