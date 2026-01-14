@@ -19,7 +19,7 @@
 // ===================================
 
 const APP_CONFIG = {
-    version: '2.9.0',
+    version: '2.10.0',
     author: 'בועז סעדה',
     copyright: '© 2024 בועז סעדה',
     lastUpdate: '13/01/2026',
@@ -570,6 +570,8 @@ function renderTenantsTable() {
                 </td>
             </tr>
         `;
+        // Also update cards
+        renderTenantCards(filteredTenants);
         return;
     }
     
@@ -633,6 +635,89 @@ function renderTenantsTable() {
     
     // Update checkbox listeners
     updateCheckboxListeners();
+    
+    // Also render mobile cards
+    renderTenantCards(filteredTenants);
+}
+
+// Render tenant cards for mobile
+function renderTenantCards(tenants) {
+    const cardsContainer = document.getElementById('tenantsCardsContainer');
+    if (!cardsContainer) return;
+    
+    if (tenants.length === 0) {
+        cardsContainer.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+                <p>לא נמצאו דיירים</p>
+            </div>
+        `;
+        return;
+    }
+    
+    cardsContainer.innerHTML = tenants.map(tenant => {
+        const paidMonths = appState.payments.filter(p => 
+            p.tenantId === tenant.id && 
+            p.year === new Date().getFullYear()
+        ).length;
+        const totalMonths = 12;
+        const statusIcon = tenant.status === 'active' ? '💚' : 
+                          tenant.status === 'debt' ? '⚠️' : '✅';
+        
+        // Calculate debt/balance
+        const totalExpected = tenant.monthlyAmount * totalMonths;
+        const totalPaid = appState.payments
+            .filter(p => p.tenantId === tenant.id && p.year === new Date().getFullYear())
+            .reduce((sum, p) => sum + p.amount, 0);
+        const balance = totalPaid - totalExpected;
+        const balanceColor = balance >= 0 ? '#34c759' : '#ff3b30';
+        
+        return `
+            <div class="tenant-card">
+                <div class="tenant-card-header">
+                    <div class="tenant-card-info">
+                        <div class="tenant-card-name">${tenant.name}</div>
+                        <div class="tenant-card-apartment">דירה ${tenant.apartment}</div>
+                    </div>
+                    <div class="tenant-card-status">${statusIcon}</div>
+                </div>
+                
+                <div class="tenant-card-details">
+                    <div class="tenant-card-detail-item">
+                        <div class="tenant-card-detail-label">סכום חודשי</div>
+                        <div class="tenant-card-detail-value">₪${tenant.monthlyAmount}</div>
+                    </div>
+                    <div class="tenant-card-detail-item">
+                        <div class="tenant-card-detail-label">תשלומים</div>
+                        <div class="tenant-card-detail-value">${paidMonths}/${totalMonths}</div>
+                    </div>
+                    <div class="tenant-card-detail-item">
+                        <div class="tenant-card-detail-label">${balance >= 0 ? 'עודף' : 'חוב'}</div>
+                        <div class="tenant-card-detail-value" style="color: ${balanceColor};">₪${Math.abs(balance)}</div>
+                    </div>
+                </div>
+                
+                <div class="tenant-card-actions">
+                    <button class="tenant-card-action-btn primary" onclick="navigateToPayments('${tenant.id}')">
+                        <i class="fas fa-dollar-sign"></i>
+                        רשום תשלום
+                    </button>
+                    <button class="tenant-card-action-btn secondary" onclick="editTenant('${tenant.id}')">
+                        <i class="fas fa-edit"></i>
+                        ערוך
+                    </button>
+                    <button class="tenant-card-action-btn secondary" onclick="openMonthlyTracking('${tenant.id}')">
+                        <i class="fas fa-calendar"></i>
+                        מעקב חודשי
+                    </button>
+                    <button class="tenant-card-action-btn secondary" onclick="openWhatsappModal('${tenant.id}')">
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function addTenant() {
@@ -3946,14 +4031,31 @@ function toggleTenantActions(tenantId, event) {
     // Close any other open menus
     if (currentOpenActionsMenu && currentOpenActionsMenu !== menu) {
         currentOpenActionsMenu.style.display = 'none';
+        currentOpenActionsMenu.classList.remove('open-upward');
     }
     
     // Toggle current menu
     if (menu.style.display === 'none' || menu.style.display === '') {
         menu.style.display = 'block';
         currentOpenActionsMenu = menu;
+        
+        // Calculate if menu should open upward or downward
+        const button = event.currentTarget;
+        const buttonRect = button.getBoundingClientRect();
+        const menuHeight = 400; // approximate height of menu
+        const windowHeight = window.innerHeight;
+        const spaceBelow = windowHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        
+        // If not enough space below and more space above, open upward
+        if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+            menu.classList.add('open-upward');
+        } else {
+            menu.classList.remove('open-upward');
+        }
     } else {
         menu.style.display = 'none';
+        menu.classList.remove('open-upward');
         currentOpenActionsMenu = null;
     }
 }
@@ -3961,6 +4063,7 @@ function toggleTenantActions(tenantId, event) {
 function closeTenantActions() {
     if (currentOpenActionsMenu) {
         currentOpenActionsMenu.style.display = 'none';
+        currentOpenActionsMenu.classList.remove('open-upward');
         currentOpenActionsMenu = null;
     }
 }

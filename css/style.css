@@ -2574,10 +2574,28 @@ body.dark-mode .more-menu-item:active {
     animation: slideDown 0.3s ease;
 }
 
+/* Open upward when near bottom */
+.tenant-actions-menu.open-upward {
+    top: auto;
+    bottom: calc(100% + 8px);
+    animation: slideUp 0.3s ease;
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;
         transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
     }
     to {
         opacity: 1;
@@ -2875,6 +2893,172 @@ body.dark-mode .tenant-actions-menu button:active {
     padding: 1rem;
     background: var(--bg-secondary);
     border-radius: 12px;
+}
+
+/* ===================================
+   Mobile Tenant Cards (Option C)
+   =================================== */
+
+@media (max-width: 768px) {
+    /* Hide table on mobile */
+    #tenantsSection .table-container {
+        display: none;
+    }
+    
+    /* Show cards container */
+    .tenants-cards-container {
+        display: block !important;
+    }
+}
+
+@media (min-width: 769px) {
+    /* Hide cards on desktop */
+    .tenants-cards-container {
+        display: none !important;
+    }
+}
+
+.tenants-cards-container {
+    display: none;
+    padding: 0;
+}
+
+.tenant-card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tenant-card:active {
+    transform: scale(0.98);
+}
+
+.tenant-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.tenant-card-info {
+    flex: 1;
+}
+
+.tenant-card-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.tenant-card-apartment {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.tenant-card-status {
+    font-size: 24px;
+}
+
+.tenant-card-details {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 12px;
+}
+
+.tenant-card-detail-item {
+    text-align: center;
+    flex: 1;
+}
+
+.tenant-card-detail-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.tenant-card-detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.tenant-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tenant-card-action-btn {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.tenant-card-action-btn.primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tenant-card-action-btn.secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.tenant-card-action-btn:active {
+    transform: scale(0.98);
+}
+
+/* Dark Mode */
+body.dark-mode .tenant-card {
+    background: #1f2937;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .tenant-card-name {
+    color: #f9fafb;
+}
+
+body.dark-mode .tenant-card-apartment {
+    color: #9ca3af;
+}
+
+body.dark-mode .tenant-card-detail-label {
+    color: #9ca3af;
+}
+
+body.dark-mode .tenant-card-detail-value {
+    color: #f9fafb;
+}
+
+body.dark-mode .tenant-card-details {
+    border-color: #374151;
+}
+
+body.dark-mode .tenant-card-action-btn.secondary {
+    background: #374151;
+    color: #f9fafb;
+}
+
+body.dark-mode .tenant-card-action-btn.secondary:hover {
+    background: #4b5563;
 }
 
 /* Dark Mode */
