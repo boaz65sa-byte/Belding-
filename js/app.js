@@ -19,10 +19,10 @@
 // ===================================
 
 const APP_CONFIG = {
-    version: '2.6.2',
+    version: '2.7.2',
     author: 'בועז סעדה',
     copyright: '© 2024 בועז סעדה',
-    lastUpdate: '09/01/2026',
+    lastUpdate: '13/01/2026',
     storageKey: 'tenantManagementData',
     backupKey: 'tenantManagementBackup',
     settingsKey: 'tenantManagementSettings',
