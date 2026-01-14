@@ -305,19 +305,6 @@
                     </div>
                 </div>
 
-                <!-- Tenant Section Tabs -->
-                <div class="tenant-tabs">
-                    <button class="tenant-tab active" data-tab="tenantsList" onclick="switchTenantTab('tenantsList')">
-                        <i class="fas fa-users"></i> רשימת דיירים
-                    </button>
-                    <button class="tenant-tab" data-tab="paymentsTable" onclick="switchTenantTab('paymentsTable')">
-                        <i class="fas fa-calendar-check"></i> טבלת תשלומים שנתית
-                    </button>
-                </div>
-
-                <!-- Tenants List Tab -->
-                <div id="tenantsListTab" class="tenant-tab-content active">
-
                 <!-- Search and Filter Bar -->
                 <div class="filter-bar">
                     <div class="search-box">
@@ -357,51 +344,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                </div>
-                <!-- End Tenants List Tab -->
-
-                <!-- Payments Table Tab -->
-                <div id="paymentsTableTab" class="tenant-tab-content" style="display: none;">
-                    
-                    <!-- Date Range Selection -->
-                    <div class="payments-table-header">
-                        <h2><i class="fas fa-calendar-alt"></i> טבלת תשלומים שנתית</h2>
-                        <div class="date-range-selector">
-                            <div class="date-input-group">
-                                <label>מתאריך:</label>
-                                <input type="date" id="paymentsTableStartDate" class="form-input">
-                            </div>
-                            <div class="date-input-group">
-                                <label>עד תאריך:</label>
-                                <input type="date" id="paymentsTableEndDate" class="form-input">
-                            </div>
-                            <button class="btn btn-primary" onclick="renderPaymentsTable()">
-                                <i class="fas fa-search"></i> הצג טבלה
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Payments Table Container -->
-                    <div id="paymentsTableContainer" class="annual-payments-table-container">
-                        <!-- Table will be generated here -->
-                    </div>
-
-                    <!-- Export Buttons -->
-                    <div class="payments-table-actions">
-                        <button class="btn btn-primary" onclick="printPaymentsTable()">
-                            <i class="fas fa-print"></i> הדפסה
-                        </button>
-                        <button class="btn btn-success" onclick="exportPaymentsTableToExcel()">
-                            <i class="fas fa-file-excel"></i> ייצוא לExcel
-                        </button>
-                        <button class="btn btn-danger" onclick="exportPaymentsTableToPDF()">
-                            <i class="fas fa-file-pdf"></i> ייצוא לPDF
-                        </button>
-                    </div>
-
-                </div>
-                <!-- End Payments Table Tab -->
 
             </section>
 
@@ -1739,7 +1681,6 @@
 
     <!-- JavaScript -->
     <script src="js/app.js"></script>
-    <script src="js/payments-table.js"></script>
     
     <!-- PWA Service Worker Registration -->
     <script>
