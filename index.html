@@ -585,6 +585,9 @@
                             <p class="category-amount" id="otherTotal">₪0</p>
                         </div>
                     </div>
+                    
+                    <!-- Dynamic Custom Categories -->
+                    <div id="customCategoriesContainer"></div>
                 </div>
 
                 <!-- Filter Bar -->
@@ -1187,7 +1190,17 @@
                             <option value="antenna">קולטים</option>
                             <option value="water">מים</option>
                             <option value="other">אחר</option>
+                            <option value="custom">➕ קטגוריה חדשה...</option>
                         </select>
+                        
+                        <!-- Custom category input (hidden by default) -->
+                        <input 
+                            type="text" 
+                            id="customCategoryInput" 
+                            class="form-input" 
+                            placeholder="הכנס שם קטגוריה חדשה"
+                            style="display: none; margin-top: 0.5rem;"
+                        >
                     </div>
                 </div>
 

@@ -19,7 +19,7 @@
 // ===================================
 
 const APP_CONFIG = {
-    version: '2.8.2',
+    version: '2.8.4',
     author: 'בועז סעדה',
     copyright: '© 2024 בועז סעדה',
     lastUpdate: '13/01/2026',
@@ -2348,11 +2348,37 @@ function setupEventListeners() {
     
     // Expenses Management
     document.getElementById('addExpenseBtn')?.addEventListener('click', addExpense);
+    
+    // Custom category handling
+    document.getElementById('expenseCategory')?.addEventListener('change', function() {
+        const customInput = document.getElementById('customCategoryInput');
+        if (this.value === 'custom') {
+            customInput.style.display = 'block';
+            customInput.required = true;
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+        }
+    });
+    
     document.getElementById('expenseForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = new FormData();
         formData.append('date', document.getElementById('expenseDate').value);
-        formData.append('category', document.getElementById('expenseCategory').value);
+        
+        // Check if custom category was selected
+        const categorySelect = document.getElementById('expenseCategory');
+        const customInput = document.getElementById('customCategoryInput');
+        const category = categorySelect.value === 'custom' ? customInput.value.trim() : categorySelect.value;
+        
+        if (!category) {
+            showToast('נא להזין שם קטגוריה', 'warning');
+            return;
+        }
+        
+        formData.append('category', category);
         formData.append('description', document.getElementById('expenseDescription').value);
         formData.append('amount', document.getElementById('expenseAmount').value);
         formData.append('paidBy', document.getElementById('expensePaidBy').value);
@@ -2821,6 +2847,7 @@ function renderExpensesTable() {
 function updateExpenseSummary() {
     const categories = ['electricity', 'elevator', 'cleaning', 'gardening', 'maintenance', 'antenna', 'water', 'other'];
     
+    // Update existing categories
     categories.forEach(cat => {
         const total = appState.expenses
             .filter(e => e.category === cat)
@@ -2828,6 +2855,40 @@ function updateExpenseSummary() {
         const elem = document.getElementById(`${cat}Total`);
         if (elem) elem.textContent = `₪${total.toLocaleString()}`;
     });
+    
+    // Find all custom categories (categories not in the default list)
+    const allCategories = [...new Set(appState.expenses.map(e => e.category))];
+    const customCategories = allCategories.filter(cat => !categories.includes(cat));
+    
+    // Render custom categories dynamically
+    const customContainer = document.getElementById('customCategoriesContainer');
+    if (customContainer && customCategories.length > 0) {
+        customContainer.innerHTML = '';
+        
+        customCategories.forEach(cat => {
+            const total = appState.expenses
+                .filter(e => e.category === cat)
+                .reduce((sum, e) => sum + e.amount, 0);
+            
+            // Generate random color for the category
+            const colors = ['#ec4899', '#14b8a6', '#f97316', '#a855f7', '#84cc16', '#06b6d4', '#f43f5e'];
+            const color = colors[customCategories.indexOf(cat) % colors.length];
+            
+            const cardHtml = `
+                <div class="expense-category-card" onclick="editExpensesByCategory('${cat}')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="category-icon" style="background: ${color};">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <div class="category-info">
+                        <h4>${cat} <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                        <p class="category-amount">₪${total.toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+            
+            customContainer.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    }
     
     const monthlyTotal = appState.expenses
         .filter(e => isCurrentMonth(e.date))
@@ -2914,6 +2975,9 @@ function saveExpense(formData) {
         };
         appState.expenses.push(newExpense);
         addActivity(`נוספה הוצאה: ${expenseData.description} - ₪${expenseData.amount}`, 'add');
+        
+        // Check if this is a new category
+        checkAndPromptNewCategory(expenseData.category);
     }
     
     // Clear current receipt image
@@ -2938,6 +3002,113 @@ function deleteExpense(id) {
         showToast('ההוצאה נמחקה בהצלחה', 'success');
     }
 }
+
+// Check if category is new and prompt to add category card
+function checkAndPromptNewCategory(category) {
+    const existingCategories = ['electricity', 'elevator', 'cleaning', 'gardening', 'maintenance', 'antenna', 'water', 'other'];
+    
+    // If it's an existing category, do nothing
+    if (existingCategories.includes(category)) {
+        return;
+    }
+    
+    // Check if we already have expenses in this category (besides the one we just added)
+    const categoryExpenses = appState.expenses.filter(e => e.category === category);
+    
+    // If this is the first expense in this category, show prompt
+    if (categoryExpenses.length === 1) {
+        const categoryName = category;
+        
+        // Show custom modal with prompt
+        const confirmHtml = `
+            <div class="custom-confirm-modal" id="newCategoryModal" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            ">
+                <div style="
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 12px;
+                    max-width: 500px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                ">
+                    <h3 style="margin-bottom: 1rem; color: #1f2937;">קטגוריה חדשה! 🆕</h3>
+                    <p style="margin-bottom: 1.5rem; color: #6b7280; font-size: 1.1rem;">
+                        זיהינו קטגוריה חדשה: <strong>"${categoryName}"</strong>
+                    </p>
+                    <p style="margin-bottom: 2rem; color: #6b7280;">
+                        האם ברצונך להוסיף קוביה (כרטיס) חדשה עבור קטגוריה זו בסיכום ההוצאות?
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <button onclick="addNewCategoryCard('${category}')" style="
+                            padding: 0.75rem 1.5rem;
+                            background: #3b82f6;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            font-weight: 500;
+                        ">
+                            ✅ כן, הוסף קוביה
+                        </button>
+                        <button onclick="closeNewCategoryModal()" style="
+                            padding: 0.75rem 1.5rem;
+                            background: #e5e7eb;
+                            color: #1f2937;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            font-weight: 500;
+                        ">
+                            ❌ לא, תודה
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', confirmHtml);
+    }
+}
+
+function closeNewCategoryModal() {
+    const modal = document.getElementById('newCategoryModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function addNewCategoryCard(category) {
+    // Close the modal
+    closeNewCategoryModal();
+    
+    // Add category to the list if not already there
+    const existingCategories = ['electricity', 'elevator', 'cleaning', 'gardening', 'maintenance', 'antenna', 'water', 'other'];
+    
+    if (!existingCategories.includes(category)) {
+        // We'll add it dynamically to the dashboard
+        showToast(`קטגוריה "${category}" נוספה בהצלחה! 🎉`, 'success');
+        
+        // Refresh the expense summary to show the new category
+        updateExpenseSummary();
+        renderDashboard();
+    }
+}
+
+// Make functions global
+window.closeNewCategoryModal = closeNewCategoryModal;
+window.addNewCategoryCard = addNewCategoryCard;
 
 // ===================================
 // Edit Expenses by Category

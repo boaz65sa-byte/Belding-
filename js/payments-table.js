@@ -98,13 +98,8 @@ function renderPaymentsTable() {
         html += `<td><strong>${tenant.name}</strong><br><small>דירה ${tenant.apartment}</small></td>`;
         
         months.forEach(m => {
-            // Find payment for this tenant and month
-            const payment = appState.payments.find(p => {
-                if (p.tenantId !== tenant.id) return false;
-                const paymentDate = new Date(p.date);
-                return paymentDate.getFullYear() === m.year && 
-                       (paymentDate.getMonth() + 1) === m.month;
-            });
+            // Use helper function to get payment
+            const payment = getPaymentForMonth(tenant, m.year, m.month);
             
             if (payment) {
                 // Paid - show checkmark, amount, and date
@@ -126,6 +121,32 @@ function renderPaymentsTable() {
     
     html += '</tbody></table>';
     container.innerHTML = html;
+}
+
+// Helper function to get payment data (checks both sources)
+function getPaymentForMonth(tenant, year, month) {
+    // First, check appState.payments
+    let payment = appState.payments.find(p => {
+        if (p.tenantId !== tenant.id) return false;
+        const paymentDate = new Date(p.date);
+        return paymentDate.getFullYear() === year && 
+               (paymentDate.getMonth() + 1) === month;
+    });
+    
+    // If no payment found, check monthlyPayments
+    if (!payment && tenant.monthlyPayments && tenant.monthlyPayments[year]) {
+        const monthlyData = tenant.monthlyPayments[year][month];
+        if (monthlyData && monthlyData.paid) {
+            // Create a virtual payment from monthlyData
+            payment = {
+                amount: monthlyData.amount || tenant.monthlyAmount,
+                date: monthlyData.date || `${year}-${String(month).padStart(2, '0')}-01`,
+                tenantId: tenant.id
+            };
+        }
+    }
+    
+    return payment;
 }
 
 // Print payments table
@@ -177,12 +198,7 @@ function exportPaymentsTableToExcel() {
             // Row 1: Tenant name + check marks
             csv += `${tenant.name} (דירה ${tenant.apartment}),`;
             months.forEach(m => {
-                const payment = appState.payments.find(p => {
-                    if (p.tenantId !== tenant.id) return false;
-                    const paymentDate = new Date(p.date);
-                    return paymentDate.getFullYear() === m.year && 
-                           (paymentDate.getMonth() + 1) === m.month;
-                });
+                const payment = getPaymentForMonth(tenant, m.year, m.month);
                 csv += payment ? '✓,' : ',';
             });
             csv += '\\n';
@@ -190,12 +206,7 @@ function exportPaymentsTableToExcel() {
             // Row 2: Empty + amounts
             csv += ',';
             months.forEach(m => {
-                const payment = appState.payments.find(p => {
-                    if (p.tenantId !== tenant.id) return false;
-                    const paymentDate = new Date(p.date);
-                    return paymentDate.getFullYear() === m.year && 
-                           (paymentDate.getMonth() + 1) === m.month;
-                });
+                const payment = getPaymentForMonth(tenant, m.year, m.month);
                 csv += payment ? `₪${payment.amount},` : ',';
             });
             csv += '\\n';
@@ -203,12 +214,7 @@ function exportPaymentsTableToExcel() {
             // Row 3: Empty + dates
             csv += ',';
             months.forEach(m => {
-                const payment = appState.payments.find(p => {
-                    if (p.tenantId !== tenant.id) return false;
-                    const paymentDate = new Date(p.date);
-                    return paymentDate.getFullYear() === m.year && 
-                           (paymentDate.getMonth() + 1) === m.month;
-                });
+                const payment = getPaymentForMonth(tenant, m.year, m.month);
                 if (payment) {
                     const paymentDate = new Date(payment.date);
                     const dateStr = `${paymentDate.getDate()}/${paymentDate.getMonth() + 1}`;
