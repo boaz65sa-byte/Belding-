@@ -19,7 +19,7 @@
 // ===================================
 
 const APP_CONFIG = {
-    version: '2.10.0',
+    version: '2.10.1',
     author: 'בועז סעדה',
     copyright: '© 2024 בועז סעדה',
     lastUpdate: '13/01/2026',
@@ -2296,8 +2296,8 @@ function updatePaymentCheckboxListeners() {
 }
 
 function updateBulkPaymentActionsUI() {
-    const bulkPaymentActions = document.getElementById('bulkPaymentActions');
-    const selectedPaymentCount = document.getElementById('selectedPaymentCount');
+    const bulkPaymentActions = document.getElementById('bulkActionsPayments');
+    const selectedPaymentCount = document.getElementById('selectedPaymentsCount');
     
     if (appState.selectedPayments.size > 0) {
         if (bulkPaymentActions) bulkPaymentActions.style.display = 'flex';
