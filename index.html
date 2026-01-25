@@ -1808,6 +1808,8 @@
     <!-- Auth Check & Protection -->
     <script>
         // 🔒 בדיקת אימות לפני טעינת האפליקציה
+        // ⚠️ זמנית מושבת עד להגדרת Supabase
+        /*
         (async function() {
             try {
                 // המתן לאתחול Supabase
@@ -1864,6 +1866,9 @@
                 window.location.href = 'login.html';
             }
         })();
+        */
+        
+        console.log('ℹ️ מערכת אימות מושבתת זמנית - עובד במצב LocalStorage');
     </script>
     
     <!-- Main App -->
