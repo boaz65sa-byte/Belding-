@@ -1838,7 +1838,11 @@
                 
                 // יש גישה - הצג מידע על המנוי
                 console.log('✅ גישה אושרה:', accessCheck.status);
-                
+
+                // --- תיקון: העלמת מסך הטעינה כדי שאפשר יהיה ללחוץ ---
+                document.getElementById('loadingOverlay').style.display = 'none';
+                // -----------------------------------------------------
+
                 // הצג התראה אם המנוי עומד לפוג
                 if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
                     const message = accessCheck.status === 'trial' 
