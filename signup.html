@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הרשמה - ועד 2025</title>
+    
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .signup-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .trial-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .trial-badge i {
+            margin-left: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+            margin-right: 3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .password-toggle {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #a0aec0;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: #ef4444;
+        }
+
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #f59e0b;
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: #10b981;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .checkbox-group label {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .checkbox-group a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #718096;
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-link {
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #68d391;
+        }
+
+        .loading {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .features-list {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+
+        .features-list h3 {
+            color: #2d3748;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .feature-item i {
+            color: #10b981;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .signup-container {
+                padding: 30px 25px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <!-- Logo -->
+        <div class="logo">
+            <i class="fas fa-building"></i>
+            <h1>ועד 2025</h1>
+            <p>הצטרף למערכת ניהול הדיירים המתקדמת</p>
+        </div>
+
+        <!-- Trial Badge -->
+        <div class="trial-badge">
+            <i class="fas fa-gift"></i>
+            14 ימי ניסיון חינם - ללא צורך בכרטיס אשראי!
+        </div>
+
+        <!-- Alert Messages -->
+        <div class="alert alert-error" id="errorAlert"></div>
+        <div class="alert alert-success" id="successAlert"></div>
+
+        <!-- Signup Form -->
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="fullName">
+                    <span class="required">*</span>
+                    שם מלא
+                </label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input 
+                        type="text" 
+                        id="fullName" 
+                        class="form-input" 
+                        placeholder="שם פרטי ומשפחה"
+                        required
+                        autocomplete="name"
+                    >
+                </div>
+                <div class="error-message" id="fullNameError">נא להזין שם מלא</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">
+                    <span class="required">*</span>
+                    אימייל
+                </label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        class="form-input" 
+                        placeholder="your@email.com"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                <div class="error-message" id="emailError">נא להזין אימייל תקין</div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">טלפון (אופציונלי)</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-phone"></i>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        class="form-input" 
+                        placeholder="05X-XXXXXXX"
+                        autocomplete="tel"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <span class="required">*</span>
+                    סיסמה
+                </label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="לפחות 6 תווים"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <button type="button" class="password-toggle" onclick="togglePassword('password', 'toggleIcon1')">
+                        <i class="fas fa-eye" id="toggleIcon1"></i>
+                    </button>
+                </div>
+                <div class="password-strength">
+                    <div class="password-strength-bar" id="strengthBar"></div>
+                </div>
+                <div class="password-hint" id="strengthText">הזן סיסמה חזקה</div>
+                <div class="error-message" id="passwordError">סיסמה חייבת להכיל לפחות 6 תווים</div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">
+                    <span class="required">*</span>
+                    אימות סיסמה
+                </label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        class="form-input" 
+                        placeholder="הזן שוב את הסיסמה"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                        <i class="fas fa-eye" id="toggleIcon2"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="confirmPasswordError">הסיסמאות אינן תואמות</div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="agreeTerms" required>
+                <label for="agreeTerms">
+                    אני מסכים ל<a href="#" target="_blank">תנאי השימוש</a> ו<a href="#" target="_blank">מדיניות הפרטיות</a>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="signupBtn">
+                <span id="signupBtnText">
+                    <i class="fas fa-user-plus"></i> הירשם עכשיו
+                </span>
+                <div class="loading" id="signupLoading">
+                    <div class="spinner"></div>
+                    <span>רושם...</span>
+                </div>
+            </button>
+        </form>
+
+        <!-- Features -->
+        <div class="features-list">
+            <h3>מה מקבלים בתקופת הניסיון:</h3>
+            <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>גישה מלאה לכל התכונות</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>ניהול דיירים ותשלומים</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>דוחות ויצוא נתונים</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>תמיכה טכנית מלאה</span>
+            </div>
+        </div>
+
+        <div class="divider">
+            <span>או</span>
+        </div>
+
+        <div class="login-link">
+            כבר יש לך חשבון? <a href="login.html">התחבר כאן</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        // Toggle Password Visibility
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Password Strength Checker
+        document.getElementById('password').addEventListener('input', (e) => {
+            const password = e.target.value;
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+            
+            strengthBar.className = 'password-strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('weak');
+                strengthText.textContent = 'סיסמה חלשה';
+                strengthText.style.color = '#ef4444';
+            } else if (strength <= 4) {
+                strengthBar.classList.add('medium');
+                strengthText.textContent = 'סיסמה בינונית';
+                strengthText.style.color = '#f59e0b';
+            } else {
+                strengthBar.classList.add('strong');
+                strengthText.textContent = 'סיסמה חזקה!';
+                strengthText.style.color = '#10b981';
+            }
+        });
+
+        // Show Alert
+        function showAlert(message, type = 'error') {
+            const alertElement = document.getElementById(type === 'error' ? 'errorAlert' : 'successAlert');
+            alertElement.textContent = message;
+            alertElement.style.display = 'block';
+            
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Form Validation
+        function validateForm() {
+            let isValid = true;
+            
+            // Full Name
+            const fullName = document.getElementById('fullName').value.trim();
+            if (fullName.length < 2) {
+                document.getElementById('fullName').classList.add('error');
+                document.getElementById('fullNameError').classList.add('show');
+                isValid = false;
+            } else {
+                document.getElementById('fullName').classList.remove('error');
+                document.getElementById('fullNameError').classList.remove('show');
+            }
+            
+            // Email
+            const email = document.getElementById('email').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('email').classList.add('error');
+                document.getElementById('emailError').classList.add('show');
+                isValid = false;
+            } else {
+                document.getElementById('email').classList.remove('error');
+                document.getElementById('emailError').classList.remove('show');
+            }
+            
+            // Password
+            const password = document.getElementById('password').value;
+            if (password.length < 6) {
+                document.getElementById('password').classList.add('error');
+                document.getElementById('passwordError').classList.add('show');
+                isValid = false;
+            } else {
+                document.getElementById('password').classList.remove('error');
+                document.getElementById('passwordError').classList.remove('show');
+            }
+            
+            // Confirm Password
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPassword').classList.add('error');
+                document.getElementById('confirmPasswordError').classList.add('show');
+                isValid = false;
+            } else {
+                document.getElementById('confirmPassword').classList.remove('error');
+                document.getElementById('confirmPasswordError').classList.remove('show');
+            }
+            
+            // Terms
+            if (!document.getElementById('agreeTerms').checked) {
+                showAlert('נא לאשר את תנאי השימוש');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Handle Signup Form Submit
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm()) return;
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim() || null;
+            const password = document.getElementById('password').value;
+            
+            // Show loading
+            document.getElementById('signupBtnText').style.display = 'none';
+            document.getElementById('signupLoading').classList.add('active');
+            document.getElementById('signupBtn').disabled = true;
+            
+            try {
+                const result = await signup(email, password, fullName, phone);
+                
+                if (result.success) {
+                    showAlert('נרשמת בהצלחה! ברוך הבא! מעביר לדף הראשי...', 'success');
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    showAlert(result.error || 'שגיאה ברישום. נסה שוב.');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAlert('שגיאה ברישום. בדוק את החיבור לאינטרנט.');
+            } finally {
+                // Hide loading
+                document.getElementById('signupBtnText').style.display = 'inline';
+                document.getElementById('signupLoading').classList.remove('active');
+                document.getElementById('signupBtn').disabled = false;
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', async () => {
+            const session = await getCurrentSession();
+            if (session) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
