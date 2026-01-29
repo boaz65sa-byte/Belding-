@@ -1817,14 +1817,12 @@
                 const accessCheck = await checkUserAccess();
                 
                 if (!accessCheck.hasAccess) {
-                    // אין גישה - הפנה להתחברות
-                    if (accessCheck.reason === 'not_logged_in') {
-                        window.location.href = 'login.html';
-                        return;
-                    }
-                    
-                    if (accessCheck.reason === 'blocked') {
-                        window.location.href = 'blocked.html';
+                    // ... קוד קיים ...
+
+                    // הוסף את זה:
+                    if (accessCheck.reason === 'expired') {
+                        // המנוי נגמר - שלח לדף תשלום
+                        window.location.href = 'pricing.html'; 
                         return;
                     }
                     
