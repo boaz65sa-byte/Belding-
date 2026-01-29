@@ -10,12 +10,10 @@
  */
 
 const SUPABASE_CONFIG = {
-    // 🔗 URL של הפרויקט שלך
     url: 'https://whpvppkssxapjkwpycch.supabase.co',
-    
-    // 🔑 Anon Key (מפתח ציבורי)
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndocHZwcGtzc3hhcGprd3B5Y2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTgyNTQsImV4cCI6MjA4NDAzNDI1NH0.KC6nLd8pw1A0UhUMQg7VsfZ1i1H0JzSJanSNoh3HNw8',
 };
+
 
 
 
