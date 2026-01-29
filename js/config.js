@@ -15,8 +15,6 @@ const SUPABASE_CONFIG = {
 };
 
 
-
-
 /**
  * 💰 הגדרות מחירים
  */
