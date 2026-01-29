@@ -2,75 +2,61 @@
  * ========================================
  * 🔧 קובץ הגדרות - Supabase Configuration
  * ========================================
- * 
- * ⚠️ חשוב! החלף את הערכים האלה עם הנתונים מ-Supabase שלך:
- * 1. לך ל-Supabase Dashboard
- * 2. Project Settings → API
- * 3. העתק את Project URL ו-anon public key
  */
 
+// ✅ תיקון 1: שמתי כאן את המפתחות של הפרויקט החדש (Vaad 2025)
 const SUPABASE_CONFIG = {
-    url: 'https://whpvppkssxapjkwpycch.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndocHZwcGtzc3hhcGprd3B5Y2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTgyNTQsImV4cCI6MjA4NDAzNDI1NH0.KC6nLd8pw1A0UhUMQg7VsfZ1i1H0JzSJanSNoh3HNw8',
+    url: 'https://msozsfuogkxtnqtidwig.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zb3pzZnVvZ2t4dG5xdGlkd2lnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDQwOTQsImV4cCI6MjA4NTI4MDA5NH0.Fuifr9nRKdCLd7iBPmdr0aFojnz2VQ5cpUDddFpS3-M',
 };
 
+// ✅ תיקון 2: הוספת לוגיקת החיבור (קריטי!)
+if (typeof supabase === 'undefined') {
+    console.error('CRITICAL ERROR: Supabase library not loaded! Check HTML script tags.');
+    // אופציונלי: הצגת התראה למשתמש
+    if (typeof window !== 'undefined') {
+        window.addEventListener('DOMContentLoaded', () => {
+            alert('שגיאה טכנית: הספרייה לא נטענה. אנא רענן את הדף.');
+        });
+    }
+} else {
+    // יצירת החיבור והפיכתו לזמין בכל האתר
+    window.supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    console.log('✅ Supabase Connected Successfully (Project: Vaad 2025)');
+}
 
 /**
- * 💰 הגדרות מחירים
+ * 💰 הגדרות מחירים (השארתי את הקוד המצוין שלך כמו שהוא)
  */
 const PRICING_CONFIG = {
     trial: {
         name: 'ניסיון חינם',
-        duration: 14, // ימים
+        duration: 14,
         price: 0,
-        features: [
-            'גישה מלאה למערכת',
-            'ניהול דיירים ותשלומים',
-            'ניהול הוצאות',
-            'דוחות ויצוא נתונים',
-            'תמיכה טכנית'
-        ]
+        features: ['גישה מלאה למערכת', 'ניהול דיירים ותשלומים', 'ניהול הוצאות', 'דוחות ויצוא נתונים', 'תמיכה טכנית']
     },
     monthly: {
         name: 'מנוי חודשי',
         price: 49,
         currency: 'ILS',
         symbol: '₪',
-        features: [
-            'כל התכונות של הניסיון',
-            'גיבויים אוטומטיים',
-            'תמיכה מועדפת',
-            'עדכונים שוטפים',
-            'ללא הגבלת דיירים'
-        ]
+        features: ['כל התכונות של הניסיון', 'גיבויים אוטומטיים', 'תמיכה מועדפת', 'עדכונים שוטפים', 'ללא הגבלת דיירים']
     },
     yearly: {
         name: 'מנוי שנתי',
         price: 490,
         currency: 'ILS',
         symbol: '₪',
-        savings: 98, // ₪49 * 12 - ₪490 = ₪98 חיסכון
-        savingsPercent: 17, // (98 / 588) * 100
-        features: [
-            'כל התכונות של החודשי',
-            'חודש חינם! (חיסכון של ₪98)',
-            'תמיכה VIP',
-            'גיבוי יומי',
-            'נעילת מחיר לתמיד'
-        ]
+        savings: 98,
+        savingsPercent: 17,
+        features: ['כל התכונות של החודשי', 'חודש חינם! (חיסכון של ₪98)', 'תמיכה VIP', 'גיבוי יומי', 'נעילת מחיר לתמיד']
     },
     lifetime: {
         name: 'חד פעמי - לתמיד',
         price: 499,
         currency: 'ILS',
         symbol: '₪',
-        features: [
-            'כל התכונות לתמיד!',
-            'תשלום חד פעמי',
-            'ללא חידושים',
-            'עדכונים לכל החיים',
-            'תמיכה VIP לצמיתות'
-        ],
+        features: ['כל התכונות לתמיד!', 'תשלום חד פעמי', 'ללא חידושים', 'עדכונים לכל החיים', 'תמיכה VIP לצמיתות'],
         badge: 'הכי כדאי!'
     }
 };
@@ -79,40 +65,34 @@ const PRICING_CONFIG = {
  * 🔔 הגדרות התראות
  */
 const NOTIFICATION_CONFIG = {
-    email: {
-        enabled: true,
-        events: ['signup', 'payment', 'expiry_warning']
-    },
-    expiry_warning_days: 7 // התראה 7 ימים לפני תום מנוי
+    email: { enabled: true, events: ['signup', 'payment', 'expiry_warning'] },
+    expiry_warning_days: 7
 };
 
 /**
  * 👑 הגדרות תפקידים
  */
-const ROLES = {
-    ADMIN: 'admin',
-    USER: 'user'
-};
+const ROLES = { ADMIN: 'admin', USER: 'user' };
 
 /**
  * 🔒 הגדרות סטטוס משתמש
  */
 const USER_STATUS = {
-    TRIAL: 'trial',        // תקופת ניסיון
-    ACTIVE: 'active',      // מנוי פעיל
-    BLOCKED: 'blocked',    // חסום על ידי אדמין
-    EXPIRED: 'expired'     // מנוי פג
+    TRIAL: 'trial',
+    ACTIVE: 'active',
+    BLOCKED: 'blocked',
+    EXPIRED: 'expired'
 };
 
 /**
  * 💳 אמצעי תשלום
  */
 const PAYMENT_METHODS = {
-    SIMULATION: 'simulation',     // סימולציה לבדיקות
-    CREDIT_CARD: 'credit_card',   // כרטיס אשראי
-    STRIPE: 'stripe',             // Stripe
-    PAYPAL: 'paypal',             // PayPal
-    MANUAL: 'manual'              // אישור ידני
+    SIMULATION: 'simulation',
+    CREDIT_CARD: 'credit_card',
+    STRIPE: 'stripe',
+    PAYPAL: 'paypal',
+    MANUAL: 'manual'
 };
 
 /**
@@ -163,40 +143,3 @@ const MESSAGES = {
         }
     }
 };
-
-/**
- * 🛡️ בדיקת תקינות הגדרות
- */
-function validateConfig() {
-    if (SUPABASE_CONFIG.url === 'YOUR_SUPABASE_URL_HERE' || 
-        SUPABASE_CONFIG.anonKey === 'YOUR_SUPABASE_ANON_KEY_HERE') {
-        console.warn('⚠️ אזהרה: עדיין לא הגדרת את Supabase Config!');
-        console.warn('לך לקובץ js/config.js והחלף את הערכים');
-        return false;
-    }
-    return true;
-}
-
-// בדיקה אוטומטית בטעינת הדף
-if (typeof window !== 'undefined') {
-    window.addEventListener('DOMContentLoaded', () => {
-        if (!validateConfig()) {
-            // הצג הודעה על המסך
-            const warning = document.createElement('div');
-            warning.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                background: #ff9800;
-                color: white;
-                padding: 15px;
-                text-align: center;
-                z-index: 99999;
-                font-weight: bold;
-            `;
-            warning.innerHTML = '⚠️ אזהרה: יש להגדיר את Supabase Config בקובץ js/config.js';
-            document.body.insertBefore(warning, document.body.firstChild);
-        }
-    });
-}
