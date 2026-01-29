@@ -1,114 +1,94 @@
 /**
  * ========================================
- * 🔐 Auth.js - לוגיקה פשוטה ועובדת
+ * 🔐 Auth.js - מעודכן עם איפוס סיסמה
  * ========================================
  */
 
-// ✅ פונקציית עזר: קבלת הלקוח בצורה בטוחה
 function getSupabase() {
     if (window.supabaseClient) return window.supabaseClient;
     console.error('CRITICAL: Supabase client missing');
-    alert('שגיאת חיבור: נסה לרענן את הדף (Ctrl+Shift+R)');
     return null;
 }
 
-// ✅ 1. הרשמה (Sign Up)
+// 1. הרשמה
 async function signup(email, password, fullName, phone) {
     const supabase = getSupabase();
     if (!supabase) return { success: false, error: 'Connection Error' };
 
     try {
-        console.log('Starting signup for:', email);
-
-        // שלב א: יצירת משתמש
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: { full_name: fullName, phone: phone } // שומר במטא-דאטה של המשתמש
-            }
+        const { data, error } = await supabase.auth.signUp({
+            email, password,
+            options: { data: { full_name: fullName, phone } }
         });
-
-        if (authError) throw authError;
-
-        // שלב ב: יצירת פרופיל בטבלה (אופציונלי - אם נכשל לא נורא)
-        if (authData.user) {
-            const { error: profileError } = await supabase
-                .from('user_profiles')
-                .insert([{
-                    id: authData.user.id,
-                    email: email,
-                    full_name: fullName,
-                    phone: phone,
-                    role: 'admin', // נותן אדמין למשתמש הראשון באופן זמני
-                    created_at: new Date().toISOString()
-                }]);
-            
-            if (profileError) console.warn('Profile creation warning:', profileError);
+        if (error) throw error;
+        
+        // יצירת פרופיל
+        if (data.user) {
+            await supabase.from('user_profiles').insert([{
+                id: data.user.id, email, full_name: fullName, phone, role: 'user'
+            }]);
         }
-
-        return { success: true, user: authData.user };
-
+        return { success: true, user: data.user };
     } catch (error) {
-        console.error('Signup Error:', error);
-        return { success: false, error: translateError(error.message) };
+        return { success: false, error: error.message };
     }
 }
 
-// ✅ 2. התחברות (Login)
-async function login(email, password, rememberMe = false) {
+// 2. התחברות
+async function login(email, password) {
     const supabase = getSupabase();
     if (!supabase) return { success: false, error: 'Connection Error' };
 
     try {
-        console.log('Logging in:', email);
-        
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-
-        // שמירת "זכור אותי" אם צריך
-        if (rememberMe) localStorage.setItem('rememberMe', 'true');
-
         return { success: true, user: data.user };
-
     } catch (error) {
-        console.error('Login Error:', error);
         return { success: false, error: translateError(error.message) };
     }
 }
 
-// ✅ 3. בדיקת משתמש מחובר (Session)
+// 3. איפוס סיסמה (החדש!)
+async function resetPassword(email) {
+    const supabase = getSupabase();
+    if (!supabase) return { success: false, error: 'Connection Error' };
+
+    try {
+        // שולח את המשתמש לדף עדכון סיסמה (צריך ליצור אותו בהמשך אם תרצה, בינתיים זה יפנה ללוגין)
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/update-password.html'
+        });
+        
+        if (error) throw error;
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+// 4. בדיקת סשן
 async function getCurrentSession() {
     const supabase = getSupabase();
     if (!supabase) return null;
-    
     const { data: { session } } = await supabase.auth.getSession();
     return session;
 }
 
-// ✅ 4. יציאה (Logout)
+// 5. יציאה
 async function logout() {
     const supabase = getSupabase();
     if (supabase) await supabase.auth.signOut();
     window.location.href = 'login.html';
 }
 
-// 🌐 תרגום שגיאות לעברית
 function translateError(msg) {
-    if (msg.includes('Invalid login')) return 'אימייל או סיסמה שגויים';
-    if (msg.includes('Email not confirmed')) return 'יש לאשר את המייל תחילה';
-    if (msg.includes('User already registered')) return 'המייל הזה כבר רשום במערכת';
-    return 'שגיאה כללית: ' + msg;
+    if (msg.includes('Invalid login')) return 'פרטים שגויים';
+    return msg;
 }
 
-// חשיפת הפונקציות לחלון (כדי שה-HTML יכיר אותן)
+// חשיפה לחלון
 window.signup = signup;
 window.login = login;
+window.resetPassword = resetPassword;
 window.getCurrentSession = getCurrentSession;
 window.logout = logout;
-
-console.log('✅ Auth.js Loaded Successfully');
