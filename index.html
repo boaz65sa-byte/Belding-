@@ -124,6 +124,23 @@
                     <span>הגדרות</span>
                 </a>
             </div>
+            
+            <!-- User Profile & Logout -->
+            <div class="sidebar-footer" style="padding: 20px; border-top: 1px solid #e5e7eb; margin-top: auto;">
+                <div class="user-info" style="margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <i class="fas fa-user-circle" style="font-size: 2rem; color: #6366f1;"></i>
+                        <div>
+                            <div id="userDisplayName" style="font-weight: 600; color: #1f2937;">טוען...</div>
+                            <div id="userDisplayEmail" style="font-size: 0.75rem; color: #6b7280;">טוען...</div>
+                        </div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn-logout" style="width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>התנתק</span>
+                </button>
+            </div>
         </aside>
 
         <!-- Mobile Menu Toggle -->
@@ -1817,12 +1834,14 @@
                 const accessCheck = await checkUserAccess();
                 
                 if (!accessCheck.hasAccess) {
-                    // ... קוד קיים ...
-
-                    // הוסף את זה:
-                    if (accessCheck.reason === 'expired') {
-                        // המנוי נגמר - שלח לדף תשלום
-                        window.location.href = 'pricing.html'; 
+                    // אין גישה - הפנה להתחברות
+                    if (accessCheck.reason === 'not_logged_in') {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    if (accessCheck.reason === 'blocked') {
+                        window.location.href = 'blocked.html';
                         return;
                     }
                     
@@ -1836,11 +1855,7 @@
                 
                 // יש גישה - הצג מידע על המנוי
                 console.log('✅ גישה אושרה:', accessCheck.status);
-
-                // --- תיקון: העלמת מסך הטעינה כדי שאפשר יהיה ללחוץ ---
-                document.getElementById('loadingOverlay').style.display = 'none';
-                // -----------------------------------------------------
-
+                
                 // הצג התראה אם המנוי עומד לפוג
                 if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
                     const message = accessCheck.status === 'trial' 
@@ -1866,6 +1881,55 @@
                 window.location.href = 'login.html';
             }
         })();
+    </script>
+    
+    <!-- Logout & User Display -->
+    <script>
+        // הצגת שם המשתמש
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const supabase = await getSupabase();
+                if (supabase) {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'משתמש';
+                        const displayEmail = user.email || '';
+                        
+                        document.getElementById('userDisplayName').textContent = displayName;
+                        document.getElementById('userDisplayEmail').textContent = displayEmail;
+                    }
+                }
+            } catch (error) {
+                console.error('שגיאה בטעינת פרטי משתמש:', error);
+            }
+            
+            // כפתור התנתקות
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    if (confirm('האם אתה בטוח שברצונך להתנתק?')) {
+                        try {
+                            const supabase = await getSupabase();
+                            if (supabase) {
+                                await supabase.auth.signOut();
+                            }
+                            window.location.href = 'login.html';
+                        } catch (error) {
+                            console.error('שגיאה בהתנתקות:', error);
+                            alert('שגיאה בהתנתקות. אנא נסה שוב.');
+                        }
+                    }
+                });
+                
+                // אפקט hover
+                logoutBtn.addEventListener('mouseenter', () => {
+                    logoutBtn.style.background = '#dc2626';
+                });
+                logoutBtn.addEventListener('mouseleave', () => {
+                    logoutBtn.style.background = '#ef4444';
+                });
+            }
+        });
     </script>
     
     <!-- Main App -->
