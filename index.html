@@ -125,9 +125,9 @@
                 </a>
                 
                 <!-- כפתור פאנל אדמין - מוצג רק לסופר אדמין -->
-                <a href="admin.html" class="menu-item super-admin-only" id="adminPanelLink" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 20px; border-radius: 10px;">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>פאנל אדמין</span>
+                <a href="admin.html" class="menu-item super-admin-only" id="adminPanelLink" style="display: none; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin-top: 20px; border-radius: 10px; border: 2px solid #fca5a5;">
+                    <i class="fas fa-crown"></i>
+                    <span>🔥 פאנל אדמין</span>
                 </a>
                 
                 <!-- כפתור תמחור - מוצג רק למשתמשים רגילים -->
@@ -1908,17 +1908,26 @@
                 
                 // הצג כפתורים לפי תפקיד המשתמש
                 console.log('🔍 בדיקת תפקיד:', accessCheck.profile?.role);
+                console.log('📋 פרופיל מלא:', accessCheck.profile);
                 
                 const userRole = accessCheck.profile?.role;
                 const adminLink = document.getElementById('adminPanelLink');
                 const pricingLink = document.getElementById('pricingLink');
+                
+                console.log('🔗 adminLink element:', adminLink);
+                console.log('🔗 pricingLink element:', pricingLink);
                 
                 // פאנל אדמין - רק לסופר אדמין (boaz65sa@gmail.com)
                 if (userRole === 'super_admin') {
                     console.log('✅ סופר אדמין - מציג פאנל ניהול');
                     if (adminLink) {
                         adminLink.style.display = 'flex';
+                        console.log('✅ כפתור אדמין הוצג בהצלחה');
+                    } else {
+                        console.error('❌ לא נמצא אלמנט adminPanelLink');
                     }
+                } else {
+                    console.log('❌ לא סופר אדמין - תפקיד:', userRole);
                 }
                 
                 // מחירים ומנויים - רק למשתמשים רגילים (לא אדמין ולא סופר אדמין)
