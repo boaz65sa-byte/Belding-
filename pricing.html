@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -23,240 +23,474 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 60px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background decoration */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-2%, 2%) rotate(1deg); }
         }
 
         .pricing-container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Header */
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
 
         .header h1 {
-            font-size: 42px;
-            margin-bottom: 15px;
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .header h1 span {
+            background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
             font-size: 18px;
-            opacity: 0.9;
+            color: #94a3b8;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
+        /* Alert */
         .alert {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+            padding: 16px 24px;
             border-radius: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 500;
+            display: none;
         }
 
+        /* Pricing Grid */
         .pricing-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 50px;
         }
 
+        @media (max-width: 968px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        /* Pricing Card */
         .pricing-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 32px;
             position: relative;
-            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .pricing-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(99, 102, 241, 0.2);
         }
 
+        .pricing-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Featured Card */
         .pricing-card.featured {
-            border: 3px solid #10b981;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-color: rgba(99, 102, 241, 0.5);
             transform: scale(1.05);
         }
 
-        .pricing-card.featured:hover {
-            transform: scale(1.08) translateY(-10px);
+        .pricing-card.featured::before {
+            opacity: 1;
+            background: linear-gradient(90deg, #10b981, #6366f1, #10b981);
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
         }
 
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.08) translateY(-8px);
+        }
+
+        /* Badge */
         .badge {
             position: absolute;
-            top: -15px;
-            right: 50%;
-            transform: translateX(50%);
-            background: #10b981;
+            top: -1px;
+            right: 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
+            border-radius: 0 0 12px 12px;
+            font-size: 12px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
 
+        /* Plan Icon */
         .plan-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            text-align: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 24px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
+        .pricing-card.featured .plan-icon {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        /* Plan Name */
         .plan-name {
-            text-align: center;
             font-size: 24px;
             font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 15px;
+            color: white;
+            margin-bottom: 8px;
         }
 
+        .plan-description {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        /* Price */
         .price {
-            text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .price-amount {
-            font-size: 48px;
-            font-weight: 700;
-            color: #667eea;
+            font-size: 56px;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+        }
+
+        .price-currency {
+            font-size: 24px;
+            font-weight: 600;
+            color: #94a3b8;
+            vertical-align: top;
         }
 
         .price-period {
-            font-size: 18px;
-            color: #718096;
-            margin-right: 5px;
+            font-size: 16px;
+            color: #64748b;
+            font-weight: 500;
         }
 
         .savings {
-            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.1);
             color: #10b981;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 20px;
-            font-size: 16px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
+        /* Features */
         .features {
-            margin: 30px 0;
+            margin: 32px 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .feature {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 15px;
-            color: #4a5568;
+            margin-bottom: 16px;
+            color: #cbd5e1;
+            font-size: 15px;
         }
 
         .feature i {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
             color: #10b981;
-            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
         }
 
+        /* Button */
         .btn {
             width: 100%;
-            padding: 16px;
+            padding: 16px 24px;
             border: none;
             border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
 
         .btn-primary:hover {
+            background: #6366f1;
+            color: white;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
         }
 
-        .btn-success {
+        .btn-featured {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
+            border: none;
         }
 
-        .btn-success:hover {
+        .btn-featured:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
         }
 
         .btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
-        .comparison {
-            background: white;
+        /* Promo Code Section */
+        .promo-section {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 40px;
-            margin-top: 40px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            margin: 0 auto 50px;
         }
 
-        .comparison h2 {
-            text-align: center;
-            color: #2d3748;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .comparison-table th,
-        .comparison-table td {
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .comparison-table th {
-            background: #f7fafc;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .comparison-table td.check {
-            color: #10b981;
-            font-size: 20px;
-        }
-
-        .comparison-table td.cross {
-            color: #ef4444;
-            font-size: 20px;
-        }
-
-        .back-link {
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .back-link a {
+        .promo-section h3 {
             color: white;
-            text-decoration: none;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
-            display: inline-flex;
+            margin-bottom: 16px;
+            display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .back-link a:hover {
-            text-decoration: underline;
+        .promo-section h3 i {
+            color: #fbbf24;
         }
 
+        .promo-input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .promo-input {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .promo-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .promo-input::placeholder {
+            color: #64748b;
+        }
+
+        .btn-apply {
+            padding: 14px 24px;
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-apply:hover {
+            background: #fbbf24;
+            color: #0f172a;
+        }
+
+        .promo-message {
+            margin-top: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .promo-message.success {
+            color: #10b981;
+            display: block;
+        }
+
+        .promo-message.error {
+            color: #ef4444;
+            display: block;
+        }
+
+        /* Guarantee Section */
+        .guarantee {
+            text-align: center;
+            padding: 40px;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .guarantee-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+        }
+
+        .guarantee h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .guarantee p {
+            color: #94a3b8;
+            font-size: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Back Link */
+        .back-link {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .back-link a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s;
+        }
+
+        .back-link a:hover {
+            color: white;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -264,7 +498,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -275,63 +510,95 @@
         }
 
         .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 420px;
             width: 90%;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .modal-content i {
-            font-size: 64px;
-            margin-bottom: 20px;
+        .modal-content .modal-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 40px;
+        }
+
+        .modal-content .modal-icon.processing {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        .modal-content .modal-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
         }
 
         .modal-content h3 {
             font-size: 24px;
-            margin-bottom: 15px;
-            color: #2d3748;
+            color: white;
+            margin-bottom: 12px;
+            font-weight: 700;
         }
 
-        .loading {
-            display: none;
-        }
-
-        .loading.active {
-            display: block;
+        .modal-content p {
+            color: #94a3b8;
+            font-size: 15px;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e2e8f0;
-            border-top-color: #667eea;
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 20px auto;
+            margin: 0 auto;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
+            body {
+                padding: 40px 16px;
+            }
+
             .header h1 {
                 font-size: 32px;
             }
 
-            .pricing-grid {
-                grid-template-columns: 1fr;
+            .header p {
+                font-size: 16px;
+            }
+
+            .pricing-card {
+                padding: 32px 24px;
             }
 
             .pricing-card.featured {
                 transform: scale(1);
             }
 
-            .comparison {
-                padding: 20px;
-                overflow-x: auto;
+            .pricing-card.featured:hover {
+                transform: translateY(-8px);
+            }
+
+            .price-amount {
+                font-size: 44px;
+            }
+
+            .promo-input-group {
+                flex-direction: column;
             }
         }
     </style>
@@ -340,12 +607,16 @@
     <div class="pricing-container">
         <!-- Header -->
         <div class="header">
-            <h1>💎 בחר את התוכנית המתאימה לך</h1>
-            <p>כל התוכניות כוללות גישה מלאה לכל התכונות</p>
+            <div class="header-badge">
+                <i class="fas fa-sparkles"></i>
+                תוכניות גמישות לכל צורך
+            </div>
+            <h1>בחר את <span>התוכנית</span> שלך</h1>
+            <p>כל התוכניות כוללות גישה מלאה לכל התכונות. בחר את התוכנית המתאימה לך ביותר.</p>
         </div>
 
         <!-- Expired Alert -->
-        <div class="alert" id="expiredAlert" style="display: none;">
+        <div class="alert" id="expiredAlert">
             ⚠️ תקופת הניסיון שלך הסתיימה. בחר תוכנית כדי להמשיך להשתמש במערכת.
         </div>
 
@@ -354,72 +625,81 @@
             <!-- Monthly -->
             <div class="pricing-card">
                 <div class="plan-icon">📅</div>
-                <h3 class="plan-name">מנוי חודשי</h3>
+                <h3 class="plan-name">חודשי</h3>
+                <p class="plan-description">גמישות מקסימלית, ללא התחייבות</p>
                 <div class="price">
-                    <span class="price-amount">₪29.90</span>
+                    <span class="price-currency">₪</span>
+                    <span class="price-amount">29.90</span>
                     <span class="price-period">/חודש</span>
                 </div>
                 <div class="features">
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>גישה מלאה לכל התכונות</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>ניהול דיירים ותשלומים</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>דוחות ויצוא נתונים</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>גיבויים אוטומטיים</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>תמיכה טכנית</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="purchasePlan('monthly')">
-                    <i class="fas fa-shopping-cart"></i> רכוש עכשיו
+                <button class="btn btn-primary" onclick="pay('monthly')">
+                    <i class="fas fa-arrow-left"></i>
+                    בחר תוכנית
                 </button>
             </div>
 
             <!-- Yearly (Featured) -->
             <div class="pricing-card featured">
-                <div class="badge">🔥 הכי משתלם!</div>
+                <div class="badge">🔥 הכי משתלם</div>
                 <div class="plan-icon">🎯</div>
-                <h3 class="plan-name">מנוי שנתי</h3>
+                <h3 class="plan-name">שנתי</h3>
+                <p class="plan-description">החיסכון הגדול ביותר</p>
                 <div class="price">
-                    <span class="price-amount">₪300</span>
+                    <span class="price-currency">₪</span>
+                    <span class="price-amount">300</span>
                     <span class="price-period">/שנה</span>
                 </div>
-                <div class="savings">💰 חסוך ₪58.80 בשנה!</div>
+                <div class="savings">
+                    <i class="fas fa-tag"></i>
+                    חסוך ₪58.80 בשנה!
+                </div>
                 <div class="features">
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span><strong>כל התכונות של החודשי</strong></span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>חיסכון של 17%</span>
+                        <i class="fas fa-check"></i>
+                        <span>תמיכה VIP מועדפת</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>תמיכה VIP</span>
+                        <i class="fas fa-check"></i>
+                        <span>גיבוי יומי אוטומטי</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>גיבוי יומי</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>נעילת מחיר לשנה</span>
                     </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span>עדכונים ושיפורים</span>
+                    </div>
                 </div>
-                <button class="btn btn-success" onclick="purchasePlan('yearly')">
-                    <i class="fas fa-crown"></i> רכוש עכשיו
+                <button class="btn btn-featured" onclick="pay('yearly')">
+                    <i class="fas fa-crown"></i>
+                    בחר תוכנית
                 </button>
             </div>
 
@@ -427,96 +707,72 @@
             <div class="pricing-card">
                 <div class="plan-icon">💎</div>
                 <h3 class="plan-name">לכל החיים</h3>
+                <p class="plan-description">תשלום אחד, גישה לתמיד</p>
                 <div class="price">
-                    <span class="price-amount">₪500</span>
+                    <span class="price-currency">₪</span>
+                    <span class="price-amount">500</span>
                     <span class="price-period">חד פעמי</span>
                 </div>
-                <div class="savings">🎁 תשלום אחד, גישה לתמיד!</div>
+                <div class="savings">
+                    <i class="fas fa-infinity"></i>
+                    ללא תשלומים נוספים!
+                </div>
                 <div class="features">
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span><strong>כל התכונות לצמיתות</strong></span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>ללא חידושים</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>עדכונים לכל החיים</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>תמיכה VIP לצמיתות</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span>ההשקעה הטובה ביותר</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="purchasePlan('lifetime')">
-                    <i class="fas fa-infinity"></i> רכוש עכשיו
+                <button class="btn btn-primary" onclick="pay('lifetime')">
+                    <i class="fas fa-gem"></i>
+                    בחר תוכנית
                 </button>
             </div>
         </div>
 
-        <!-- Comparison Table -->
-        <div class="comparison">
-            <h2>📊 השוואת תוכניות</h2>
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th>תכונה</th>
-                        <th>חודשי</th>
-                        <th>שנתי</th>
-                        <th>לכל החיים</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>ניהול דיירים</td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>ניהול תשלומים</td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>דוחות ויצוא</td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>גיבויים אוטומטיים</td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>תמיכה VIP</td>
-                        <td class="cross"><i class="fas fa-times"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>גיבוי יומי</td>
-                        <td class="cross"><i class="fas fa-times"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>עדכונים לצמיתות</td>
-                        <td class="cross"><i class="fas fa-times"></i></td>
-                        <td class="cross"><i class="fas fa-times"></i></td>
-                        <td class="check"><i class="fas fa-check"></i></td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Promo Code Section -->
+        <div class="promo-section">
+            <h3>
+                <i class="fas fa-ticket-alt"></i>
+                יש לך קוד קופון?
+            </h3>
+            <div class="promo-input-group">
+                <input 
+                    type="text" 
+                    id="promoCode" 
+                    class="promo-input" 
+                    placeholder="הכנס קוד קופון..."
+                    autocomplete="off"
+                >
+                <button class="btn-apply" onclick="applyPromoCode()">
+                    <i class="fas fa-check"></i>
+                    החל
+                </button>
+            </div>
+            <div class="promo-message" id="promoMessage"></div>
+        </div>
+
+        <!-- Guarantee -->
+        <div class="guarantee">
+            <div class="guarantee-icon">🛡️</div>
+            <h3>אחריות 30 יום להחזר כספי</h3>
+            <p>אם אתה לא מרוצה מהמערכת מכל סיבה שהיא, נחזיר לך את הכסף במלואו תוך 30 יום מרגע הרכישה. ללא שאלות.</p>
         </div>
 
         <!-- Back Link -->
@@ -531,9 +787,10 @@
     <!-- Processing Modal -->
     <div class="modal" id="processingModal">
         <div class="modal-content">
-            <i class="fas fa-credit-card" style="color: #667eea;"></i>
+            <div class="modal-icon processing">
+                <div class="spinner"></div>
+            </div>
             <h3>מעבד תשלום...</h3>
-            <div class="spinner"></div>
             <p>אנא המתן, אל תסגור את החלון</p>
         </div>
     </div>
@@ -541,7 +798,9 @@
     <!-- Success Modal -->
     <div class="modal" id="successModal">
         <div class="modal-content">
-            <i class="fas fa-check-circle" style="color: #10b981;"></i>
+            <div class="modal-icon success">
+                <i class="fas fa-check"></i>
+            </div>
             <h3>התשלום בוצע בהצלחה!</h3>
             <p>המנוי שלך עודכן. מעביר לדף הראשי...</p>
         </div>
@@ -551,11 +810,15 @@
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/payment.js"></script>
     
     <script>
+        let appliedPromoCode = null;
+        let discountPercent = 0;
+
         // Check URL parameters on page load
         window.addEventListener('DOMContentLoaded', async () => {
+            await initSupabase();
+            
             const urlParams = new URLSearchParams(window.location.search);
             
             // Show expired alert if redirected from expired trial
@@ -566,7 +829,6 @@
             // Handle successful payment return from Stripe
             if (urlParams.get('success') === 'true') {
                 document.getElementById('successModal').classList.add('active');
-                // Clear URL params and redirect after delay
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 2500);
@@ -575,16 +837,51 @@
             // Handle canceled payment
             if (urlParams.get('canceled') === 'true') {
                 alert('התשלום בוטל. תוכל לנסות שוב בכל עת.');
-                // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Check for global discount
+            const globalDiscount = localStorage.getItem('globalDiscount');
+            if (globalDiscount && parseInt(globalDiscount) > 0) {
+                discountPercent = parseInt(globalDiscount);
+                document.getElementById('promoMessage').textContent = `🎉 הנחה של ${discountPercent}% תחול אוטומטית!`;
+                document.getElementById('promoMessage').className = 'promo-message success';
             }
         });
 
         /**
-         * Purchase a plan via Stripe Checkout
+         * Apply promo code
+         */
+        function applyPromoCode() {
+            const code = document.getElementById('promoCode').value.trim().toUpperCase();
+            const messageEl = document.getElementById('promoMessage');
+            
+            if (!code) {
+                messageEl.textContent = 'נא להזין קוד קופון';
+                messageEl.className = 'promo-message error';
+                return;
+            }
+
+            // Check promo codes from localStorage (set by admin)
+            const promoCodes = JSON.parse(localStorage.getItem('promoCodes') || '{}');
+            
+            if (promoCodes[code]) {
+                appliedPromoCode = code;
+                discountPercent = promoCodes[code];
+                messageEl.textContent = `🎉 קופון "${code}" הופעל! הנחה של ${discountPercent}%`;
+                messageEl.className = 'promo-message success';
+            } else {
+                messageEl.textContent = '❌ קוד קופון לא תקין';
+                messageEl.className = 'promo-message error';
+                appliedPromoCode = null;
+            }
+        }
+
+        /**
+         * Pay for a plan
          * @param {string} planType - 'monthly', 'yearly', or 'lifetime'
          */
-        async function purchasePlan(planType) {
+        async function pay(planType) {
             try {
                 // Show processing modal
                 document.getElementById('processingModal').classList.add('active');
@@ -601,17 +898,22 @@
                 const userId = session.user.id;
                 const userEmail = session.user.email;
 
+                // Build payload
+                const payload = {
+                    planType,
+                    userId,
+                    userEmail,
+                    promoCode: appliedPromoCode,
+                    discountPercent: discountPercent
+                };
+
                 // Call the Stripe checkout API
                 const response = await fetch('/api/create-checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        planType,
-                        userId,
-                        userEmail,
-                    }),
+                    body: JSON.stringify(payload),
                 });
 
                 const data = await response.json();
@@ -628,35 +930,9 @@
                 }
 
             } catch (error) {
-                console.error('Purchase error:', error);
+                console.error('Payment error:', error);
                 document.getElementById('processingModal').classList.remove('active');
                 alert('שגיאה ביצירת תשלום: ' + error.message);
-            }
-        }
-
-        /**
-         * Fallback to simulation mode (for testing without Stripe)
-         * @param {string} planType
-         */
-        async function purchasePlanSimulation(planType) {
-            try {
-                document.getElementById('processingModal').classList.add('active');
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                const result = await processPayment(planType, 'simulation');
-                document.getElementById('processingModal').classList.remove('active');
-
-                if (result.success) {
-                    document.getElementById('successModal').classList.add('active');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000);
-                } else {
-                    alert('שגיאה בתשלום: ' + result.error);
-                }
-            } catch (error) {
-                document.getElementById('processingModal').classList.remove('active');
-                alert('שגיאה: ' + error.message);
             }
         }
     </script>
