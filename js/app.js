@@ -4045,24 +4045,40 @@ function toggleTenantActions(tenantId, event) {
         menu.style.display = 'block';
         currentOpenActionsMenu = menu;
         
-        // Show overlay on mobile
-        if (overlay && window.innerWidth <= 768) {
+        // Show overlay
+        if (overlay) {
             overlay.classList.add('active');
         }
         
-        // Calculate if menu should open upward or downward
+        // Position the menu using fixed positioning
         const button = event.currentTarget;
         const buttonRect = button.getBoundingClientRect();
         const menuHeight = menu.offsetHeight || 350;
+        const menuWidth = menu.offsetWidth || 200;
         const windowHeight = window.innerHeight;
+        const windowWidth = window.innerWidth;
         const spaceBelow = windowHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
         
-        // If not enough space below, open upward
-        if (spaceBelow < menuHeight && spaceAbove > menuHeight) {
-            menu.classList.add('open-upward');
-        } else {
+        // Calculate horizontal position (align to right of button, but don't go off screen)
+        let leftPos = buttonRect.right - menuWidth;
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + menuWidth > windowWidth - 10) leftPos = windowWidth - menuWidth - 10;
+        
+        menu.style.left = leftPos + 'px';
+        menu.style.right = 'auto';
+        
+        // Calculate vertical position
+        if (spaceBelow >= menuHeight || spaceBelow > spaceAbove) {
+            // Open downward
+            menu.style.top = (buttonRect.bottom + 8) + 'px';
+            menu.style.bottom = 'auto';
             menu.classList.remove('open-upward');
+        } else {
+            // Open upward
+            menu.style.top = 'auto';
+            menu.style.bottom = (windowHeight - buttonRect.top + 8) + 'px';
+            menu.classList.add('open-upward');
         }
     } else {
         menu.style.display = 'none';
