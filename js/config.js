@@ -11,17 +11,12 @@ const SUPABASE_CONFIG = {
 };
 
 // ✅ תיקון 2: הוספת לוגיקת החיבור (קריטי!)
-if (typeof supabase === 'undefined') {
+// בדיקה אם ספריית Supabase נטענה מה-CDN (window.supabase)
+if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
     console.error('CRITICAL ERROR: Supabase library not loaded! Check HTML script tags.');
-    // אופציונלי: הצגת התראה למשתמש
-    if (typeof window !== 'undefined') {
-        window.addEventListener('DOMContentLoaded', () => {
-            alert('שגיאה טכנית: הספרייה לא נטענה. אנא רענן את הדף.');
-        });
-    }
 } else {
     // יצירת החיבור והפיכתו לזמין בכל האתר
-    window.supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
     console.log('✅ Supabase Connected Successfully (Project: Vaad 2025)');
 }
 

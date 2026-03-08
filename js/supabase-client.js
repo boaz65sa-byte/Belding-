@@ -4,8 +4,10 @@
  * ========================================
  */
 
-// שימוש ב-supabaseClient שכבר הוגדר ב-config.js
-let supabase = window.supabaseClient || null;
+// הפונקציה מחזירה את ה-client הפעיל
+function getSupabase() {
+    return window.supabaseClient;
+}
 
 /**
  * אתחול Supabase Client
@@ -14,9 +16,8 @@ async function initSupabase() {
     try {
         // אם כבר מוגדר מ-config.js, השתמש בו
         if (window.supabaseClient) {
-            supabase = window.supabaseClient;
             console.log('✅ Supabase Client נטען מ-config.js');
-            return supabase;
+            return window.supabaseClient;
         }
 
         // בדיקה אם Supabase JS SDK נטען
@@ -25,14 +26,13 @@ async function initSupabase() {
         }
 
         // יצירת client
-        supabase = window.supabase.createClient(
+        window.supabaseClient = window.supabase.createClient(
             SUPABASE_CONFIG.url,
             SUPABASE_CONFIG.anonKey
         );
         
-        window.supabaseClient = supabase;
         console.log('✅ Supabase Client אותחל בהצלחה');
-        return supabase;
+        return window.supabaseClient;
     } catch (error) {
         console.error('❌ שגיאה באתחול Supabase:', error);
         throw error;
@@ -44,7 +44,7 @@ async function initSupabase() {
  */
 async function getCurrentSession() {
     try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await getSupabase().auth.getSession();
         if (error) throw error;
         return session;
     } catch (error) {
@@ -58,7 +58,7 @@ async function getCurrentSession() {
  */
 async function getCurrentUser() {
     try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error } = await getSupabase().auth.getUser();
         if (error) throw error;
         return user;
     } catch (error) {
@@ -72,7 +72,7 @@ async function getCurrentUser() {
  */
 async function getUserProfile(userId) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .eq('id', userId)
@@ -91,7 +91,7 @@ async function getUserProfile(userId) {
  */
 async function updateUserProfile(userId, updates) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update(updates)
             .eq('id', userId)
@@ -215,7 +215,7 @@ async function logActivity(actionType, description, metadata = {}) {
         const user = await getCurrentUser();
         if (!user) return;
 
-        const { error } = await supabase
+        const { error } = await getSupabase()
             .from('activity_log')
             .insert({
                 user_id: user.id,
@@ -234,12 +234,12 @@ async function logActivity(actionType, description, metadata = {}) {
  * 🔔 האזנה לשינויים באימות
  */
 function onAuthStateChange(callback) {
-    if (!supabase) {
+    if (!getSupabase()) {
         console.error('Supabase לא אותחל');
         return;
     }
 
-    return supabase.auth.onAuthStateChange((event, session) => {
+    return getSupabase().auth.onAuthStateChange((event, session) => {
         console.log('🔐 אירוע אימות:', event);
         callback(event, session);
     });
@@ -250,7 +250,7 @@ function onAuthStateChange(callback) {
  */
 async function signOut() {
     try {
-        const { error } = await supabase.auth.signOut();
+        const { error } = await getSupabase().auth.signOut();
         if (error) throw error;
         
         // ניקוי localStorage
