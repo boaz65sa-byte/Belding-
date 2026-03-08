@@ -279,7 +279,7 @@ async function getCurrentUser() {
     }
 }
 
-// 8. קבלת פרופיל משתמש מהטבלה
+// 8. קבלת פרופיל משתמש מהטבלה (יוצר אוטומטית אם לא קיים)
 async function getUserProfile(userId) {
     const supabase = await getSupabase();
     if (!supabase) return null;
@@ -291,7 +291,42 @@ async function getUserProfile(userId) {
             .eq('id', userId)
             .single();
         
-        if (error) throw error;
+        if (error || !data) {
+            // נסה ליצור פרופיל חדש
+            console.log('📝 פרופיל לא נמצא, יוצר חדש...');
+            
+            // קבל פרטי משתמש מ-auth
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                const newProfile = {
+                    id: userId,
+                    email: user.email,
+                    full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+                    phone: user.user_metadata?.phone || '',
+                    role: user.email === 'boaz65sa@gmail.com' ? 'super_admin' : 'user',
+                    status: user.email === 'boaz65sa@gmail.com' ? 'active' : 'trial',
+                    subscription_type: user.email === 'boaz65sa@gmail.com' ? 'lifetime' : null,
+                    created_at: new Date().toISOString()
+                };
+                
+                const { data: createdProfile, error: insertError } = await supabase
+                    .from('user_profiles')
+                    .upsert(newProfile)
+                    .select()
+                    .single();
+                
+                if (insertError) {
+                    console.error('שגיאה ביצירת פרופיל:', insertError);
+                    return newProfile; // החזר את הפרופיל גם אם לא נשמר
+                }
+                
+                console.log('✅ פרופיל נוצר בהצלחה');
+                return createdProfile;
+            }
+            return null;
+        }
+        
         return data;
     } catch (error) {
         console.error('Error getting profile:', error);
