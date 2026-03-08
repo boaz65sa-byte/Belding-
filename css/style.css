@@ -3118,6 +3118,100 @@ body.dark-mode .payments-table-actions {
     background: #1f2937;
 }
 
+/* ===================================
+   Enhanced Mobile Experience
+   =================================== */
+
+/* Better touch targets */
+@media (max-width: 768px) {
+    /* Larger touch targets */
+    .btn, button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Smoother scrolling */
+    .table-container,
+    .content-area {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Better card spacing */
+    .stat-card,
+    .card {
+        margin-bottom: 12px;
+    }
+
+    /* Improved form inputs */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+
+    /* Hide scrollbars on mobile */
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Safe area support for notched phones */
+    .top-nav {
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .mobile-bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .content-area {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+
+    /* Better modal on mobile */
+    .modal-content {
+        max-height: calc(100vh - 40px);
+        margin: 20px;
+        border-radius: 16px;
+    }
+
+    /* Improved sidebar animation */
+    .sidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    /* Better action buttons */
+    .action-btn {
+        padding: 12px 16px;
+        border-radius: 10px;
+    }
+
+    /* Improved table cells */
+    td, th {
+        padding: 12px 8px;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 375px) {
+    .nav-brand span {
+        display: none;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .section-header h1 {
+        font-size: 1.25rem;
+    }
+}
+
 /* Print Styles */
 @media print {
     /* Hide navigation and actions */

@@ -124,14 +124,14 @@
                     <span>הגדרות</span>
                 </a>
                 
-                <!-- כפתור פאנל אדמין - מוצג רק לאדמינים -->
-                <a href="admin.html" class="menu-item admin-only" id="adminPanelLink" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 20px; border-radius: 10px;">
+                <!-- כפתור פאנל אדמין - מוצג רק לסופר אדמין -->
+                <a href="admin.html" class="menu-item super-admin-only" id="adminPanelLink" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 20px; border-radius: 10px;">
                     <i class="fas fa-shield-alt"></i>
                     <span>פאנל אדמין</span>
                 </a>
                 
-                <!-- כפתור תמחור -->
-                <a href="pricing.html" class="menu-item" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 10px; border-radius: 10px;">
+                <!-- כפתור תמחור - מוצג רק למשתמשים רגילים -->
+                <a href="pricing.html" class="menu-item user-only" id="pricingLink" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 10px; border-radius: 10px;">
                     <i class="fas fa-tags"></i>
                     <span>מחירים ומנויים</span>
                 </a>
@@ -1927,20 +1927,29 @@
                     }
                 }
                 
-                // הצג כפתור אדמין אם המשתמש הוא אדמין או סופר-אדמין
+                // הצג כפתורים לפי תפקיד המשתמש
                 console.log('🔍 בדיקת תפקיד:', accessCheck.profile?.role);
-                console.log('🔍 פרופיל מלא:', accessCheck.profile);
                 
-                if (accessCheck.profile && 
-                    (accessCheck.profile.role === 'admin' || accessCheck.profile.role === 'super_admin')) {
-                    console.log('✅ משתמש אדמין - מציג כפתור');
-                    const adminLink = document.getElementById('adminPanelLink');
+                const userRole = accessCheck.profile?.role;
+                const adminLink = document.getElementById('adminPanelLink');
+                const pricingLink = document.getElementById('pricingLink');
+                
+                // פאנל אדמין - רק לסופר אדמין (boaz65sa@gmail.com)
+                if (userRole === 'super_admin') {
+                    console.log('✅ סופר אדמין - מציג פאנל ניהול');
                     if (adminLink) {
                         adminLink.style.display = 'flex';
-                        console.log('✅ כפתור אדמין הוצג');
+                    }
+                }
+                
+                // מחירים ומנויים - רק למשתמשים רגילים (לא אדמין ולא סופר אדמין)
+                if (userRole === 'user' || !userRole) {
+                    console.log('✅ משתמש רגיל - מציג מחירים ומנויים');
+                    if (pricingLink) {
+                        pricingLink.style.display = 'flex';
                     }
                 } else {
-                    console.log('❌ משתמש רגיל או אין פרופיל - תפקיד:', accessCheck.profile?.role);
+                    console.log('❌ אדמין/סופר אדמין - מסתיר מחירים');
                 }
                 
             } catch (error) {

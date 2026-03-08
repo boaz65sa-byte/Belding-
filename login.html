@@ -2,8 +2,11 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>התחברות - ועד 2025</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>התחברות - ועד בית</title>
     
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,69 +14,156 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Heebo for Hebrew -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --shadow: 0 10px 40px rgba(0,0,0,0.15);
+            --shadow-lg: 0 25px 50px rgba(0,0,0,0.25);
+            --radius: 16px;
+            --radius-sm: 12px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .login-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 450px;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
             width: 100%;
-            padding: 40px;
-            animation: slideUp 0.5s ease;
+            max-width: 420px;
+            padding: 32px 24px;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
+        /* Logo Section */
         .logo {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
-        .logo i {
-            font-size: 60px;
-            color: #667eea;
-            margin-bottom: 15px;
+        .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .logo-icon i {
+            font-size: 32px;
+            color: var(--white);
         }
 
         .logo h1 {
-            font-size: 28px;
-            color: #2d3748;
-            margin-bottom: 10px;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 6px;
         }
 
         .logo p {
-            color: #718096;
+            color: var(--gray);
             font-size: 14px;
+            font-weight: 400;
         }
 
+        /* Alert Messages */
+        .alert {
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            animation: shake 0.4s ease;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            color: var(--success);
+            border: 1px solid #a7f3d0;
+        }
+
+        /* Form Styles */
         .form-group {
             margin-bottom: 20px;
         }
@@ -81,8 +171,8 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #2d3748;
-            font-weight: 500;
+            color: var(--dark);
+            font-weight: 600;
             font-size: 14px;
         }
 
@@ -90,206 +180,217 @@
             position: relative;
         }
 
-        .input-wrapper i {
+        .input-wrapper .icon {
             position: absolute;
-            right: 15px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #a0aec0;
+            color: var(--gray);
+            font-size: 18px;
+            pointer-events: none;
+            transition: color 0.3s;
         }
 
         .form-input {
             width: 100%;
-            padding: 12px 45px 12px 15px;
+            padding: 16px 50px 16px 50px;
             border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: all 0.3s;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
             font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--light);
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input:focus + .icon {
+            color: var(--primary);
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
         }
 
         .password-toggle {
             position: absolute;
-            left: 15px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #a0aec0;
+            color: var(--gray);
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
+            font-size: 18px;
+            transition: color 0.3s;
         }
 
         .password-toggle:hover {
-            color: #667eea;
+            color: var(--primary);
         }
 
+        /* Remember & Forgot */
         .remember-forgot {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            font-size: 14px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .remember-me {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            cursor: pointer;
         }
 
         .remember-me input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
             cursor: pointer;
+        }
+
+        .remember-me span {
+            font-size: 14px;
+            color: var(--gray);
         }
 
         .forgot-password {
-            color: #667eea;
+            color: var(--primary);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 14px;
+            transition: color 0.3s;
         }
 
         .forgot-password:hover {
-            text-decoration: underline;
+            color: var(--primary-dark);
         }
 
+        /* Buttons */
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px 24px;
             border: none;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             font-size: 16px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
             font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .btn-primary:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
 
         .btn-google {
-            background: white;
-            color: #444;
+            background: var(--white);
+            color: var(--dark);
             border: 2px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 0;
+            margin-top: 12px;
         }
 
         .btn-google:hover {
-            background: #f7fafc;
-            border-color: #cbd5e0;
+            background: var(--light);
+            border-color: #cbd5e1;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .btn-google svg {
-            flex-shrink: 0;
+        .btn-admin {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: var(--white);
+            margin-top: 16px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
 
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+        }
+
+        /* Divider */
         .divider {
-            text-align: center;
-            margin: 25px 0;
-            position: relative;
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            gap: 16px;
         }
 
-        .divider::before {
+        .divider::before,
+        .divider::after {
             content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
+            flex: 1;
             height: 1px;
             background: #e2e8f0;
         }
 
         .divider span {
-            background: white;
-            padding: 0 15px;
-            color: #718096;
-            font-size: 14px;
-            position: relative;
-            z-index: 1;
+            color: var(--gray);
+            font-size: 13px;
+            font-weight: 500;
         }
 
+        /* Signup Link */
         .signup-link {
             text-align: center;
-            color: #718096;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .signup-link p {
+            color: var(--gray);
             font-size: 14px;
         }
 
         .signup-link a {
-            color: #667eea;
+            color: var(--primary);
             text-decoration: none;
             font-weight: 600;
+            transition: color 0.3s;
         }
 
         .signup-link a:hover {
-            text-decoration: underline;
+            color: var(--primary-dark);
         }
 
-        .alert {
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: none;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .alert-error {
-            background: #fed7d7;
-            color: #c53030;
-            border: 1px solid #fc8181;
-        }
-
-        .alert-success {
-            background: #c6f6d5;
-            color: #2f855a;
-            border: 1px solid #68d391;
-        }
-
+        /* Loading Spinner */
         .loading {
             display: none;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             gap: 10px;
-            padding: 15px;
         }
 
         .loading.active {
@@ -299,8 +400,8 @@
         .spinner {
             width: 20px;
             height: 20px;
-            border: 3px solid #e2e8f0;
-            border-top-color: #667eea;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: var(--white);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -309,13 +410,58 @@
             to { transform: rotate(360deg); }
         }
 
-        @media (max-width: 768px) {
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+                padding-top: 40px;
+            }
+
             .login-container {
-                padding: 30px 25px;
+                padding: 28px 20px;
+                border-radius: 20px;
+            }
+
+            .logo-icon {
+                width: 64px;
+                height: 64px;
+            }
+
+            .logo-icon i {
+                font-size: 28px;
             }
 
             .logo h1 {
                 font-size: 24px;
+            }
+
+            .form-input {
+                padding: 14px 46px;
+                font-size: 16px;
+            }
+
+            .btn {
+                padding: 14px 20px;
+            }
+
+            .remember-forgot {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Safe Area for iPhone */
+        @supports (padding: max(0px)) {
+            body {
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Prevent zoom on input focus (iOS) */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+            .form-input {
+                font-size: 16px;
             }
         }
     </style>
@@ -324,44 +470,53 @@
     <div class="login-container">
         <!-- Logo -->
         <div class="logo">
-            <i class="fas fa-building"></i>
-            <h1>ועד 2025</h1>
-            <p>מערכת ניהול דיירים מתקדמת</p>
+            <div class="logo-icon">
+                <i class="fas fa-building"></i>
+            </div>
+            <h1>ועד בית</h1>
+            <p>מערכת ניהול דיירים חכמה</p>
         </div>
 
         <!-- Alert Messages -->
-        <div class="alert alert-error" id="errorAlert"></div>
-        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-error" id="errorAlert">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+        <div class="alert alert-success" id="successAlert">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText"></span>
+        </div>
 
         <!-- Login Form -->
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">אימייל</label>
                 <div class="input-wrapper">
-                    <i class="fas fa-envelope"></i>
                     <input 
                         type="email" 
                         id="email" 
                         class="form-input" 
-                        placeholder="your@email.com"
+                        placeholder="הזן את האימייל שלך"
                         required
                         autocomplete="email"
+                        inputmode="email"
                     >
+                    <i class="fas fa-envelope icon"></i>
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="password">סיסמה</label>
                 <div class="input-wrapper">
-                    <i class="fas fa-lock"></i>
                     <input 
                         type="password" 
                         id="password" 
                         class="form-input" 
-                        placeholder="••••••••"
+                        placeholder="הזן את הסיסמה שלך"
                         required
                         autocomplete="current-password"
                     >
+                    <i class="fas fa-lock icon"></i>
                     <button type="button" class="password-toggle" onclick="togglePassword()">
                         <i class="fas fa-eye" id="toggleIcon"></i>
                     </button>
@@ -373,7 +528,7 @@
                     <input type="checkbox" id="rememberMe">
                     <span>זכור אותי</span>
                 </label>
-                <a href="forgot-password.html" class="forgot-password">שכחת סיסמה?</a> 
+                <a href="forgot-password.html" class="forgot-password">שכחת סיסמה?</a>
             </div>
 
             <button type="submit" class="btn btn-primary" id="loginBtn">
@@ -386,10 +541,10 @@
         </form>
 
         <div class="divider">
-            <span>או</span>
+            <span>או התחבר עם</span>
         </div>
 
-        <!-- כפתור התחברות עם Google -->
+        <!-- Google Login -->
         <button type="button" class="btn btn-google" id="googleLoginBtn" onclick="handleGoogleLogin()">
             <svg width="20" height="20" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -400,26 +555,20 @@
             התחבר עם Google
         </button>
 
-        <div style="margin-top: 15px;"></div>
-
+        <!-- Signup Link -->
         <div class="signup-link">
-            עדיין אין לך חשבון? <a href="signup.html">הירשם עכשיו - 14 ימי ניסיון חינם!</a>
+            <p>עדיין אין לך חשבון? <a href="signup.html">הירשם עכשיו</a></p>
         </div>
 
-        <!-- כפתור התחברות מנהל -->
-        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-            <a href="admin-login.html" class="btn" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-decoration: none;">
-                <i class="fas fa-crown"></i>
-                👑 התחברות מנהל
-            </a>
-        </div>
+        <!-- Admin Login -->
+        <a href="admin-login.html" class="btn btn-admin">
+            <i class="fas fa-crown"></i>
+            כניסת מנהל
+        </a>
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="js/config.js"></script>
-    
     <script src="js/supabase-client.js"></script>
     <script src="js/auth.js"></script>
     
@@ -442,12 +591,16 @@
 
         // Show Alert
         function showAlert(message, type = 'error') {
-            const alertElement = document.getElementById(type === 'error' ? 'errorAlert' : 'successAlert');
-            alertElement.textContent = message;
-            alertElement.style.display = 'block';
+            const alertEl = document.getElementById(type === 'error' ? 'errorAlert' : 'successAlert');
+            const textEl = document.getElementById(type === 'error' ? 'errorText' : 'successText');
+            const otherAlert = document.getElementById(type === 'error' ? 'successAlert' : 'errorAlert');
+            
+            otherAlert.style.display = 'none';
+            textEl.textContent = message;
+            alertEl.style.display = 'flex';
             
             setTimeout(() => {
-                alertElement.style.display = 'none';
+                alertEl.style.display = 'none';
             }, 5000);
         }
 
@@ -468,20 +621,17 @@
                 const result = await login(email, password, rememberMe);
                 
                 if (result.success) {
-                    showAlert('התחברת בהצלחה! מעביר לדף הראשי...', 'success');
-                    
-                    // Redirect after 1 second
+                    showAlert('התחברת בהצלחה! מעביר...', 'success');
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 1000);
                 } else {
-                    showAlert(result.error || 'שגיאה בהתחברות. נסה שוב.');
+                    showAlert(result.error || 'שגיאה בהתחברות');
                 }
             } catch (error) {
                 console.error('Login error:', error);
                 showAlert('שגיאה בהתחברות. בדוק את החיבור לאינטרנט.');
             } finally {
-                // Hide loading
                 document.getElementById('loginBtnText').style.display = 'inline';
                 document.getElementById('loginLoading').classList.remove('active');
                 document.getElementById('loginBtn').disabled = false;
@@ -490,9 +640,7 @@
 
         // Check if already logged in
         window.addEventListener('DOMContentLoaded', async () => {
-            // אתחול Supabase קודם
             await initSupabase();
-            
             const session = await getCurrentSession();
             if (session) {
                 window.location.href = 'index.html';
@@ -501,11 +649,10 @@
 
         // Handle Google Login
         async function handleGoogleLogin() {
-            // וודא ש-Supabase מאותחל
             await initSupabase();
             const btn = document.getElementById('googleLoginBtn');
             btn.disabled = true;
-            btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border:3px solid #e2e8f0;border-top-color:#4285F4;border-radius:50%;animation:spin 0.8s linear infinite;"></div> מתחבר...';
+            btn.innerHTML = '<div class="spinner" style="border-color: #e2e8f0; border-top-color: #667eea;"></div> מתחבר...';
             
             try {
                 const result = await signInWithGoogle();
