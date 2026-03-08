@@ -4050,20 +4050,19 @@ function toggleTenantActions(tenantId, event) {
             overlay.classList.add('active');
         }
         
-        // Calculate if menu should open upward or downward (desktop only)
-        if (window.innerWidth > 768) {
-            const button = event.currentTarget;
-            const buttonRect = button.getBoundingClientRect();
-            const menuHeight = 400;
-            const windowHeight = window.innerHeight;
-            const spaceBelow = windowHeight - buttonRect.bottom;
-            const spaceAbove = buttonRect.top;
-            
-            if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
-                menu.classList.add('open-upward');
-            } else {
-                menu.classList.remove('open-upward');
-            }
+        // Calculate if menu should open upward or downward
+        const button = event.currentTarget;
+        const buttonRect = button.getBoundingClientRect();
+        const menuHeight = menu.offsetHeight || 350;
+        const windowHeight = window.innerHeight;
+        const spaceBelow = windowHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        
+        // If not enough space below, open upward
+        if (spaceBelow < menuHeight && spaceAbove > menuHeight) {
+            menu.classList.add('open-upward');
+        } else {
+            menu.classList.remove('open-upward');
         }
     } else {
         menu.style.display = 'none';
