@@ -24,7 +24,7 @@ async function getAllUsers(filters = {}) {
         const currentUser = await getCurrentUser();
         const currentProfile = await getUserProfile(currentUser.id);
 
-        let query = supabase
+        let query = getSupabase()
             .from('user_profiles')
             .select('*')
             .order('created_at', { ascending: false });
@@ -69,7 +69,7 @@ async function blockUser(userId) {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update({ status: USER_STATUS.BLOCKED })
             .eq('id', userId)
@@ -98,7 +98,7 @@ async function unblockUser(userId) {
         }
 
         // קבע סטטוס לפי מנוי
-        const { data: user } = await supabase
+        const { data: user } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .eq('id', userId)
@@ -119,7 +119,7 @@ async function unblockUser(userId) {
             newStatus = new Date() < expiresAt ? USER_STATUS.ACTIVE : USER_STATUS.EXPIRED;
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update({ status: newStatus })
             .eq('id', userId)
@@ -151,7 +151,7 @@ async function changeUserRole(userId, newRole) {
             throw new Error('תפקיד לא תקין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update({ role: newRole })
             .eq('id', userId)
@@ -202,7 +202,7 @@ async function updateUserSubscription(userId, subscriptionData) {
             updates.subscription_start = new Date().toISOString();
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update(updates)
             .eq('id', userId)
@@ -212,7 +212,7 @@ async function updateUserSubscription(userId, subscriptionData) {
         if (error) throw error;
 
         // רישום תשלום (manual)
-        await supabase
+        await getSupabase()
             .from('payments')
             .insert({
                 user_id: userId,
@@ -243,7 +243,7 @@ async function getUserPayments(userId) {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('payments')
             .select('*')
             .eq('user_id', userId)
@@ -269,7 +269,7 @@ async function getAdminStats() {
         }
 
         // ספירת משתמשים לפי סטטוס
-        const { data: users, error: usersError } = await supabase
+        const { data: users, error: usersError } = await getSupabase()
             .from('user_profiles')
             .select('status, subscription_type');
 
@@ -287,7 +287,7 @@ async function getAdminStats() {
         };
 
         // סכום תשלומים
-        const { data: payments, error: paymentsError } = await supabase
+        const { data: payments, error: paymentsError } = await getSupabase()
             .from('payments')
             .select('amount, status')
             .eq('status', 'completed');
@@ -316,14 +316,14 @@ async function deleteUser(userId) {
         }
 
         // קודם קבל את פרטי המשתמש
-        const { data: user } = await supabase
+        const { data: user } = await getSupabase()
             .from('user_profiles')
             .select('email')
             .eq('id', userId)
             .single();
 
         // מחק את המשתמש (CASCADE ימחק הכל)
-        const { error } = await supabase
+        const { error } = await getSupabase()
             .from('user_profiles')
             .delete()
             .eq('id', userId);
@@ -349,7 +349,7 @@ async function searchUsers(searchTerm) {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`)
@@ -398,7 +398,7 @@ async function sendPaymentReminderWhatsApp(userId) {
         }
 
         // קבל פרטי משתמש
-        const { data: user, error } = await supabase
+        const { data: user, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .eq('id', userId)
@@ -503,7 +503,7 @@ async function sendBulkPaymentReminders() {
         }
 
         // קבל משתמשים עם מנוי שפג או בניסיון
-        const { data: users, error } = await supabase
+        const { data: users, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .in('status', ['expired', 'trial'])
@@ -549,7 +549,7 @@ async function exportUsersToCSV() {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data: users, error } = await supabase
+        const { data: users, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .order('created_at', { ascending: false });
