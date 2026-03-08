@@ -400,85 +400,224 @@
         /* Mobile Cards View */
         .mobile-cards {
             display: none;
+            padding: 16px;
+        }
+
+        .user-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-right: 5px solid var(--primary);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .user-card:active {
+            transform: scale(0.98);
+        }
+
+        .user-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .user-card-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        .user-card-email {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        .user-card-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .user-card-detail {
+            font-size: 13px;
+        }
+
+        .user-card-detail-label {
+            color: var(--gray);
+            font-size: 11px;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .user-card-actions {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            padding-top: 14px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .user-card-actions .action-btn {
+            width: 100%;
+            height: 44px;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 900px) {
+            .desktop-table { display: none !important; }
+            .mobile-cards { display: block !important; }
         }
 
         @media (max-width: 768px) {
+            .admin-header {
+                padding: 14px 16px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .header-title {
+                text-align: center;
+            }
+
             .header-title h1 {
                 font-size: 18px;
             }
 
+            .header-title p {
+                font-size: 12px;
+            }
+
+            .header-actions {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .header-actions .btn {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .header-actions .btn i {
+                font-size: 14px;
+            }
+
+            .container {
+                padding: 12px;
+            }
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 14px;
+                border-radius: 10px;
+            }
+
+            .stat-card h3 {
+                font-size: 11px;
             }
 
             .stat-value {
                 font-size: 20px;
             }
 
-            .table-container table {
-                display: none;
+            .stat-change {
+                font-size: 10px;
             }
 
-            .mobile-cards {
-                display: block;
-            }
-
-            .user-card {
-                background: var(--white);
+            .section-card {
                 border-radius: 12px;
-                padding: 16px;
-                margin-bottom: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                border-right: 4px solid var(--primary);
+                margin-bottom: 16px;
             }
 
-            .user-card-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 12px;
-            }
-
-            .user-card-name {
-                font-weight: 700;
-                font-size: 16px;
-                color: var(--dark);
-            }
-
-            .user-card-email {
-                font-size: 13px;
-                color: var(--gray);
-                margin-top: 4px;
-            }
-
-            .user-card-details {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
+            .section-header {
+                padding: 14px;
+                flex-direction: column;
                 gap: 10px;
-                margin-bottom: 14px;
             }
 
-            .user-card-detail {
-                font-size: 13px;
+            .section-header h2 {
+                font-size: 16px;
             }
 
-            .user-card-detail-label {
-                color: var(--gray);
-                font-size: 11px;
-                margin-bottom: 2px;
+            .filters {
+                padding: 12px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .filter-select {
+                width: 100%;
             }
 
             .user-card-actions {
-                display: flex;
-                gap: 8px;
-                flex-wrap: wrap;
-                padding-top: 12px;
-                border-top: 1px solid #e2e8f0;
+                grid-template-columns: repeat(3, 1fr);
             }
 
-            .user-card-actions .action-btn {
-                flex: 1;
-                min-width: 44px;
+            /* הנחות ומבצעים - מובייל */
+            #discountsSection > div:last-child {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* סיכום מנויים - מובייל */
+            #subscriptionsSummary > div {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* בניינים - מובייל */
+            #buildingsSummary .building-card {
+                min-width: 100% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions .btn {
+                justify-content: center;
+            }
+
+            .user-card-details {
+                grid-template-columns: 1fr;
+            }
+
+            .user-card-actions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            #subscriptionsSummary > div {
+                grid-template-columns: 1fr !important;
+            }
+
+            .modal-content {
+                padding: 20px 16px;
+                border-radius: 16px 16px 0 0;
+                max-height: 85vh;
             }
         }
 
@@ -501,7 +640,7 @@
             color: var(--dark);
         }
 
-        /* Modal */
+        /* Modal - Mobile Optimized */
         .modal {
             display: none;
             position: fixed;
@@ -509,11 +648,11 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 1000;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
-            padding: 20px;
+            padding: 0;
         }
 
         .modal.active {
@@ -522,16 +661,28 @@
 
         .modal-content {
             background: var(--white);
-            border-radius: 16px;
-            max-width: 450px;
+            border-radius: 20px 20px 0 0;
+            max-width: 500px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                align-items: center;
+                padding: 20px;
+            }
+            .modal-content {
+                border-radius: 16px;
+                padding-bottom: 0;
+            }
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(100%); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -541,19 +692,49 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            z-index: 10;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+
+        @media (min-width: 768px) {
+            .modal-header::before {
+                display: none;
+            }
         }
 
         .modal-header h3 {
             font-size: 18px;
             color: var(--dark);
+            margin-top: 8px;
         }
 
         .modal-close {
-            background: none;
+            background: #f1f5f9;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             color: var(--gray);
             cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
         }
 
         .modal-body {
@@ -565,7 +746,15 @@
             border-top: 1px solid #e2e8f0;
             display: flex;
             gap: 10px;
-            justify-content: flex-end;
+            justify-content: stretch;
+            position: sticky;
+            bottom: 0;
+            background: var(--white);
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+            min-height: 48px;
         }
 
         /* Form in Modal */
@@ -1215,7 +1404,7 @@
             });
         }
 
-        // רינדור משתמשים
+        // רינדור משתמשים - טבלה לדסקטופ וכרטיסים למובייל
         function renderUsers(users) {
             const container = document.getElementById('tableContainer');
             
@@ -1230,20 +1419,108 @@
                 return;
             }
 
-            const html = `
+            // יצירת כרטיסים למובייל
+            const mobileCardsHtml = users.map(user => `
+                <div class="user-card" data-user-id="${user.id}" style="border-right-color: ${getStatusBorderColor(user.status)};">
+                    <div class="user-card-header">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
+                                    ${(user.full_name || 'U').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div class="user-card-name">${user.full_name || 'לא צוין'}</div>
+                                    <div class="user-card-email">${user.email}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="status-badge status-${user.status}" style="font-size: 11px;">
+                            ${getStatusText(user.status)}
+                        </span>
+                    </div>
+                    
+                    <div class="user-card-details">
+                        <div class="user-card-detail">
+                            <div class="user-card-detail-label">תפקיד</div>
+                            <span class="role-badge role-${user.role}" style="font-size: 10px; padding: 4px 8px;">
+                                ${getRoleText(user.role)}
+                            </span>
+                        </div>
+                        <div class="user-card-detail">
+                            <div class="user-card-detail-label">סוג מנוי</div>
+                            <span style="background: ${getSubscriptionColor(user.subscription_type)}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">
+                                ${getSubscriptionText(user.subscription_type)}
+                            </span>
+                        </div>
+                        <div class="user-card-detail">
+                            <div class="user-card-detail-label">טלפון</div>
+                            ${user.phone 
+                                ? `<a href="tel:${user.phone}" style="color: #10b981; text-decoration: none; font-weight: 600;">${user.phone}</a>` 
+                                : '<span style="color:#94a3b8;">לא צוין</span>'}
+                        </div>
+                        <div class="user-card-detail">
+                            <div class="user-card-detail-label">בניין</div>
+                            ${user.building_name 
+                                ? `<span style="color: #0369a1; font-weight: 500;">🏢 ${user.building_name}</span>` 
+                                : '<span style="color:#94a3b8;">לא הוקצה</span>'}
+                        </div>
+                        <div class="user-card-detail">
+                            <div class="user-card-detail-label">הרשמה</div>
+                            <span>${user.created_at ? new Date(user.created_at).toLocaleDateString('he-IL') : '-'}</span>
+                        </div>
+                        <div class="user-card-detail">
+                            <div class="user-card-detail-label">התחברות אחרונה</div>
+                            <span>${user.last_login ? formatTimeAgo(user.last_login) : 'מעולם לא'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card-actions">
+                        ${user.status === 'active' || user.status === 'trial'
+                            ? `<button class="action-btn" style="background: #ef4444; color: white;" onclick="toggleSubscription('${user.id}', 'off')" title="כבה מנוי">
+                                <i class="fas fa-power-off"></i>
+                              </button>`
+                            : `<button class="action-btn" style="background: #10b981; color: white;" onclick="toggleSubscription('${user.id}', 'on')" title="הפעל מנוי">
+                                <i class="fas fa-play"></i>
+                              </button>`
+                        }
+                        ${user.status === 'blocked' 
+                            ? `<button class="action-btn" style="background: #10b981; color: white;" onclick="unblockUserAction('${user.id}')" title="שחרר">
+                                <i class="fas fa-unlock"></i>
+                              </button>`
+                            : `<button class="action-btn" style="background: #f59e0b; color: white;" onclick="blockUserAction('${user.id}')" title="חסום">
+                                <i class="fas fa-ban"></i>
+                              </button>`
+                        }
+                        <button class="action-btn" style="background: #667eea; color: white;" onclick="openSubscriptionModal('${user.id}')" title="שנה מנוי">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" style="background: #06b6d4; color: white;" onclick="openBuildingModal('${user.id}', '${user.building_name || ''}', '${user.building_id || ''}')" title="הקצה לבניין">
+                            <i class="fas fa-building"></i>
+                        </button>
+                        <button class="action-btn" style="background: #25D366; color: white;" onclick="sendWhatsAppReminder('${user.id}')" title="וואטסאפ">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                        <button class="action-btn" style="background: #ef4444; color: white;" onclick="deleteUserAction('${user.id}')" title="מחק">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // יצירת טבלה לדסקטופ
+            const tableHtml = `
                 <table>
                     <thead>
                         <tr>
                             <th>שם מלא</th>
                             <th>אימייל</th>
                             <th>טלפון</th>
-                            <th>בניין/ועד</th>
+                            <th>בניין</th>
                             <th>תפקיד</th>
-                            <th>סטטוס מנוי</th>
-                            <th>סוג מנוי</th>
-                            <th>תאריך הרשמה</th>
-                            <th>התחברות אחרונה</th>
-                            <th>פעולות מהירות</th>
+                            <th>סטטוס</th>
+                            <th>מנוי</th>
+                            <th>הרשמה</th>
+                            <th>פעולות</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1260,96 +1537,64 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td><a href="mailto:${user.email}" style="color: #667eea; text-decoration: none;">${user.email}</a></td>
+                                <td>${user.phone ? `<a href="tel:${user.phone}" style="color: #10b981; text-decoration: none;">${user.phone}</a>` : '<span style="color:#94a3b8;">-</span>'}</td>
+                                <td>${user.building_name ? `<span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px;">🏢 ${user.building_name}</span>` : '<span style="color:#94a3b8; font-size: 12px;">-</span>'}</td>
+                                <td><span class="role-badge role-${user.role}" style="font-size: 11px;">${getRoleText(user.role)}</span></td>
+                                <td><span class="status-badge status-${user.status}">${getStatusText(user.status)}</span></td>
+                                <td><span style="background: ${getSubscriptionColor(user.subscription_type)}; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px;">${getSubscriptionText(user.subscription_type)}</span></td>
+                                <td style="font-size: 12px; color: #64748b;">${user.created_at ? new Date(user.created_at).toLocaleDateString('he-IL') : '-'}</td>
                                 <td>
-                                    <a href="mailto:${user.email}" style="color: #667eea; text-decoration: none;">${user.email}</a>
-                                </td>
-                                <td>
-                                    ${user.phone 
-                                        ? `<a href="tel:${user.phone}" style="color: #10b981; text-decoration: none;">${user.phone}</a>` 
-                                        : '<span style="color:#94a3b8;">-</span>'}
-                                </td>
-                                <td>
-                                    ${user.building_name 
-                                        ? `<span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500;">🏢 ${user.building_name}</span>` 
-                                        : '<span style="color:#94a3b8; font-size: 12px;">לא הוקצה</span>'}
-                                </td>
-                                <td>
-                                    <span class="role-badge role-${user.role}" style="font-size: 11px;">
-                                        ${getRoleText(user.role)}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 6px;">
-                                        <span class="status-badge status-${user.status}">
-                                            ${getStatusText(user.status)}
-                                        </span>
-                                        ${user.status === 'active' 
-                                            ? '<span style="width:8px;height:8px;background:#10b981;border-radius:50%;animation:pulse 2s infinite;"></span>' 
-                                            : ''}
-                                    </div>
-                                </td>
-                                <td>
-                                    <span style="background: ${getSubscriptionColor(user.subscription_type)}; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500;">
-                                        ${getSubscriptionText(user.subscription_type)}
-                                    </span>
-                                </td>
-                                <td style="font-size: 12px; color: #64748b;">
-                                    ${user.created_at ? new Date(user.created_at).toLocaleDateString('he-IL') : '-'}
-                                </td>
-                                <td style="font-size: 12px; color: #64748b;">
-                                    ${user.last_login ? formatTimeAgo(user.last_login) : 'מעולם לא'}
-                                </td>
-                                <td>
-                                    <div class="action-buttons" style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                        <!-- הפעל/כבה מנוי -->
+                                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                         ${user.status === 'active' || user.status === 'trial'
-                                            ? `<button class="btn btn-sm" style="background: #ef4444; color: white;" onclick="toggleSubscription('${user.id}', 'off')" title="כבה מנוי">
-                                                <i class="fas fa-power-off"></i>
-                                              </button>`
-                                            : `<button class="btn btn-sm" style="background: #10b981; color: white;" onclick="toggleSubscription('${user.id}', 'on')" title="הפעל מנוי">
-                                                <i class="fas fa-play"></i>
-                                              </button>`
+                                            ? `<button class="btn btn-sm" style="background: #ef4444; color: white;" onclick="toggleSubscription('${user.id}', 'off')" title="כבה"><i class="fas fa-power-off"></i></button>`
+                                            : `<button class="btn btn-sm" style="background: #10b981; color: white;" onclick="toggleSubscription('${user.id}', 'on')" title="הפעל"><i class="fas fa-play"></i></button>`
                                         }
-                                        <!-- חסום/שחרר -->
                                         ${user.status === 'blocked' 
-                                            ? `<button class="btn btn-success btn-sm" onclick="unblockUserAction('${user.id}')" title="שחרר">
-                                                <i class="fas fa-unlock"></i>
-                                              </button>`
-                                            : `<button class="btn btn-warning btn-sm" onclick="blockUserAction('${user.id}')" title="חסום">
-                                                <i class="fas fa-ban"></i>
-                                              </button>`
+                                            ? `<button class="btn btn-sm" style="background: #10b981; color: white;" onclick="unblockUserAction('${user.id}')" title="שחרר"><i class="fas fa-unlock"></i></button>`
+                                            : `<button class="btn btn-sm" style="background: #f59e0b; color: white;" onclick="blockUserAction('${user.id}')" title="חסום"><i class="fas fa-ban"></i></button>`
                                         }
-                                        <!-- עדכון מנוי -->
-                                        <button class="btn btn-primary btn-sm" onclick="openSubscriptionModal('${user.id}')" title="שנה סוג מנוי">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <!-- הקצאת בניין -->
-                                        <button class="btn btn-sm" style="background: #06b6d4; color: white;" onclick="openBuildingModal('${user.id}', '${user.building_name || ''}', '${user.building_id || ''}')" title="הקצה לבניין">
-                                            <i class="fas fa-building"></i>
-                                        </button>
-                                        <!-- וואטסאפ -->
-                                        <button class="btn btn-sm" style="background: #25D366; color: white;" onclick="sendWhatsAppReminder('${user.id}')" title="וואטסאפ">
-                                            <i class="fab fa-whatsapp"></i>
-                                        </button>
-                                        <!-- מחיקה -->
-                                        <button class="btn btn-danger btn-sm" onclick="deleteUserAction('${user.id}')" title="מחק לצמיתות">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <button class="btn btn-sm" style="background: #667eea; color: white;" onclick="openSubscriptionModal('${user.id}')" title="ערוך"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm" style="background: #06b6d4; color: white;" onclick="openBuildingModal('${user.id}', '${user.building_name || ''}', '${user.building_id || ''}')" title="בניין"><i class="fas fa-building"></i></button>
+                                        <button class="btn btn-sm" style="background: #25D366; color: white;" onclick="sendWhatsAppReminder('${user.id}')" title="וואטסאפ"><i class="fab fa-whatsapp"></i></button>
+                                        <button class="btn btn-sm" style="background: #ef4444; color: white;" onclick="deleteUserAction('${user.id}')" title="מחק"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
+            `;
+
+            container.innerHTML = `
+                <!-- טבלה לדסקטופ -->
+                <div class="desktop-table">${tableHtml}</div>
+                <!-- כרטיסים למובייל -->
+                <div class="mobile-cards">${mobileCardsHtml}</div>
                 <style>
                     @keyframes pulse {
                         0%, 100% { opacity: 1; }
                         50% { opacity: 0.5; }
                     }
+                    .desktop-table { display: block; }
+                    .mobile-cards { display: none; padding: 16px; }
+                    @media (max-width: 900px) {
+                        .desktop-table { display: none; }
+                        .mobile-cards { display: block; }
+                    }
                 </style>
             `;
-            
-            container.innerHTML = html;
+        }
+        
+        // צבע גבול לפי סטטוס
+        function getStatusBorderColor(status) {
+            switch(status) {
+                case 'active': return '#10b981';
+                case 'trial': return '#8b5cf6';
+                case 'expired': return '#ef4444';
+                case 'blocked': return '#991b1b';
+                default: return '#667eea';
+            }
         }
 
         // פונקציות עזר
