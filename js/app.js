@@ -4029,20 +4029,24 @@ let currentOpenActionsMenu = null;
 
 function toggleTenantActions(tenantId, event) {
     event.stopPropagation();
-    
+
     const menu = document.getElementById(`tenantActions-${tenantId}`);
+    const wrapper = menu?.closest('.tenant-actions-wrapper');
     if (!menu) return;
-    
+
     // Close any other open menus
     if (currentOpenActionsMenu && currentOpenActionsMenu !== menu) {
         currentOpenActionsMenu.style.display = 'none';
         currentOpenActionsMenu.classList.remove('open-upward');
+        const oldWrapper = currentOpenActionsMenu.closest('.tenant-actions-wrapper');
+        if (oldWrapper) oldWrapper.classList.remove('menu-open');
     }
-    
+
     // Toggle current menu
     if (menu.style.display === 'none' || menu.style.display === '') {
         menu.style.display = 'block';
         currentOpenActionsMenu = menu;
+        if (wrapper) wrapper.classList.add('menu-open');
         
         // Calculate if menu should open upward or downward
         const button = event.currentTarget;
@@ -4061,14 +4065,17 @@ function toggleTenantActions(tenantId, event) {
     } else {
         menu.style.display = 'none';
         menu.classList.remove('open-upward');
+        if (wrapper) wrapper.classList.remove('menu-open');
         currentOpenActionsMenu = null;
     }
 }
 
 function closeTenantActions() {
     if (currentOpenActionsMenu) {
+        const wrapper = currentOpenActionsMenu.closest('.tenant-actions-wrapper');
         currentOpenActionsMenu.style.display = 'none';
         currentOpenActionsMenu.classList.remove('open-upward');
+        if (wrapper) wrapper.classList.remove('menu-open');
         currentOpenActionsMenu = null;
     }
 }

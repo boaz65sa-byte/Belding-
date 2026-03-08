@@ -2682,16 +2682,65 @@ body.dark-mode .tenant-actions-menu button:active {
 /* Mobile Optimizations */
 @media (max-width: 768px) {
     .tenant-actions-menu {
-        min-width: 180px;
-        font-size: 0.9rem;
-    }
-    
-    .tenant-actions-menu button {
-        padding: 0.875rem 0.875rem;
-    }
-    
-    .tenant-actions-menu button i {
+        position: fixed;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        top: auto !important;
+        bottom: 20px !important;
+        min-width: 280px;
+        max-width: 90vw;
         font-size: 1rem;
+        border-radius: 16px;
+        box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideUpMobile 0.3s ease;
+    }
+
+    .tenant-actions-menu.open-upward {
+        bottom: 20px !important;
+        top: auto !important;
+    }
+
+    @keyframes slideUpMobile {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .tenant-actions-menu button {
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+
+    .tenant-actions-menu button i {
+        font-size: 1.2rem;
+        width: 24px;
+    }
+
+    /* Backdrop for mobile */
+    .tenant-actions-wrapper::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9998;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+    .tenant-actions-wrapper.menu-open::before {
+        opacity: 1;
+        visibility: visible;
     }
 }
 
