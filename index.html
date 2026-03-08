@@ -1821,27 +1821,24 @@
     <!-- Auth Check & Protection -->
     <script>
         // 🔒 בדיקת אימות לפני טעינת האפליקציה
-        (async function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             try {
                 // המתן לאתחול Supabase
                 await initSupabase();
                 
                 // בדוק גישה
                 const accessCheck = await checkUserAccess();
+                console.log('🔐 תוצאת בדיקת גישה:', accessCheck);
                 
                 if (!accessCheck.hasAccess) {
-                    // ... קוד קיים ...
-
-                    // הוסף את זה:
-                    if (accessCheck.reason === 'expired') {
-                        // המנוי נגמר - שלח לדף תשלום
-                        window.location.href = 'pricing.html'; 
+                    if (accessCheck.reason === 'not_logged_in') {
+                        window.location.href = 'login.html';
                         return;
                     }
                     
-                    if (accessCheck.reason === 'trial_expired' || 
-                        accessCheck.reason === 'subscription_expired' || 
-                        accessCheck.reason === 'expired') {
+                    if (accessCheck.reason === 'expired' ||
+                        accessCheck.reason === 'trial_expired' || 
+                        accessCheck.reason === 'subscription_expired') {
                         window.location.href = 'pricing.html?expired=true';
                         return;
                     }
@@ -1850,9 +1847,11 @@
                 // יש גישה - הצג מידע על המנוי
                 console.log('✅ גישה אושרה:', accessCheck.status);
 
-                // --- תיקון: העלמת מסך הטעינה כדי שאפשר יהיה ללחוץ ---
-                document.getElementById('loadingOverlay').style.display = 'none';
-                // -----------------------------------------------------
+                // העלמת מסך הטעינה
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
 
                 // הצג התראה אם המנוי עומד לפוג
                 if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
@@ -1860,12 +1859,9 @@
                         ? `תקופת הניסיון שלך מסתיימת בעוד ${accessCheck.daysLeft} ימים`
                         : `המנוי שלך מסתיים בעוד ${accessCheck.daysLeft} ימים`;
                     
-                    // הצג התראה בממשק (אחרי טעינת האפליקציה)
-                    window.addEventListener('load', () => {
-                        if (typeof showToast !== 'undefined') {
-                            showToast(message, 'warning');
-                        }
-                    });
+                    if (typeof showToast !== 'undefined') {
+                        showToast(message, 'warning');
+                    }
                 }
                 
                 // שמור מידע על המשתמש ב-appState
@@ -1889,7 +1885,6 @@
                             ? `נותרו לך ${accessCheck.daysLeft} ימים - שדרג עכשיו ותיהנה מכל התכונות!`
                             : 'תקופת הניסיון שלך פעילה';
                     } else if (profile.status === 'active' && !profile.has_lifetime_access) {
-                        // מנוי פעיל - הצג רק אם עומד לפוג
                         if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
                             banner.style.display = 'block';
                             banner.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
@@ -1897,55 +1892,44 @@
                             text.textContent = `נותרו ${accessCheck.daysLeft} ימים - חדש עכשיו!`;
                         }
                     } else if (profile.has_lifetime_access) {
-                        // מנוי לכל החיים - הצג באנר ירוק
                         banner.style.display = 'block';
                         banner.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
                         title.textContent = '💎 מנוי לכל החיים';
                         text.textContent = 'תודה שבחרת בנו! יש לך גישה מלאה לתמיד';
-                        banner.querySelector('a').style.display = 'none';
+                        const bannerLink = banner.querySelector('a');
+                        if (bannerLink) bannerLink.style.display = 'none';
                     }
                 }
                 
-                // הצג כפתורים לפי תפקיד המשתמש
-                console.log('🔍 בדיקת תפקיד:', accessCheck.profile?.role);
-                console.log('📋 פרופיל מלא:', accessCheck.profile);
-                
+                // === הצג כפתורים בתפריט ===
                 const userRole = accessCheck.profile?.role;
                 const userEmail = accessCheck.profile?.email;
                 const adminLink = document.getElementById('adminPanelLink');
                 const pricingLink = document.getElementById('pricingLink');
                 
-                console.log('📧 אימייל משתמש:', userEmail);
+                console.log('👤 תפקיד:', userRole, '| אימייל:', userEmail);
                 
-                // פאנל אדמין - בדיקה כפולה: לפי role או לפי אימייל
+                // בדיקה אם סופר אדמין
                 const isSuperAdmin = userRole === 'super_admin' || userEmail === 'boaz65sa@gmail.com';
+                console.log('🔑 סופר אדמין:', isSuperAdmin);
                 
-                if (isSuperAdmin) {
-                    console.log('✅ סופר אדמין מזוהה - מציג פאנל ניהול');
-                    if (adminLink) {
-                        adminLink.style.display = 'flex';
-                        console.log('✅ כפתור אדמין הוצג בהצלחה');
-                    }
-                } else {
-                    console.log('❌ לא סופר אדמין - תפקיד:', userRole, 'אימייל:', userEmail);
+                // הצג כפתור פאנל אדמין לסופר אדמין
+                if (isSuperAdmin && adminLink) {
+                    adminLink.style.display = 'flex';
+                    console.log('✅ כפתור פאנל אדמין מוצג');
                 }
                 
-                // מחירים ומנויים - רק למשתמשים רגילים (לא סופר אדמין)
-                if (!isSuperAdmin && (userRole === 'user' || !userRole)) {
-                    console.log('✅ משתמש רגיל - מציג מחירים ומנויים');
-                    if (pricingLink) {
-                        pricingLink.style.display = 'flex';
-                    }
-                } else if (isSuperAdmin) {
-                    console.log('❌ סופר אדמין - מסתיר מחירים');
+                // הצג כפתור מחירים לכולם (גם לסופר אדמין לצורך בדיקה)
+                if (pricingLink) {
+                    pricingLink.style.display = 'flex';
+                    console.log('✅ כפתור מחירים מוצג');
                 }
                 
             } catch (error) {
                 console.error('❌ שגיאה בבדיקת אימות:', error);
-                // במקרה של שגיאה קריטית - הפנה להתחברות
                 window.location.href = 'login.html';
             }
-        })();
+        });
     </script>
     
     <!-- Main App -->
