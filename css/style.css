@@ -2679,69 +2679,57 @@ body.dark-mode .tenant-actions-menu button:active {
     background: #4b5563;
 }
 
-/* Mobile Optimizations */
+/* Mobile Optimizations for Actions Menu */
 @media (max-width: 768px) {
     .tenant-actions-menu {
-        position: fixed;
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
+        position: fixed !important;
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 16px !important;
         top: auto !important;
-        bottom: 20px !important;
-        min-width: 280px;
-        max-width: 90vw;
+        transform: none !important;
+        min-width: auto;
+        width: calc(100% - 32px);
+        max-width: 400px;
+        margin: 0 auto;
         font-size: 1rem;
         border-radius: 16px;
-        box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
-        z-index: 9999;
-        animation: slideUpMobile 0.3s ease;
+        box-shadow: 0 -4px 30px rgba(0,0,0,0.3);
+        z-index: 10001;
+        background: white;
     }
 
     .tenant-actions-menu.open-upward {
-        bottom: 20px !important;
+        bottom: 16px !important;
         top: auto !important;
-    }
-
-    @keyframes slideUpMobile {
-        from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(100%);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
     }
 
     .tenant-actions-menu button {
         padding: 16px 20px;
         font-size: 1rem;
+        min-height: 52px;
     }
 
     .tenant-actions-menu button i {
         font-size: 1.2rem;
-        width: 24px;
+        width: 28px;
     }
+}
 
-    /* Backdrop for mobile */
-    .tenant-actions-wrapper::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 9998;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s;
-    }
+/* Mobile Overlay for Actions Menu */
+#mobileActionsOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000;
+}
 
-    .tenant-actions-wrapper.menu-open::before {
-        opacity: 1;
-        visibility: visible;
-    }
+#mobileActionsOverlay.active {
+    display: block;
 }
 
 /* ===================================

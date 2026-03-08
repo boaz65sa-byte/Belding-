@@ -4031,53 +4031,56 @@ function toggleTenantActions(tenantId, event) {
     event.stopPropagation();
 
     const menu = document.getElementById(`tenantActions-${tenantId}`);
-    const wrapper = menu?.closest('.tenant-actions-wrapper');
+    const overlay = document.getElementById('mobileActionsOverlay');
     if (!menu) return;
 
     // Close any other open menus
     if (currentOpenActionsMenu && currentOpenActionsMenu !== menu) {
         currentOpenActionsMenu.style.display = 'none';
         currentOpenActionsMenu.classList.remove('open-upward');
-        const oldWrapper = currentOpenActionsMenu.closest('.tenant-actions-wrapper');
-        if (oldWrapper) oldWrapper.classList.remove('menu-open');
     }
 
     // Toggle current menu
     if (menu.style.display === 'none' || menu.style.display === '') {
         menu.style.display = 'block';
         currentOpenActionsMenu = menu;
-        if (wrapper) wrapper.classList.add('menu-open');
         
-        // Calculate if menu should open upward or downward
-        const button = event.currentTarget;
-        const buttonRect = button.getBoundingClientRect();
-        const menuHeight = 400; // approximate height of menu
-        const windowHeight = window.innerHeight;
-        const spaceBelow = windowHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
+        // Show overlay on mobile
+        if (overlay && window.innerWidth <= 768) {
+            overlay.classList.add('active');
+        }
         
-        // If not enough space below and more space above, open upward
-        if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
-            menu.classList.add('open-upward');
-        } else {
-            menu.classList.remove('open-upward');
+        // Calculate if menu should open upward or downward (desktop only)
+        if (window.innerWidth > 768) {
+            const button = event.currentTarget;
+            const buttonRect = button.getBoundingClientRect();
+            const menuHeight = 400;
+            const windowHeight = window.innerHeight;
+            const spaceBelow = windowHeight - buttonRect.bottom;
+            const spaceAbove = buttonRect.top;
+            
+            if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+                menu.classList.add('open-upward');
+            } else {
+                menu.classList.remove('open-upward');
+            }
         }
     } else {
         menu.style.display = 'none';
         menu.classList.remove('open-upward');
-        if (wrapper) wrapper.classList.remove('menu-open');
+        if (overlay) overlay.classList.remove('active');
         currentOpenActionsMenu = null;
     }
 }
 
 function closeTenantActions() {
+    const overlay = document.getElementById('mobileActionsOverlay');
     if (currentOpenActionsMenu) {
-        const wrapper = currentOpenActionsMenu.closest('.tenant-actions-wrapper');
         currentOpenActionsMenu.style.display = 'none';
         currentOpenActionsMenu.classList.remove('open-upward');
-        if (wrapper) wrapper.classList.remove('menu-open');
         currentOpenActionsMenu = null;
     }
+    if (overlay) overlay.classList.remove('active');
 }
 
 // Close menu when clicking outside
