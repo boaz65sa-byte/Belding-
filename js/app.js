@@ -1747,9 +1747,33 @@ function loadSettings() {
 }
 
 function saveGeneralSettings() {
+    const oldAmount = appState.settings.defaultAmount;
+    const newAmount = parseFloat(document.getElementById('defaultAmount').value);
+    
     appState.settings.buildingName = document.getElementById('buildingName').value;
-    appState.settings.defaultAmount = parseFloat(document.getElementById('defaultAmount').value);
+    appState.settings.defaultAmount = newAmount;
     appState.settings.paymentDay = parseInt(document.getElementById('paymentDay').value);
+    
+    // אם העלות החודשית השתנתה, שאל אם לעדכן את כל הדיירים
+    if (oldAmount !== newAmount && appState.tenants.length > 0) {
+        const updateAll = confirm(`העלות החודשית השתנתה מ-₪${oldAmount} ל-₪${newAmount}.\n\nהאם לעדכן את העלות החודשית לכל הדיירים הקיימים?`);
+        
+        if (updateAll) {
+            let updatedCount = 0;
+            appState.tenants.forEach(tenant => {
+                // עדכן רק דיירים שהיה להם הסכום הישן
+                if (tenant.monthlyAmount === oldAmount) {
+                    tenant.monthlyAmount = newAmount;
+                    updatedCount++;
+                }
+            });
+            
+            if (updatedCount > 0) {
+                showToast(`עודכנו ${updatedCount} דיירים לסכום החדש ₪${newAmount}`, 'success');
+                renderTenantsTable();
+            }
+        }
+    }
     
     saveDataToStorage();
     showToast('ההגדרות נשמרו בהצלחה!', 'success');
