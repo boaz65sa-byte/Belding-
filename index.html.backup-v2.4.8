@@ -111,10 +111,6 @@
                     <i class="fas fa-receipt"></i>
                     <span>הוצאות</span>
                 </a>
-                <a href="#notices" class="menu-item" data-section="notices">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>הודעות לדיירים</span>
-                </a>
                 <a href="#reports" class="menu-item" data-section="reports">
                     <i class="fas fa-file-alt"></i>
                     <span>דוחות</span>
@@ -290,9 +286,6 @@
                 <div class="section-header">
                     <h1><i class="fas fa-users"></i> ניהול דיירים</h1>
                     <div class="header-actions">
-                        <button class="btn" style="background: #10b981; color: white;" onclick="switchTab('payments')" title="עבור ללשונית תשלומים">
-                            <i class="fas fa-money-bill-wave"></i> עבור לתשלומים
-                        </button>
                         <button class="btn btn-primary" id="addTenantBtn">
                             <i class="fas fa-plus"></i> הוסף דייר חדש
                         </button>
@@ -305,19 +298,6 @@
                     </div>
                 </div>
 
-                <!-- Tenant Section Tabs -->
-                <div class="tenant-tabs">
-                    <button class="tenant-tab active" data-tab="tenantsList" onclick="switchTenantTab('tenantsList')">
-                        <i class="fas fa-users"></i> רשימת דיירים
-                    </button>
-                    <button class="tenant-tab" data-tab="paymentsTable" onclick="switchTenantTab('paymentsTable')">
-                        <i class="fas fa-calendar-check"></i> טבלת תשלומים שנתית
-                    </button>
-                </div>
-
-                <!-- Tenants List Tab -->
-                <div id="tenantsListTab" class="tenant-tab-content active">
-
                 <!-- Search and Filter Bar -->
                 <div class="filter-bar">
                     <div class="search-box">
@@ -326,10 +306,18 @@
                     </div>
                     
                     <div class="filter-group">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="all">כל הסטטוסים</option>
+                            <option value="paid">שולם</option>
+                            <option value="pending">ממתין לתשלום</option>
+                            <option value="overdue">באיחור</option>
+                        </select>
+                        
                         <select id="sortBy" class="filter-select">
                             <option value="apartment">מיין לפי דירה</option>
                             <option value="name">מיין לפי שם</option>
                             <option value="amount">מיין לפי סכום</option>
+                            <option value="status">מיין לפי סטטוס</option>
                         </select>
                         
                         <button class="btn-icon" id="refreshBtn" title="רענן נתונים">
@@ -346,10 +334,12 @@
                                 <th><input type="checkbox" id="selectAll"></th>
                                 <th>דירה</th>
                                 <th>שם הדייר</th>
+                                <th>טלפון</th>
+                                <th>אימייל</th>
                                 <th>סכום חודשי</th>
-                                <th>תשלומים</th>
                                 <th>סטטוס</th>
-                                <th style="text-align: center;">⋮</th>
+                                <th>תשלום אחרון</th>
+                                <th>פעולות</th>
                             </tr>
                         </thead>
                         <tbody id="tenantsTableBody">
@@ -357,57 +347,23 @@
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Mobile Tenant Cards (visible only on mobile) -->
-                <div class="tenants-cards-container" id="tenantsCardsContainer">
-                    <!-- Cards will be added dynamically -->
+
+                <!-- Bulk Actions -->
+                <div class="bulk-actions" id="bulkActions" style="display: none;">
+                    <span id="selectedCount">0 נבחרו</span>
+                    <button class="btn btn-sm btn-success" id="bulkSendWhatsappBtn">
+                        <i class="fab fa-whatsapp"></i> שלח WhatsApp
+                    </button>
+                    <button class="btn btn-sm" id="bulkMarkPaidBtn">
+                        <i class="fas fa-check"></i> סמן כשולם
+                    </button>
+                    <button class="btn btn-sm" id="bulkSendReminderBtn">
+                        <i class="fas fa-envelope"></i> שלח תזכורת
+                    </button>
+                    <button class="btn btn-sm btn-danger" id="bulkDeleteBtn">
+                        <i class="fas fa-trash"></i> מחק
+                    </button>
                 </div>
-
-                </div>
-                <!-- End Tenants List Tab -->
-
-                <!-- Payments Table Tab -->
-                <div id="paymentsTableTab" class="tenant-tab-content" style="display: none;">
-                    
-                    <!-- Date Range Selection -->
-                    <div class="payments-table-header">
-                        <h2><i class="fas fa-calendar-alt"></i> טבלת תשלומים שנתית</h2>
-                        <div class="date-range-selector">
-                            <div class="date-input-group">
-                                <label>מתאריך:</label>
-                                <input type="date" id="paymentsTableStartDate" class="form-input">
-                            </div>
-                            <div class="date-input-group">
-                                <label>עד תאריך:</label>
-                                <input type="date" id="paymentsTableEndDate" class="form-input">
-                            </div>
-                            <button class="btn btn-primary" onclick="renderPaymentsTable()">
-                                <i class="fas fa-search"></i> הצג טבלה
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Payments Table Container -->
-                    <div id="paymentsTableContainer" class="annual-payments-table-container">
-                        <!-- Table will be generated here -->
-                    </div>
-
-                    <!-- Export Buttons -->
-                    <div class="payments-table-actions">
-                        <button class="btn btn-primary" onclick="printPaymentsTable()">
-                            <i class="fas fa-print"></i> הדפסה
-                        </button>
-                        <button class="btn btn-success" onclick="exportPaymentsTableToExcel()">
-                            <i class="fas fa-file-excel"></i> ייצוא לExcel
-                        </button>
-                        <button class="btn btn-danger" onclick="exportPaymentsTableToPDF()">
-                            <i class="fas fa-file-pdf"></i> ייצוא לPDF
-                        </button>
-                    </div>
-
-                </div>
-                <!-- End Payments Table Tab -->
-
             </section>
 
             <!-- Payments Section -->
@@ -415,9 +371,6 @@
                 <div class="section-header">
                     <h1><i class="fas fa-money-bill-wave"></i> ניהול תשלומים</h1>
                     <div class="header-actions">
-                        <button class="btn btn-secondary" onclick="switchTab('tenants')" title="חזור ללשונית דיירים">
-                            <i class="fas fa-users"></i> חזור לדיירים
-                        </button>
                         <button class="btn btn-primary" id="recordPaymentBtn">
                             <i class="fas fa-plus"></i> רשום תשלום
                         </button>
@@ -443,34 +396,15 @@
                     </div>
                 </div>
 
-                <!-- Tenant Selection for Bulk Actions -->
-                <div class="filter-bar" style="margin-top: 20px;">
-                    <div class="filter-group">
-                        <label style="margin-left: 10px; font-weight: 600;">בחר דייר לפעולות:</label>
-                        <select id="paymentTenantFilter" class="filter-select" style="min-width: 200px;">
-                            <option value="all">כל הדיירים</option>
-                            <!-- Tenant options will be added dynamically -->
-                        </select>
-                        
-                        <select id="paymentStatusFilter" class="filter-select">
-                            <option value="all">כל הסטטוסים</option>
-                            <option value="paid">שולם</option>
-                            <option value="pending">ממתין</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Payment History Table -->
                 <div class="table-container">
                     <table class="data-table" id="paymentsTable">
                         <thead>
                             <tr>
-                                <th><input type="checkbox" id="selectAllPayments"></th>
                                 <th>תאריך</th>
                                 <th>דירה</th>
                                 <th>שם הדייר</th>
                                 <th>סכום</th>
-                                <th>סטטוס</th>
                                 <th>אמצעי תשלום</th>
                                 <th>הערות</th>
                                 <th>פעולות</th>
@@ -480,23 +414,6 @@
                             <!-- Payment rows will be added dynamically -->
                         </tbody>
                     </table>
-                </div>
-
-                <!-- Bulk Actions for Payments -->
-                <div class="bulk-actions" id="bulkActionsPayments" style="display: none;">
-                    <span id="selectedPaymentsCount">0 נבחרו</span>
-                    <button class="btn btn-sm btn-success" id="bulkSendReceiptBtn">
-                        <i class="fas fa-file-invoice"></i> הפק קבלות
-                    </button>
-                    <button class="btn btn-sm btn-success" id="bulkSendWhatsappPaymentsBtn">
-                        <i class="fab fa-whatsapp"></i> שלח ב-WhatsApp
-                    </button>
-                    <button class="btn btn-sm" id="bulkMarkPaidPaymentsBtn">
-                        <i class="fas fa-check"></i> סמן כשולם
-                    </button>
-                    <button class="btn btn-sm btn-danger" id="bulkDeletePaymentsBtn">
-                        <i class="fas fa-trash"></i> מחק
-                    </button>
                 </div>
             </section>
 
@@ -511,88 +428,85 @@
 
                 <!-- Expense Categories Summary -->
                 <div class="expense-categories">
-                    <div class="expense-category-card" onclick="editExpensesByCategory('electricity')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #3b82f6;">
                             <i class="fas fa-bolt"></i>
                         </div>
                         <div class="category-info">
-                            <h4>חשמל <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>חשמל</h4>
                             <p class="category-amount" id="electricityTotal">₪0</p>
                         </div>
                     </div>
                     
-                    <div class="expense-category-card" onclick="editExpensesByCategory('elevator')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #8b5cf6;">
                             <i class="fas fa-elevator"></i>
                         </div>
                         <div class="category-info">
-                            <h4>מעלית <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>מעלית</h4>
                             <p class="category-amount" id="elevatorTotal">₪0</p>
                         </div>
                     </div>
                     
-                    <div class="expense-category-card" onclick="editExpensesByCategory('cleaning')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #10b981;">
                             <i class="fas fa-broom"></i>
                         </div>
                         <div class="category-info">
-                            <h4>ניקיון <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>ניקיון</h4>
                             <p class="category-amount" id="cleaningTotal">₪0</p>
                         </div>
                     </div>
                     
-                    <div class="expense-category-card" onclick="editExpensesByCategory('gardening')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #22c55e;">
                             <i class="fas fa-leaf"></i>
                         </div>
                         <div class="category-info">
-                            <h4>גינון <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>גינון</h4>
                             <p class="category-amount" id="gardeningTotal">₪0</p>
                         </div>
                     </div>
                     
-                    <div class="expense-category-card" onclick="editExpensesByCategory('maintenance')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #f59e0b;">
                             <i class="fas fa-tools"></i>
                         </div>
                         <div class="category-info">
-                            <h4>תחזוקה <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>תחזוקה</h4>
                             <p class="category-amount" id="maintenanceTotal">₪0</p>
                         </div>
                     </div>
                     
-                    <div class="expense-category-card" onclick="editExpensesByCategory('antenna')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #ef4444;">
                             <i class="fas fa-satellite-dish"></i>
                         </div>
                         <div class="category-info">
-                            <h4>קולטים <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>קולטים</h4>
                             <p class="category-amount" id="antennaTotal">₪0</p>
                         </div>
                     </div>
                     
-                    <div class="expense-category-card" onclick="editExpensesByCategory('water')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #06b6d4;">
                             <i class="fas fa-water"></i>
                         </div>
                         <div class="category-info">
-                            <h4>מים <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>מים</h4>
                             <p class="category-amount" id="waterTotal">₪0</p>
                         </div>
                     </div>
                     
-                    <div class="expense-category-card" onclick="editExpensesByCategory('other')" style="cursor: pointer;" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                    <div class="expense-category-card">
                         <div class="category-icon" style="background: #6366f1;">
                             <i class="fas fa-ellipsis-h"></i>
                         </div>
                         <div class="category-info">
-                            <h4>אחר <i class="fas fa-edit" style="font-size: 0.8em; color: #6b7280;"></i></h4>
+                            <h4>אחר</h4>
                             <p class="category-amount" id="otherTotal">₪0</p>
                         </div>
                     </div>
-                    
-                    <!-- Dynamic Custom Categories -->
-                    <div id="customCategoriesContainer"></div>
                 </div>
 
                 <!-- Filter Bar -->
@@ -631,7 +545,6 @@
                                 <th>תיאור</th>
                                 <th>סכום</th>
                                 <th>שולם ע"י</th>
-                                <th>קבלה</th>
                                 <th>הערות</th>
                                 <th>פעולות</th>
                             </tr>
@@ -651,120 +564,6 @@
                     <div class="summary-row">
                         <span>סה"כ הוצאות שנתי:</span>
                         <strong class="total-amount" id="yearlyExpenseTotal">₪0</strong>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Notices Section (הודעות לדיירים) -->
-            <section id="noticesSection" class="content-section">
-                <div class="section-header">
-                    <h1><i class="fas fa-bullhorn"></i> הודעות לדיירים</h1>
-                    <p class="section-subtitle">צור הודעות למען הדיירים להדפסה על לוח המודעות</p>
-                </div>
-
-                <!-- Create Notice Card -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div class="card-header">
-                        <h3><i class="fas fa-plus-circle"></i> צור הודעה חדשה</h3>
-                    </div>
-                    <div class="card-body">
-                        <form id="noticeForm">
-                            <!-- Notice Type -->
-                            <div class="form-group">
-                                <label for="noticeType">סוג הודעה *</label>
-                                <select id="noticeType" class="form-select" required>
-                                    <option value="">-- בחר סוג הודעה --</option>
-                                    <option value="payment">הודעת תשלום</option>
-                                    <option value="general">הודעה כללית</option>
-                                    <option value="maintenance">הודעת תחזוקה</option>
-                                    <option value="meeting">הודעת אסיפה</option>
-                                    <option value="urgent">הודעה דחופה</option>
-                                </select>
-                            </div>
-
-                            <!-- Subject -->
-                            <div class="form-group">
-                                <label for="noticeSubject">נושא ההודעה *</label>
-                                <input type="text" id="noticeSubject" class="form-input" placeholder="לדוגמה: תשלום ועד בית לחודש ינואר" required>
-                            </div>
-
-                            <!-- Content -->
-                            <div class="form-group">
-                                <label for="noticeContent">תוכן ההודעה *</label>
-                                <textarea id="noticeContent" class="form-textarea" rows="8" placeholder="כתוב את תוכן ההודעה כאן..." required></textarea>
-                            </div>
-
-                            <!-- Options -->
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="noticeIncludeSignature" checked>
-                                    <span>הוסף חתימה אוטומטית (מפרטי הועד)</span>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="noticeIncludeDate" checked>
-                                    <span>הוסף תאריך</span>
-                                </label>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-primary" id="previewNoticeBtn">
-                                    <i class="fas fa-eye"></i> תצוגה מקדימה
-                                </button>
-                                <button type="button" class="btn btn-success" id="generateNoticePdfBtn">
-                                    <i class="fas fa-file-pdf"></i> הורד PDF
-                                </button>
-                                <button type="button" class="btn btn-secondary" id="printNoticeBtn">
-                                    <i class="fas fa-print"></i> הדפס
-                                </button>
-                                <button type="reset" class="btn btn-cancel">
-                                    <i class="fas fa-times"></i> נקה טופס
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Notice Preview -->
-                <div class="card" id="noticePreviewCard" style="display: none;">
-                    <div class="card-header">
-                        <h3><i class="fas fa-eye"></i> תצוגה מקדימה</h3>
-                    </div>
-                    <div class="card-body">
-                        <div id="noticePreview" class="notice-preview" style="background: white; padding: 3rem; border: 2px solid #e5e7eb; min-height: 400px; font-family: 'Arial', sans-serif;">
-                            <!-- Preview will be generated here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Saved Notices History -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-history"></i> הודעות קודמות</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>תאריך</th>
-                                        <th>סוג</th>
-                                        <th>נושא</th>
-                                        <th>פעולות</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="noticesHistoryTableBody">
-                                    <tr>
-                                        <td colspan="4" style="text-align: center; padding: 2rem; color: #6b7280;">
-                                            אין הודעות קודמות
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -959,29 +758,6 @@
                                 <i class="fas fa-trash-alt"></i> מחק את כל הנתונים
                             </button>
                         </div>
-                    </div>
-
-                    <!-- PWA Installation -->
-                    <div class="settings-card" id="pwaInstallCard" style="display: none;">
-                        <h3><i class="fas fa-mobile-alt"></i> התקן כאפליקציה</h3>
-                        <p>התקן את המערכת כאפליקציה במכשיר שלך לגישה מהירה!</p>
-                        <div class="pwa-benefits" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
-                            <div class="pwa-benefit" style="text-align: center;">
-                                <i class="fas fa-bolt" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;"></i>
-                                <div style="font-size: 0.85rem;">גישה מהירה</div>
-                            </div>
-                            <div class="pwa-benefit" style="text-align: center;">
-                                <i class="fas fa-wifi" style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;"></i>
-                                <div style="font-size: 0.85rem;">עובד ללא אינטרנט</div>
-                            </div>
-                            <div class="pwa-benefit" style="text-align: center;">
-                                <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--info-color); margin-bottom: 0.5rem;"></i>
-                                <div style="font-size: 0.85rem;">חוויית אפליקציה</div>
-                            </div>
-                        </div>
-                        <button class="btn btn-success" id="installPwaBtn" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
-                            <i class="fas fa-download"></i> התקן עכשיו
-                        </button>
                     </div>
 
                     <!-- About System -->
@@ -1195,17 +971,7 @@
                             <option value="antenna">קולטים</option>
                             <option value="water">מים</option>
                             <option value="other">אחר</option>
-                            <option value="custom">➕ קטגוריה חדשה...</option>
                         </select>
-                        
-                        <!-- Custom category input (hidden by default) -->
-                        <input 
-                            type="text" 
-                            id="customCategoryInput" 
-                            class="form-input" 
-                            placeholder="הכנס שם קטגוריה חדשה"
-                            style="display: none; margin-top: 0.5rem;"
-                        >
                     </div>
                 </div>
 
@@ -1224,70 +990,10 @@
                         <input type="text" id="expensePaidBy" class="form-input" placeholder="שם">
                     </div>
                 </div>
-                
-                <!-- Recurring Expense Settings -->
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="isRecurringExpense" style="margin-left: 8px;">
-                        הוצאה קבועה (חוזרת)
-                    </label>
-                </div>
-                
-                <div id="recurringExpenseSettings" style="display: none;">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="expenseFrequency">תדירות *</label>
-                            <select id="expenseFrequency" class="form-select">
-                                <option value="">-- בחר תדירות --</option>
-                                <option value="weekly">שבועי</option>
-                                <option value="biweekly">דו-שבועי</option>
-                                <option value="monthly">חודשי</option>
-                                <option value="quarterly">רבעוני (כל 3 חודשים)</option>
-                                <option value="semiannual">חצי שנתי (כל 6 חודשים)</option>
-                                <option value="annual">שנתי</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="expenseStartDate">תאריך התחלה</label>
-                            <input type="date" id="expenseStartDate" class="form-input">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="expenseReminder" style="margin-left: 8px;" checked>
-                            תזכורת לפני המועד (3 ימים)
-                        </label>
-                    </div>
-                </div>
 
                 <div class="form-group">
                     <label for="expenseNotes">הערות</label>
                     <textarea id="expenseNotes" class="form-textarea" rows="2"></textarea>
-                </div>
-
-                <!-- Receipt Upload Section -->
-                <div class="form-group">
-                    <label>
-                        <i class="fas fa-camera"></i> צרף קבלה/תמונה
-                    </label>
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <input type="file" id="expenseReceiptFile" accept="image/*,application/pdf" style="display: none;">
-                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('expenseReceiptFile').click()">
-                            <i class="fas fa-paperclip"></i> בחר קובץ
-                        </button>
-                        <button type="button" class="btn" style="background: #10b981; color: white;" onclick="captureReceiptPhoto()">
-                            <i class="fas fa-camera"></i> צלם קבלה
-                        </button>
-                        <span id="receiptFileName" style="font-size: 0.9rem; color: #6b7280;"></span>
-                    </div>
-                    <!-- Receipt Preview -->
-                    <div id="receiptPreview" style="margin-top: 10px; display: none;">
-                        <img id="receiptPreviewImg" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 2px solid #e5e7eb;">
-                        <button type="button" class="btn btn-secondary" onclick="removeReceipt()" style="margin-top: 10px;">
-                            <i class="fas fa-trash"></i> הסר קבלה
-                        </button>
-                    </div>
                 </div>
 
                 <div class="modal-actions">
@@ -1320,13 +1026,10 @@
                         <i class="fab fa-whatsapp"></i> שלח ב-WhatsApp
                     </button>
                     <button class="btn btn-primary" id="downloadReceiptBtn">
-                        <i class="fas fa-download"></i> הורד PDF
+                        <i class="fas fa-download"></i> הורד קבלה
                     </button>
                     <button class="btn btn-secondary" id="printReceiptBtn">
                         <i class="fas fa-print"></i> הדפס
-                    </button>
-                    <button class="btn btn-cancel" onclick="hideModal('receiptModal')" style="margin-top: 1rem;">
-                        <i class="fas fa-arrow-right"></i> חזור
                     </button>
                 </div>
             </div>
@@ -1699,178 +1402,8 @@
         </div>
     </footer>
 
-    <!-- Modal: Edit Expenses by Category -->
-    <div class="modal modal-large" id="categoryExpensesModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-edit"></i> עריכת הוצאות: <span id="categoryExpensesTitle">קטגוריה</span></h2>
-                <button class="modal-close" id="closeCategoryExpensesModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>תאריך</th>
-                                <th>תיאור</th>
-                                <th>סכום</th>
-                                <th>שילם</th>
-                                <th>הערות</th>
-                                <th>קבלה</th>
-                                <th>פעולות</th>
-                            </tr>
-                        </thead>
-                        <tbody id="categoryExpensesTableBody">
-                            <!-- Expenses will be dynamically added here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-actions" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <button class="btn btn-primary" onclick="addExpense()">
-                            <i class="fas fa-plus"></i> הוסף הוצאה חדשה בקטגוריה זו
-                        </button>
-                        <button class="btn btn-cancel" onclick="hideModal('categoryExpensesModal')">
-                            <i class="fas fa-arrow-right"></i> חזור
-                        </button>
-                    </div>
-                    <button class="btn btn-danger" id="deleteCategoryBtn" style="display: none;" title="מחק קטגוריה זו">
-                        <i class="fas fa-trash"></i> מחק קטגוריה
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Bottom Navigation (visible only on mobile) -->
-    <nav class="mobile-bottom-nav">
-        <button class="nav-item" onclick="showTab('dashboard')" data-tab="dashboard">
-            <i class="fas fa-home"></i>
-            <span>ראשי</span>
-        </button>
-        <button class="nav-item" onclick="showTab('tenants')" data-tab="tenants">
-            <i class="fas fa-users"></i>
-            <span>דיירים</span>
-        </button>
-        <button class="nav-item" onclick="showTab('payments')" data-tab="payments">
-            <i class="fas fa-credit-card"></i>
-            <span>תשלומים</span>
-        </button>
-        <button class="nav-item" onclick="showTab('expenses')" data-tab="expenses">
-            <i class="fas fa-receipt"></i>
-            <span>הוצאות</span>
-        </button>
-        <button class="nav-item" onclick="openMoreMenu()" data-tab="more">
-            <i class="fas fa-ellipsis-h"></i>
-            <span>עוד</span>
-        </button>
-    </nav>
-
-    <!-- More Menu Modal -->
-    <div class="more-menu-overlay" id="moreMenuOverlay" onclick="closeMoreMenu()"></div>
-    <div class="more-menu" id="moreMenu">
-        <div class="more-menu-header">
-            <h3>תפריט נוסף</h3>
-            <button class="close-more-menu" onclick="closeMoreMenu()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="more-menu-items">
-            <button class="more-menu-item" onclick="showTab('notices'); closeMoreMenu();">
-                <i class="fas fa-bullhorn"></i>
-                <span>הודעות</span>
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="more-menu-item" onclick="showTab('reports'); closeMoreMenu();">
-                <i class="fas fa-chart-bar"></i>
-                <span>דוחות</span>
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="more-menu-item" onclick="showTab('settings'); closeMoreMenu();">
-                <i class="fas fa-cog"></i>
-                <span>הגדרות</span>
-                <i class="fas fa-chevron-left"></i>
-            </button>
-        </div>
-    </div>
-
     <!-- JavaScript -->
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Auth System -->
-    <script src="js/config.js"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/auth.js"></script>
-    
-    <!-- Auth Check & Protection -->
-    <script>
-        // 🔒 בדיקת אימות לפני טעינת האפליקציה
-        (async function() {
-            try {
-                // המתן לאתחול Supabase
-                await initSupabase();
-                
-                // בדוק גישה
-                const accessCheck = await checkUserAccess();
-                
-                if (!accessCheck.hasAccess) {
-                    // ... קוד קיים ...
-
-                    // הוסף את זה:
-                    if (accessCheck.reason === 'expired') {
-                        // המנוי נגמר - שלח לדף תשלום
-                        window.location.href = 'pricing.html'; 
-                        return;
-                    }
-                    
-                    if (accessCheck.reason === 'trial_expired' || 
-                        accessCheck.reason === 'subscription_expired' || 
-                        accessCheck.reason === 'expired') {
-                        window.location.href = 'pricing.html?expired=true';
-                        return;
-                    }
-                }
-                
-                // יש גישה - הצג מידע על המנוי
-                console.log('✅ גישה אושרה:', accessCheck.status);
-
-                // --- תיקון: העלמת מסך הטעינה כדי שאפשר יהיה ללחוץ ---
-                document.getElementById('loadingOverlay').style.display = 'none';
-                // -----------------------------------------------------
-
-                // הצג התראה אם המנוי עומד לפוג
-                if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
-                    const message = accessCheck.status === 'trial' 
-                        ? `תקופת הניסיון שלך מסתיימת בעוד ${accessCheck.daysLeft} ימים`
-                        : `המנוי שלך מסתיים בעוד ${accessCheck.daysLeft} ימים`;
-                    
-                    // הצג התראה בממשק (אחרי טעינת האפליקציה)
-                    window.addEventListener('load', () => {
-                        if (typeof showToast !== 'undefined') {
-                            showToast(message, 'warning');
-                        }
-                    });
-                }
-                
-                // שמור מידע על המשתמש ב-appState
-                if (typeof window.appState !== 'undefined' && accessCheck.profile) {
-                    window.appState.currentUser = accessCheck.profile;
-                }
-                
-            } catch (error) {
-                console.error('❌ שגיאה בבדיקת אימות:', error);
-                // במקרה של שגיאה קריטית - הפנה להתחברות
-                window.location.href = 'login.html';
-            }
-        })();
-    </script>
-    
-    <!-- Main App -->
     <script src="js/app.js"></script>
-    <script src="js/payments-table.js"></script>
     
     <!-- PWA Service Worker Registration -->
     <script>
@@ -1984,7 +1517,56 @@
             });
         }
         
-        // Note: PWA installation code is in js/app.js
+        // Install prompt for PWA
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button or notification
+            console.log('💾 האפליקציה ניתנת להתקנה!');
+            
+            // Optional: Show custom install prompt
+            const showInstallPromotion = () => {
+                const installMsg = document.createElement('div');
+                installMsg.innerHTML = `
+                    <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--primary-color); color: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10000; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <div style="flex: 1;">
+                            <strong>התקן את האפליקציה</strong>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">שמור במסך הבית לגישה מהירה</p>
+                        </div>
+                        <button id="installBtn" style="background: white; color: var(--primary-color); border: none; padding: 10px 20px; border-radius: 5px; font-weight: 600; cursor: pointer;">התקן</button>
+                        <button id="dismissBtn" style="background: transparent; color: white; border: 1px solid white; padding: 10px 15px; border-radius: 5px; cursor: pointer;">לא עכשיו</button>
+                    </div>
+                `;
+                document.body.appendChild(installMsg);
+                
+                document.getElementById('installBtn').addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`תוצאת התקנה: ${outcome}`);
+                        deferredPrompt = null;
+                        installMsg.remove();
+                    }
+                });
+                
+                document.getElementById('dismissBtn').addEventListener('click', () => {
+                    installMsg.remove();
+                });
+            };
+            
+            // Show promotion after 10 seconds
+            setTimeout(showInstallPromotion, 10000);
+        });
+        
+        // Track installation
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 האפליקציה הותקנה בהצלחה!');
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>

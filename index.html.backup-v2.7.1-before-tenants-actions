@@ -305,19 +305,6 @@
                     </div>
                 </div>
 
-                <!-- Tenant Section Tabs -->
-                <div class="tenant-tabs">
-                    <button class="tenant-tab active" data-tab="tenantsList" onclick="switchTenantTab('tenantsList')">
-                        <i class="fas fa-users"></i> רשימת דיירים
-                    </button>
-                    <button class="tenant-tab" data-tab="paymentsTable" onclick="switchTenantTab('paymentsTable')">
-                        <i class="fas fa-calendar-check"></i> טבלת תשלומים שנתית
-                    </button>
-                </div>
-
-                <!-- Tenants List Tab -->
-                <div id="tenantsListTab" class="tenant-tab-content active">
-
                 <!-- Search and Filter Bar -->
                 <div class="filter-bar">
                     <div class="search-box">
@@ -346,10 +333,10 @@
                                 <th><input type="checkbox" id="selectAll"></th>
                                 <th>דירה</th>
                                 <th>שם הדייר</th>
+                                <th>טלפון</th>
+                                <th>אימייל</th>
                                 <th>סכום חודשי</th>
-                                <th>תשלומים</th>
-                                <th>סטטוס</th>
-                                <th style="text-align: center;">⋮</th>
+                                <th>פעולות</th>
                             </tr>
                         </thead>
                         <tbody id="tenantsTableBody">
@@ -357,56 +344,6 @@
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Mobile Tenant Cards (visible only on mobile) -->
-                <div class="tenants-cards-container" id="tenantsCardsContainer">
-                    <!-- Cards will be added dynamically -->
-                </div>
-
-                </div>
-                <!-- End Tenants List Tab -->
-
-                <!-- Payments Table Tab -->
-                <div id="paymentsTableTab" class="tenant-tab-content" style="display: none;">
-                    
-                    <!-- Date Range Selection -->
-                    <div class="payments-table-header">
-                        <h2><i class="fas fa-calendar-alt"></i> טבלת תשלומים שנתית</h2>
-                        <div class="date-range-selector">
-                            <div class="date-input-group">
-                                <label>מתאריך:</label>
-                                <input type="date" id="paymentsTableStartDate" class="form-input">
-                            </div>
-                            <div class="date-input-group">
-                                <label>עד תאריך:</label>
-                                <input type="date" id="paymentsTableEndDate" class="form-input">
-                            </div>
-                            <button class="btn btn-primary" onclick="renderPaymentsTable()">
-                                <i class="fas fa-search"></i> הצג טבלה
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Payments Table Container -->
-                    <div id="paymentsTableContainer" class="annual-payments-table-container">
-                        <!-- Table will be generated here -->
-                    </div>
-
-                    <!-- Export Buttons -->
-                    <div class="payments-table-actions">
-                        <button class="btn btn-primary" onclick="printPaymentsTable()">
-                            <i class="fas fa-print"></i> הדפסה
-                        </button>
-                        <button class="btn btn-success" onclick="exportPaymentsTableToExcel()">
-                            <i class="fas fa-file-excel"></i> ייצוא לExcel
-                        </button>
-                        <button class="btn btn-danger" onclick="exportPaymentsTableToPDF()">
-                            <i class="fas fa-file-pdf"></i> ייצוא לPDF
-                        </button>
-                    </div>
-
-                </div>
-                <!-- End Payments Table Tab -->
 
             </section>
 
@@ -590,9 +527,6 @@
                             <p class="category-amount" id="otherTotal">₪0</p>
                         </div>
                     </div>
-                    
-                    <!-- Dynamic Custom Categories -->
-                    <div id="customCategoriesContainer"></div>
                 </div>
 
                 <!-- Filter Bar -->
@@ -1195,17 +1129,7 @@
                             <option value="antenna">קולטים</option>
                             <option value="water">מים</option>
                             <option value="other">אחר</option>
-                            <option value="custom">➕ קטגוריה חדשה...</option>
                         </select>
-                        
-                        <!-- Custom category input (hidden by default) -->
-                        <input 
-                            type="text" 
-                            id="customCategoryInput" 
-                            class="form-input" 
-                            placeholder="הכנס שם קטגוריה חדשה"
-                            style="display: none; margin-top: 0.5rem;"
-                        >
                     </div>
                 </div>
 
@@ -1222,42 +1146,6 @@
                     <div class="form-group">
                         <label for="expensePaidBy">שולם ע"י</label>
                         <input type="text" id="expensePaidBy" class="form-input" placeholder="שם">
-                    </div>
-                </div>
-                
-                <!-- Recurring Expense Settings -->
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="isRecurringExpense" style="margin-left: 8px;">
-                        הוצאה קבועה (חוזרת)
-                    </label>
-                </div>
-                
-                <div id="recurringExpenseSettings" style="display: none;">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="expenseFrequency">תדירות *</label>
-                            <select id="expenseFrequency" class="form-select">
-                                <option value="">-- בחר תדירות --</option>
-                                <option value="weekly">שבועי</option>
-                                <option value="biweekly">דו-שבועי</option>
-                                <option value="monthly">חודשי</option>
-                                <option value="quarterly">רבעוני (כל 3 חודשים)</option>
-                                <option value="semiannual">חצי שנתי (כל 6 חודשים)</option>
-                                <option value="annual">שנתי</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="expenseStartDate">תאריך התחלה</label>
-                            <input type="date" id="expenseStartDate" class="form-input">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="expenseReminder" style="margin-left: 8px;" checked>
-                            תזכורת לפני המועד (3 ימים)
-                        </label>
                     </div>
                 </div>
 
@@ -1727,17 +1615,12 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="modal-actions" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <button class="btn btn-primary" onclick="addExpense()">
-                            <i class="fas fa-plus"></i> הוסף הוצאה חדשה בקטגוריה זו
-                        </button>
-                        <button class="btn btn-cancel" onclick="hideModal('categoryExpensesModal')">
-                            <i class="fas fa-arrow-right"></i> חזור
-                        </button>
-                    </div>
-                    <button class="btn btn-danger" id="deleteCategoryBtn" style="display: none;" title="מחק קטגוריה זו">
-                        <i class="fas fa-trash"></i> מחק קטגוריה
+                <div class="modal-actions" style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="addExpense()">
+                        <i class="fas fa-plus"></i> הוסף הוצאה חדשה בקטגוריה זו
+                    </button>
+                    <button class="btn btn-cancel" onclick="hideModal('categoryExpensesModal')">
+                        <i class="fas fa-arrow-right"></i> חזור
                     </button>
                 </div>
             </div>
@@ -1797,80 +1680,7 @@
     </div>
 
     <!-- JavaScript -->
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Auth System -->
-    <script src="js/config.js"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/auth.js"></script>
-    
-    <!-- Auth Check & Protection -->
-    <script>
-        // 🔒 בדיקת אימות לפני טעינת האפליקציה
-        (async function() {
-            try {
-                // המתן לאתחול Supabase
-                await initSupabase();
-                
-                // בדוק גישה
-                const accessCheck = await checkUserAccess();
-                
-                if (!accessCheck.hasAccess) {
-                    // ... קוד קיים ...
-
-                    // הוסף את זה:
-                    if (accessCheck.reason === 'expired') {
-                        // המנוי נגמר - שלח לדף תשלום
-                        window.location.href = 'pricing.html'; 
-                        return;
-                    }
-                    
-                    if (accessCheck.reason === 'trial_expired' || 
-                        accessCheck.reason === 'subscription_expired' || 
-                        accessCheck.reason === 'expired') {
-                        window.location.href = 'pricing.html?expired=true';
-                        return;
-                    }
-                }
-                
-                // יש גישה - הצג מידע על המנוי
-                console.log('✅ גישה אושרה:', accessCheck.status);
-
-                // --- תיקון: העלמת מסך הטעינה כדי שאפשר יהיה ללחוץ ---
-                document.getElementById('loadingOverlay').style.display = 'none';
-                // -----------------------------------------------------
-
-                // הצג התראה אם המנוי עומד לפוג
-                if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
-                    const message = accessCheck.status === 'trial' 
-                        ? `תקופת הניסיון שלך מסתיימת בעוד ${accessCheck.daysLeft} ימים`
-                        : `המנוי שלך מסתיים בעוד ${accessCheck.daysLeft} ימים`;
-                    
-                    // הצג התראה בממשק (אחרי טעינת האפליקציה)
-                    window.addEventListener('load', () => {
-                        if (typeof showToast !== 'undefined') {
-                            showToast(message, 'warning');
-                        }
-                    });
-                }
-                
-                // שמור מידע על המשתמש ב-appState
-                if (typeof window.appState !== 'undefined' && accessCheck.profile) {
-                    window.appState.currentUser = accessCheck.profile;
-                }
-                
-            } catch (error) {
-                console.error('❌ שגיאה בבדיקת אימות:', error);
-                // במקרה של שגיאה קריטית - הפנה להתחברות
-                window.location.href = 'login.html';
-            }
-        })();
-    </script>
-    
-    <!-- Main App -->
     <script src="js/app.js"></script>
-    <script src="js/payments-table.js"></script>
     
     <!-- PWA Service Worker Registration -->
     <script>
