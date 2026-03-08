@@ -21,7 +21,7 @@ if (typeof window.supabase === 'undefined' || typeof window.supabase.createClien
 }
 
 /**
- * 💰 הגדרות מחירים (השארתי את הקוד המצוין שלך כמו שהוא)
+ * 💰 הגדרות מחירים - מעודכן
  */
 const PRICING_CONFIG = {
     trial: {
@@ -32,23 +32,23 @@ const PRICING_CONFIG = {
     },
     monthly: {
         name: 'מנוי חודשי',
-        price: 49,
+        price: 29.90,
         currency: 'ILS',
         symbol: '₪',
         features: ['כל התכונות של הניסיון', 'גיבויים אוטומטיים', 'תמיכה מועדפת', 'עדכונים שוטפים', 'ללא הגבלת דיירים']
     },
     yearly: {
         name: 'מנוי שנתי',
-        price: 490,
+        price: 300,
         currency: 'ILS',
         symbol: '₪',
-        savings: 98,
-        savingsPercent: 17,
-        features: ['כל התכונות של החודשי', 'חודש חינם! (חיסכון של ₪98)', 'תמיכה VIP', 'גיבוי יומי', 'נעילת מחיר לתמיד']
+        savings: 58.80,
+        savingsPercent: 16,
+        features: ['כל התכונות של החודשי', 'חיסכון של ₪58.80 בשנה!', 'תמיכה VIP', 'גיבוי יומי', 'נעילת מחיר לתמיד']
     },
     lifetime: {
         name: 'חד פעמי - לתמיד',
-        price: 499,
+        price: 500,
         currency: 'ILS',
         symbol: '₪',
         features: ['כל התכונות לתמיד!', 'תשלום חד פעמי', 'ללא חידושים', 'עדכונים לכל החיים', 'תמיכה VIP לצמיתות'],

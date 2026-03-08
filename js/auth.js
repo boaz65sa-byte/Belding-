@@ -151,6 +151,50 @@ async function signup(email, password, fullName, phone) {
     }
 }
 
+// 1.1 הרשמה עם בניין
+async function signupWithBuilding(email, password, fullName, phone, buildingAddress) {
+    const supabase = await getSupabase();
+    if (!supabase) return { success: false, error: 'Connection Error' };
+
+    try {
+        // יצירת מזהה בניין מהכתובת
+        const buildingId = buildingAddress.toLowerCase().replace(/[^a-zA-Z0-9א-ת]/g, '_');
+        
+        const { data, error } = await supabase.auth.signUp({
+            email, password,
+            options: { 
+                data: { 
+                    full_name: fullName, 
+                    phone,
+                    building_name: buildingAddress,
+                    building_id: buildingId
+                } 
+            }
+        });
+        if (error) throw error;
+        
+        // עדכן את הפרופיל עם פרטי הבניין
+        if (data.user) {
+            await supabase
+                .from('user_profiles')
+                .upsert({
+                    id: data.user.id,
+                    email: email,
+                    full_name: fullName,
+                    phone: phone,
+                    building_name: buildingAddress,
+                    building_id: buildingId,
+                    role: 'user',
+                    status: 'trial'
+                });
+        }
+        
+        return { success: true, user: data.user };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
 // 2. התחברות
 async function login(email, password) {
     const supabase = await getSupabase();
@@ -283,3 +327,4 @@ window.signInWithGoogle = signInWithGoogle;
 window.getCurrentUser = getCurrentUser;
 window.getUserProfile = getUserProfile;
 window.signOut = signOut;
+window.signupWithBuilding = signupWithBuilding;
