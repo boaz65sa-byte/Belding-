@@ -1911,33 +1911,33 @@
                 console.log('📋 פרופיל מלא:', accessCheck.profile);
                 
                 const userRole = accessCheck.profile?.role;
+                const userEmail = accessCheck.profile?.email;
                 const adminLink = document.getElementById('adminPanelLink');
                 const pricingLink = document.getElementById('pricingLink');
                 
-                console.log('🔗 adminLink element:', adminLink);
-                console.log('🔗 pricingLink element:', pricingLink);
+                console.log('📧 אימייל משתמש:', userEmail);
                 
-                // פאנל אדמין - רק לסופר אדמין (boaz65sa@gmail.com)
-                if (userRole === 'super_admin') {
-                    console.log('✅ סופר אדמין - מציג פאנל ניהול');
+                // פאנל אדמין - בדיקה כפולה: לפי role או לפי אימייל
+                const isSuperAdmin = userRole === 'super_admin' || userEmail === 'boaz65sa@gmail.com';
+                
+                if (isSuperAdmin) {
+                    console.log('✅ סופר אדמין מזוהה - מציג פאנל ניהול');
                     if (adminLink) {
                         adminLink.style.display = 'flex';
                         console.log('✅ כפתור אדמין הוצג בהצלחה');
-                    } else {
-                        console.error('❌ לא נמצא אלמנט adminPanelLink');
                     }
                 } else {
-                    console.log('❌ לא סופר אדמין - תפקיד:', userRole);
+                    console.log('❌ לא סופר אדמין - תפקיד:', userRole, 'אימייל:', userEmail);
                 }
                 
-                // מחירים ומנויים - רק למשתמשים רגילים (לא אדמין ולא סופר אדמין)
-                if (userRole === 'user' || !userRole) {
+                // מחירים ומנויים - רק למשתמשים רגילים (לא סופר אדמין)
+                if (!isSuperAdmin && (userRole === 'user' || !userRole)) {
                     console.log('✅ משתמש רגיל - מציג מחירים ומנויים');
                     if (pricingLink) {
                         pricingLink.style.display = 'flex';
                     }
-                } else {
-                    console.log('❌ אדמין/סופר אדמין - מסתיר מחירים');
+                } else if (isSuperAdmin) {
+                    console.log('❌ סופר אדמין - מסתיר מחירים');
                 }
                 
             } catch (error) {
