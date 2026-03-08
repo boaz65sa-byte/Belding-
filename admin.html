@@ -213,29 +213,40 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 1200px;
         }
 
         thead {
-            background: #f7fafc;
+            background: linear-gradient(135deg, #1e293b, #334155);
         }
 
         th {
-            padding: 15px;
+            padding: 12px 10px;
             text-align: right;
             font-weight: 600;
-            font-size: 13px;
-            color: #4a5568;
+            font-size: 11px;
+            color: white;
             text-transform: uppercase;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 2px solid #475569;
+            white-space: nowrap;
         }
 
         td {
-            padding: 15px;
+            padding: 12px 10px;
             border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
         }
 
         tbody tr:hover {
-            background: #f7fafc;
+            background: #f1f5f9;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        tbody tr:nth-child(even):hover {
+            background: #f1f5f9;
         }
 
         .status-badge {
@@ -538,12 +549,12 @@
             <div class="stat-card" style="border-right-color: #10b981;">
                 <h3>מנויים חודשיים</h3>
                 <div class="stat-value" id="monthlyUsers">-</div>
-                <div class="stat-change">📅 ₪49/חודש</div>
+                <div class="stat-change">📅 ₪29.90/חודש</div>
             </div>
             <div class="stat-card" style="border-right-color: #f59e0b;">
                 <h3>מנויים שנתיים</h3>
                 <div class="stat-value" id="yearlyUsers">-</div>
-                <div class="stat-change">🎯 ₪490/שנה</div>
+                <div class="stat-change">🎯 ₪300/שנה</div>
             </div>
         </div>
 
@@ -552,7 +563,7 @@
             <div class="stat-card" style="border-right-color: #ec4899;">
                 <h3>מנויים לכל החיים</h3>
                 <div class="stat-value" id="lifetimeUsers">-</div>
-                <div class="stat-change">💎 ₪499 חד פעמי</div>
+                <div class="stat-change">💎 ₪500 חד פעמי</div>
             </div>
             <div class="stat-card" style="border-right-color: #06b6d4;">
                 <h3>התחברויות היום</h3>
@@ -615,10 +626,54 @@
             </div>
         </div>
 
+        <!-- Buildings & Committees Summary -->
+        <div class="section-card" style="margin-bottom: 30px;">
+            <div class="section-header">
+                <h2><i class="fas fa-building"></i> בניינים וועדים</h2>
+                <button class="btn btn-sm" style="background: #06b6d4; color: white;" onclick="loadBuildingsSummary()">
+                    <i class="fas fa-sync-alt"></i> רענן
+                </button>
+            </div>
+            <div id="buildingsSummary" style="padding: 20px;">
+                <div style="text-align: center; color: #64748b;">טוען נתוני בניינים...</div>
+            </div>
+        </div>
+
+        <!-- Subscriptions Summary -->
+        <div class="section-card" style="margin-bottom: 30px;">
+            <div class="section-header">
+                <h2><i class="fas fa-credit-card"></i> סיכום מנויים</h2>
+            </div>
+            <div id="subscriptionsSummary" style="padding: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold;" id="monthlyCount">0</div>
+                        <div>מנויים חודשיים</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">₪29.90/חודש</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold;" id="yearlyCount">0</div>
+                        <div>מנויים שנתיים</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">₪300/שנה</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ec4899, #db2777); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold;" id="lifetimeCount">0</div>
+                        <div>מנויים לכל החיים</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">₪500 חד פעמי</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold;" id="trialCount">0</div>
+                        <div>בתקופת ניסיון</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">14 ימים חינם</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Users Table -->
         <div class="section-card">
             <div class="section-header">
-                <h2><i class="fas fa-users"></i> משתמשים</h2>
+                <h2><i class="fas fa-users"></i> כל המשתמשים</h2>
                 <button class="btn btn-primary btn-sm" onclick="refreshData()">
                     <i class="fas fa-sync-alt"></i>
                     רענן
@@ -771,6 +826,9 @@
                 if (superAdmin && allUsers.length > 0) {
                     loadBuildingsFilter(allUsers);
                 }
+                
+                // טען סיכום בניינים
+                loadBuildingsSummary();
             } catch (error) {
                 console.error('שגיאה בטעינת נתונים:', error);
                 document.getElementById('tableContainer').innerHTML = `
@@ -818,64 +876,102 @@
                             <th>שם מלא</th>
                             <th>אימייל</th>
                             <th>טלפון</th>
-                            <th>בניין</th>
+                            <th>בניין/ועד</th>
                             <th>תפקיד</th>
-                            <th>סטטוס</th>
-                            <th>מנוי</th>
-                            <th>פעולות</th>
+                            <th>סטטוס מנוי</th>
+                            <th>סוג מנוי</th>
+                            <th>תאריך הרשמה</th>
+                            <th>התחברות אחרונה</th>
+                            <th>פעולות מהירות</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${users.map(user => `
-                            <tr>
-                                <td><strong>${user.full_name || 'לא צוין'}</strong></td>
-                                <td>${user.email}</td>
-                                <td>${user.phone || '-'}</td>
-                                <td>${user.building_name || '<span style="color:#a0aec0;">לא הוקצה</span>'}</td>
+                            <tr data-user-id="${user.id}">
                                 <td>
-                                    <span class="role-badge role-${user.role}">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                                            ${(user.full_name || 'U').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <strong>${user.full_name || 'לא צוין'}</strong>
+                                            <div style="font-size: 11px; color: #64748b;">ID: ${user.id.substring(0,8)}...</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="mailto:${user.email}" style="color: #667eea; text-decoration: none;">${user.email}</a>
+                                </td>
+                                <td>
+                                    ${user.phone 
+                                        ? `<a href="tel:${user.phone}" style="color: #10b981; text-decoration: none;">${user.phone}</a>` 
+                                        : '<span style="color:#94a3b8;">-</span>'}
+                                </td>
+                                <td>
+                                    ${user.building_name 
+                                        ? `<span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500;">🏢 ${user.building_name}</span>` 
+                                        : '<span style="color:#94a3b8; font-size: 12px;">לא הוקצה</span>'}
+                                </td>
+                                <td>
+                                    <span class="role-badge role-${user.role}" style="font-size: 11px;">
                                         ${getRoleText(user.role)}
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="status-badge status-${user.status}">
-                                        ${getStatusText(user.status)}
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="status-badge status-${user.status}">
+                                            ${getStatusText(user.status)}
+                                        </span>
+                                        ${user.status === 'active' 
+                                            ? '<span style="width:8px;height:8px;background:#10b981;border-radius:50%;animation:pulse 2s infinite;"></span>' 
+                                            : ''}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span style="background: ${getSubscriptionColor(user.subscription_type)}; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500;">
+                                        ${getSubscriptionText(user.subscription_type)}
                                     </span>
                                 </td>
-                                <td>${getSubscriptionText(user.subscription_type)}</td>
+                                <td style="font-size: 12px; color: #64748b;">
+                                    ${user.created_at ? new Date(user.created_at).toLocaleDateString('he-IL') : '-'}
+                                </td>
+                                <td style="font-size: 12px; color: #64748b;">
+                                    ${user.last_login ? formatTimeAgo(user.last_login) : 'מעולם לא'}
+                                </td>
                                 <td>
-                                    <div class="action-buttons">
-                                        <!-- כפתור וואטסאפ -->
-                                        <button class="btn btn-sm" style="background: #25D366; color: white;" onclick="sendWhatsAppReminder('${user.id}')" title="שלח תזכורת בוואטסאפ">
-                                            <i class="fab fa-whatsapp"></i>
-                                        </button>
+                                    <div class="action-buttons" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                        <!-- הפעל/כבה מנוי -->
+                                        ${user.status === 'active' || user.status === 'trial'
+                                            ? `<button class="btn btn-sm" style="background: #ef4444; color: white;" onclick="toggleSubscription('${user.id}', 'off')" title="כבה מנוי">
+                                                <i class="fas fa-power-off"></i>
+                                              </button>`
+                                            : `<button class="btn btn-sm" style="background: #10b981; color: white;" onclick="toggleSubscription('${user.id}', 'on')" title="הפעל מנוי">
+                                                <i class="fas fa-play"></i>
+                                              </button>`
+                                        }
                                         <!-- חסום/שחרר -->
                                         ${user.status === 'blocked' 
-                                            ? `<button class="btn btn-success btn-sm" onclick="unblockUserAction('${user.id}')" title="שחרר משתמש">
+                                            ? `<button class="btn btn-success btn-sm" onclick="unblockUserAction('${user.id}')" title="שחרר">
                                                 <i class="fas fa-unlock"></i>
                                               </button>`
-                                            : `<button class="btn btn-warning btn-sm" onclick="blockUserAction('${user.id}')" title="חסום משתמש">
+                                            : `<button class="btn btn-warning btn-sm" onclick="blockUserAction('${user.id}')" title="חסום">
                                                 <i class="fas fa-ban"></i>
                                               </button>`
                                         }
                                         <!-- עדכון מנוי -->
-                                        <button class="btn btn-primary btn-sm" onclick="openSubscriptionModal('${user.id}')" title="עדכן מנוי">
-                                            <i class="fas fa-credit-card"></i>
-                                        </button>
-                                        <!-- חידוש מנוי -->
-                                        <button class="btn btn-sm" style="background: #10b981; color: white;" onclick="renewUserSubscription('${user.id}')" title="חדש מנוי +1 חודש">
-                                            <i class="fas fa-redo"></i>
-                                        </button>
-                                        <!-- ביטול מנוי -->
-                                        <button class="btn btn-sm" style="background: #f59e0b; color: white;" onclick="cancelUserSubscription('${user.id}')" title="בטל מנוי">
-                                            <i class="fas fa-times-circle"></i>
+                                        <button class="btn btn-primary btn-sm" onclick="openSubscriptionModal('${user.id}')" title="שנה סוג מנוי">
+                                            <i class="fas fa-edit"></i>
                                         </button>
                                         <!-- הקצאת בניין -->
                                         <button class="btn btn-sm" style="background: #06b6d4; color: white;" onclick="openBuildingModal('${user.id}', '${user.building_name || ''}', '${user.building_id || ''}')" title="הקצה לבניין">
                                             <i class="fas fa-building"></i>
                                         </button>
+                                        <!-- וואטסאפ -->
+                                        <button class="btn btn-sm" style="background: #25D366; color: white;" onclick="sendWhatsAppReminder('${user.id}')" title="וואטסאפ">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </button>
                                         <!-- מחיקה -->
-                                        <button class="btn btn-danger btn-sm" onclick="deleteUserAction('${user.id}')" title="מחק משתמש">
+                                        <button class="btn btn-danger btn-sm" onclick="deleteUserAction('${user.id}')" title="מחק לצמיתות">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -884,9 +980,72 @@
                         `).join('')}
                     </tbody>
                 </table>
+                <style>
+                    @keyframes pulse {
+                        0%, 100% { opacity: 1; }
+                        50% { opacity: 0.5; }
+                    }
+                </style>
             `;
             
             container.innerHTML = html;
+        }
+
+        // פונקציות עזר
+        function getSubscriptionColor(type) {
+            switch(type) {
+                case 'monthly': return '#10b981';
+                case 'yearly': return '#f59e0b';
+                case 'lifetime': return '#ec4899';
+                case 'trial': return '#8b5cf6';
+                default: return '#64748b';
+            }
+        }
+
+        function formatTimeAgo(dateString) {
+            if (!dateString) return 'מעולם לא';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'עכשיו';
+            if (diffMins < 60) return `לפני ${diffMins} דקות`;
+            if (diffHours < 24) return `לפני ${diffHours} שעות`;
+            if (diffDays < 7) return `לפני ${diffDays} ימים`;
+            return date.toLocaleDateString('he-IL');
+        }
+
+        // הפעלה/כיבוי מנוי
+        async function toggleSubscription(userId, action) {
+            const supabase = getSupabase();
+            if (!supabase) return;
+            
+            const confirmMsg = action === 'off' 
+                ? 'האם לכבות את המנוי של משתמש זה? הוא יאבד גישה למערכת.'
+                : 'האם להפעיל את המנוי של משתמש זה?';
+            
+            if (!confirm(confirmMsg)) return;
+            
+            try {
+                const newStatus = action === 'off' ? 'expired' : 'active';
+                const { error } = await supabase
+                    .from('user_profiles')
+                    .update({ 
+                        status: newStatus,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', userId);
+                
+                if (error) throw error;
+                
+                alert(action === 'off' ? 'המנוי כובה בהצלחה' : 'המנוי הופעל בהצלחה');
+                loadData();
+            } catch (error) {
+                alert('שגיאה: ' + error.message);
+            }
         }
 
         // פעולות
@@ -946,6 +1105,124 @@
                 loadData();
             } else {
                 alert('שגיאה: ' + result.error);
+            }
+        }
+
+        // טעינת סיכום בניינים
+        async function loadBuildingsSummary() {
+            const supabase = getSupabase();
+            if (!supabase) return;
+            
+            const container = document.getElementById('buildingsSummary');
+            
+            try {
+                const { data: users, error } = await supabase
+                    .from('user_profiles')
+                    .select('building_name, building_id, role, status, subscription_type');
+                
+                if (error) throw error;
+                
+                // קיבוץ לפי בניינים
+                const buildings = {};
+                users.forEach(user => {
+                    const buildingName = user.building_name || 'לא מוקצה';
+                    if (!buildings[buildingName]) {
+                        buildings[buildingName] = {
+                            name: buildingName,
+                            id: user.building_id || '',
+                            total: 0,
+                            active: 0,
+                            trial: 0,
+                            expired: 0,
+                            admins: 0,
+                            monthly: 0,
+                            yearly: 0,
+                            lifetime: 0
+                        };
+                    }
+                    buildings[buildingName].total++;
+                    if (user.status === 'active') buildings[buildingName].active++;
+                    if (user.status === 'trial') buildings[buildingName].trial++;
+                    if (user.status === 'expired') buildings[buildingName].expired++;
+                    if (user.role === 'admin') buildings[buildingName].admins++;
+                    if (user.subscription_type === 'monthly') buildings[buildingName].monthly++;
+                    if (user.subscription_type === 'yearly') buildings[buildingName].yearly++;
+                    if (user.subscription_type === 'lifetime') buildings[buildingName].lifetime++;
+                });
+                
+                const buildingsList = Object.values(buildings).filter(b => b.name !== 'לא מוקצה');
+                const unassigned = buildings['לא מוקצה'] || { total: 0 };
+                
+                // עדכון סיכום מנויים
+                const totalMonthly = users.filter(u => u.subscription_type === 'monthly').length;
+                const totalYearly = users.filter(u => u.subscription_type === 'yearly').length;
+                const totalLifetime = users.filter(u => u.subscription_type === 'lifetime').length;
+                const totalTrial = users.filter(u => u.status === 'trial').length;
+                
+                document.getElementById('monthlyCount').textContent = totalMonthly;
+                document.getElementById('yearlyCount').textContent = totalYearly;
+                document.getElementById('lifetimeCount').textContent = totalLifetime;
+                document.getElementById('trialCount').textContent = totalTrial;
+                
+                if (buildingsList.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; color: #64748b; padding: 40px;">
+                            <i class="fas fa-building" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                            <p>אין בניינים רשומים עדיין</p>
+                            <p style="font-size: 0.9rem;">הקצה משתמשים לבניינים דרך טבלת המשתמשים</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                        ${buildingsList.map(building => `
+                            <div style="background: linear-gradient(135deg, #1e293b, #334155); border-radius: 12px; padding: 20px; border-right: 4px solid #06b6d4;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                    <div>
+                                        <h3 style="margin: 0; color: white; font-size: 1.1rem;">🏢 ${building.name}</h3>
+                                        <span style="font-size: 0.8rem; color: #94a3b8;">ID: ${building.id || 'לא מוגדר'}</span>
+                                    </div>
+                                    ${building.admins > 0 
+                                        ? `<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem;">👑 ${building.admins} אדמין</span>`
+                                        : `<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem;">⚠️ ללא אדמין</span>`
+                                    }
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem;">
+                                    <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="color: white; font-weight: bold; font-size: 1.2rem;">${building.total}</div>
+                                        <div style="color: #94a3b8;">סה"כ משתמשים</div>
+                                    </div>
+                                    <div style="background: rgba(16,185,129,0.2); padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="color: #10b981; font-weight: bold; font-size: 1.2rem;">${building.active}</div>
+                                        <div style="color: #94a3b8;">פעילים</div>
+                                    </div>
+                                    <div style="background: rgba(139,92,246,0.2); padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="color: #8b5cf6; font-weight: bold; font-size: 1.2rem;">${building.trial}</div>
+                                        <div style="color: #94a3b8;">ניסיון</div>
+                                    </div>
+                                    <div style="background: rgba(239,68,68,0.2); padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="color: #ef4444; font-weight: bold; font-size: 1.2rem;">${building.expired}</div>
+                                        <div style="color: #94a3b8;">פגו</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <span style="background: #10b981; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">📅 ${building.monthly} חודשי</span>
+                                    <span style="background: #f59e0b; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">🎯 ${building.yearly} שנתי</span>
+                                    <span style="background: #ec4899; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">💎 ${building.lifetime} לכל החיים</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${unassigned.total > 0 ? `
+                        <div style="margin-top: 20px; background: rgba(239,68,68,0.1); border: 1px dashed #ef4444; border-radius: 12px; padding: 15px; text-align: center;">
+                            <span style="color: #ef4444;">⚠️ ${unassigned.total} משתמשים לא מוקצים לבניין</span>
+                        </div>
+                    ` : ''}
+                `;
+            } catch (error) {
+                container.innerHTML = `<div style="color: #ef4444; text-align: center;">שגיאה בטעינת נתונים: ${error.message}</div>`;
             }
         }
 
