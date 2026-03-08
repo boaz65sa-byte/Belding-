@@ -127,18 +127,6 @@
                     <span>הגדרות</span>
                 </a>
                 
-                <!-- כפתור פאנל אדמין - מוצג רק לסופר אדמין -->
-                <a href="admin.html" class="menu-item super-admin-only" id="adminPanelLink" style="display: none; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin-top: 20px; border-radius: 10px; border: 2px solid #fca5a5;">
-                    <i class="fas fa-crown"></i>
-                    <span>🔥 פאנל אדמין</span>
-                </a>
-                
-                <!-- כפתור תמחור - מוצג רק למשתמשים רגילים -->
-                <a href="pricing.html" class="menu-item user-only" id="pricingLink" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 10px; border-radius: 10px;">
-                    <i class="fas fa-tags"></i>
-                    <span>מחירים ומנויים</span>
-                </a>
-                
                 <!-- כפתור התנתקות -->
                 <a href="#" class="menu-item" onclick="logout(); return false;" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin-top: 10px; border-radius: 10px;">
                     <i class="fas fa-sign-out-alt"></i>
@@ -1919,15 +1907,11 @@
                     }
                 }
                 
-                // === הצג כפתורים בתפריט ===
+                // === הצג כפתורים בראש הדף ===
                 const userRole = accessCheck.profile?.role;
                 const userEmail = accessCheck.profile?.email;
                 
-                // כפתורים בסיידבר
-                const adminLink = document.getElementById('adminPanelLink');
-                const pricingLink = document.getElementById('pricingLink');
-                
-                // כפתורים חדשים בראש הדף (גלויים תמיד)
+                // כפתורים בראש הדף
                 const adminBtnTop = document.getElementById('adminPanelBtnTop');
                 const pricingBtnTop = document.getElementById('pricingBtnTop');
                 
@@ -1938,16 +1922,16 @@
                 console.log('🔑 סופר אדמין:', isSuperAdmin);
                 
                 // הצג כפתור פאנל אדמין לסופר אדמין
-                if (isSuperAdmin) {
-                    if (adminLink) adminLink.style.display = 'flex';
-                    if (adminBtnTop) adminBtnTop.style.display = 'inline-flex';
+                if (isSuperAdmin && adminBtnTop) {
+                    adminBtnTop.style.display = 'inline-flex';
                     console.log('✅ כפתור פאנל אדמין מוצג');
                 }
                 
                 // הצג כפתור מחירים לכולם
-                if (pricingLink) pricingLink.style.display = 'flex';
-                if (pricingBtnTop) pricingBtnTop.style.display = 'inline-flex';
-                console.log('✅ כפתור מחירים מוצג');
+                if (pricingBtnTop) {
+                    pricingBtnTop.style.display = 'inline-flex';
+                    console.log('✅ כפתור מחירים מוצג');
+                }
                 
             } catch (error) {
                 console.error('❌ שגיאה בבדיקת אימות:', error);
