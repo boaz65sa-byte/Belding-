@@ -490,6 +490,9 @@
 
         // Check if already logged in
         window.addEventListener('DOMContentLoaded', async () => {
+            // אתחול Supabase קודם
+            await initSupabase();
+            
             const session = await getCurrentSession();
             if (session) {
                 window.location.href = 'index.html';
@@ -498,6 +501,8 @@
 
         // Handle Google Login
         async function handleGoogleLogin() {
+            // וודא ש-Supabase מאותחל
+            await initSupabase();
             const btn = document.getElementById('googleLoginBtn');
             btn.disabled = true;
             btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border:3px solid #e2e8f0;border-top-color:#4285F4;border-radius:50%;animation:spin 0.8s linear infinite;"></div> מתחבר...';
