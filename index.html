@@ -1867,12 +1867,19 @@
                 }
                 
                 // הצג כפתור אדמין אם המשתמש הוא אדמין או סופר-אדמין
+                console.log('🔍 בדיקת תפקיד:', accessCheck.profile?.role);
+                console.log('🔍 פרופיל מלא:', accessCheck.profile);
+                
                 if (accessCheck.profile && 
                     (accessCheck.profile.role === 'admin' || accessCheck.profile.role === 'super_admin')) {
+                    console.log('✅ משתמש אדמין - מציג כפתור');
                     const adminLink = document.getElementById('adminPanelLink');
                     if (adminLink) {
                         adminLink.style.display = 'flex';
+                        console.log('✅ כפתור אדמין הוצג');
                     }
+                } else {
+                    console.log('❌ משתמש רגיל או אין פרופיל - תפקיד:', accessCheck.profile?.role);
                 }
                 
             } catch (error) {
