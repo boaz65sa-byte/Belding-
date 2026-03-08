@@ -60,6 +60,10 @@ async function checkUserAccess() {
         // אם אין פרופיל בטבלה, צור אחד
         if (error || !profile) {
             console.log('📝 יוצר פרופיל חדש למשתמש...');
+            
+            // בדוק אם זה הסופר אדמין
+            const isSuperAdmin = session.user.email === 'boaz65sa@gmail.com';
+            
             const { data: newProfile, error: insertError } = await supabase
                 .from('user_profiles')
                 .upsert({
@@ -67,8 +71,10 @@ async function checkUserAccess() {
                     email: session.user.email,
                     full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
                     phone: session.user.user_metadata?.phone || '',
-                    role: 'user',
-                    status: 'trial',
+                    role: isSuperAdmin ? 'super_admin' : 'user',
+                    status: isSuperAdmin ? 'active' : 'trial',
+                    has_lifetime_access: isSuperAdmin ? true : false,
+                    subscription_type: isSuperAdmin ? 'lifetime' : null,
                     created_at: new Date().toISOString()
                 })
                 .select()
@@ -91,6 +97,32 @@ async function checkUserAccess() {
                 daysLeft: 14,
                 profile: newProfile
             };
+        }
+
+        // תיקון: אם זה boaz65sa@gmail.com ואין לו role של super_admin, עדכן
+        if (session.user.email === 'boaz65sa@gmail.com' && profile.role !== 'super_admin') {
+            console.log('🔧 מעדכן הרשאות סופר אדמין...');
+            const { data: updatedProfile, error: updateError } = await supabase
+                .from('user_profiles')
+                .update({
+                    role: 'super_admin',
+                    status: 'active',
+                    has_lifetime_access: true,
+                    subscription_type: 'lifetime'
+                })
+                .eq('id', session.user.id)
+                .select()
+                .single();
+            
+            if (!updateError && updatedProfile) {
+                console.log('✅ הרשאות סופר אדמין עודכנו');
+                return {
+                    hasAccess: true,
+                    status: 'active',
+                    daysLeft: null,
+                    profile: updatedProfile
+                };
+            }
         }
 
         // בדוק סטטוס מנוי
