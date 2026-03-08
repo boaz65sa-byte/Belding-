@@ -1240,76 +1240,137 @@ function generateReport() {
     addActivity(`נוצר דוח לתקופה ${formatDate(startDate)} - ${formatDate(endDate)}`, 'report');
 }
 
-function exportToPDF() {
+async function exportToPDF() {
     try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
+        showLoading();
         
-        // Add Hebrew font support
-        doc.setFont('Helvetica');
-        doc.setFontSize(16);
-        doc.text('דוח דיירים', 105, 20, { align: 'center' });
+        // יצירת אלמנט HTML זמני עם הדוח
+        const reportContainer = document.createElement('div');
+        reportContainer.style.cssText = `
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 800px;
+            padding: 40px;
+            background: white;
+            font-family: 'Heebo', Arial, sans-serif;
+            direction: rtl;
+        `;
         
-        // Add date
-        doc.setFontSize(10);
-        doc.text(`תאריך: ${new Date().toLocaleDateString('he-IL')}`, 105, 30, { align: 'center' });
+        const buildingName = appState.settings.buildingName || 'בניין';
+        const currentDate = new Date().toLocaleDateString('he-IL');
         
-        // Prepare table data
-        const headers = [['דירה', 'שם', 'טלפון', 'סכום חודשי', 'סטטוס']];
-        const data = appState.tenants.map(t => [
-            t.apartment,
-            t.name,
-            t.phone,
-            `₪${t.monthlyAmount}`,
-            getStatusText(t.status)
-        ]);
+        // חישוב סטטיסטיקות
+        const totalTenants = appState.tenants.length;
+        const totalExpected = appState.tenants.reduce((sum, t) => sum + t.monthlyAmount, 0);
+        const paidTenants = appState.tenants.filter(t => t.status === 'paid').length;
+        const debtTenants = appState.tenants.filter(t => t.status === 'overdue' || t.status === 'debt').length;
         
-        // Add table (simple version without autoTable)
-        let y = 45;
-        doc.setFontSize(9);
+        reportContainer.innerHTML = `
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
+                <h1 style="color: #667eea; margin: 0 0 10px 0; font-size: 28px;">📊 דוח דיירים</h1>
+                <h2 style="color: #333; margin: 0 0 10px 0; font-size: 20px;">${buildingName}</h2>
+                <p style="color: #666; margin: 0; font-size: 14px;">תאריך הפקה: ${currentDate}</p>
+            </div>
+            
+            <div style="display: flex; justify-content: space-around; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">${totalTenants}</div>
+                    <div style="font-size: 14px;">סה"כ דיירים</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">${paidTenants}</div>
+                    <div style="font-size: 14px;">שילמו</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">${debtTenants}</div>
+                    <div style="font-size: 14px;">בחוב</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">₪${totalExpected.toLocaleString()}</div>
+                    <div style="font-size: 14px;">צפי חודשי</div>
+                </div>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #1e293b, #334155); color: white;">
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">דירה</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">שם</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">טלפון</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">סכום חודשי</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">סטטוס</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${appState.tenants.map((t, i) => `
+                        <tr style="background: ${i % 2 === 0 ? '#f8fafc' : 'white'};">
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${t.apartment}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${t.name}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; direction: ltr; text-align: right;">${t.phone}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">₪${t.monthlyAmount}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                                <span style="background: ${t.status === 'paid' ? '#d1fae5' : t.status === 'pending' ? '#fef3c7' : '#fee2e2'}; 
+                                             color: ${t.status === 'paid' ? '#065f46' : t.status === 'pending' ? '#92400e' : '#991b1b'}; 
+                                             padding: 4px 12px; border-radius: 20px; font-size: 12px;">
+                                    ${getStatusText(t.status)}
+                                </span>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <div style="text-align: center; color: #666; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <p>מערכת ניהול דיירים | בועז סעדה © ${new Date().getFullYear()}</p>
+            </div>
+        `;
         
-        // Headers
-        doc.setFont('Helvetica', 'bold');
-        const colWidths = [20, 50, 40, 30, 30];
-        let x = 20;
-        headers[0].forEach((header, i) => {
-            doc.text(header, x, y, { align: 'right' });
-            x += colWidths[i];
+        document.body.appendChild(reportContainer);
+        
+        // המרה לתמונה באמצעות html2canvas
+        const canvas = await html2canvas(reportContainer, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
         });
         
-        // Data rows
-        doc.setFont('Helvetica', 'normal');
-        y += 7;
-        data.forEach((row, rowIndex) => {
-            if (y > 270) {
-                doc.addPage();
-                y = 20;
-            }
-            x = 20;
-            row.forEach((cell, i) => {
-                doc.text(String(cell), x, y, { align: 'right' });
-                x += colWidths[i];
-            });
-            y += 7;
-        });
+        document.body.removeChild(reportContainer);
         
-        // Add footer
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.text(`עמוד ${i} מתוך ${pageCount}`, 105, 285, { align: 'center' });
-            doc.text('מערכת ניהול דיירים - בועז סעדה', 105, 290, { align: 'center' });
+        // יצירת PDF
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+        
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // אם הדוח ארוך מדי, חלק לעמודים
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 297;
+        
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= 297;
         }
         
-        // Save PDF
-        doc.save(`דוח_דיירים_${new Date().toISOString().split('T')[0]}.pdf`);
+        // שמירה
+        const fileName = `דוח_דיירים_${buildingName}_${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(fileName);
+        
+        hideLoading();
         showToast('PDF יוצא בהצלחה!', 'success');
         addActivity('יוצא קובץ PDF', 'export');
         
     } catch (error) {
+        hideLoading();
         console.error('שגיאה ביצירת PDF:', error);
-        showToast('שגיאה ביצירת PDF - וודא שהדפדפן תומך', 'error');
+        showToast('שגיאה ביצירת PDF - נסה שוב', 'error');
     }
 }
 
