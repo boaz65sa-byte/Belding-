@@ -146,6 +146,22 @@
                     <p class="section-subtitle">סקירה כללית של מצב הבניין</p>
                 </div>
 
+                <!-- Subscription Banner -->
+                <div id="subscriptionBanner" class="subscription-banner" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 2rem;">🎁</div>
+                            <div>
+                                <h3 id="subscriptionTitle" style="color: white; margin: 0; font-size: 1.1rem;">תקופת ניסיון</h3>
+                                <p id="subscriptionText" style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 0.9rem;">נותרו לך 14 ימים חינם</p>
+                            </div>
+                        </div>
+                        <a href="pricing.html" style="background: white; color: #d97706; padding: 10px 25px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.95rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            💳 שדרג עכשיו
+                        </a>
+                    </div>
+                </div>
+
                 <!-- System Info Banner -->
                 <div class="system-info-banner">
                     <div class="system-info-content">
@@ -1864,6 +1880,39 @@
                 // שמור מידע על המשתמש ב-appState
                 if (typeof window.appState !== 'undefined' && accessCheck.profile) {
                     window.appState.currentUser = accessCheck.profile;
+                }
+                
+                // הצג באנר מנוי
+                const banner = document.getElementById('subscriptionBanner');
+                const title = document.getElementById('subscriptionTitle');
+                const text = document.getElementById('subscriptionText');
+                
+                if (banner && accessCheck.profile) {
+                    const profile = accessCheck.profile;
+                    
+                    if (profile.status === 'trial') {
+                        banner.style.display = 'block';
+                        banner.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                        title.textContent = '🎁 תקופת ניסיון חינם';
+                        text.textContent = accessCheck.daysLeft 
+                            ? `נותרו לך ${accessCheck.daysLeft} ימים - שדרג עכשיו ותיהנה מכל התכונות!`
+                            : 'תקופת הניסיון שלך פעילה';
+                    } else if (profile.status === 'active' && !profile.has_lifetime_access) {
+                        // מנוי פעיל - הצג רק אם עומד לפוג
+                        if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
+                            banner.style.display = 'block';
+                            banner.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                            title.textContent = '⚠️ המנוי עומד לפוג';
+                            text.textContent = `נותרו ${accessCheck.daysLeft} ימים - חדש עכשיו!`;
+                        }
+                    } else if (profile.has_lifetime_access) {
+                        // מנוי לכל החיים - הצג באנר ירוק
+                        banner.style.display = 'block';
+                        banner.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                        title.textContent = '💎 מנוי לכל החיים';
+                        text.textContent = 'תודה שבחרת בנו! יש לך גישה מלאה לתמיד';
+                        banner.querySelector('a').style.display = 'none';
+                    }
                 }
                 
                 // הצג כפתור אדמין אם המשתמש הוא אדמין או סופר-אדמין

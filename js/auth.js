@@ -36,26 +36,102 @@ function getSupabase() {
 }
 
 /**
- * 🛑 פונקציית הבדיקה שחסרה וגרמה ללולאה
- * בודקת אם למשתמש יש גישה ומונעת את הריצוד
+ * 🛑 פונקציית בדיקת גישה מורחבת
+ * בודקת אם למשתמש יש גישה ומחזירה פרטי פרופיל מלאים
  */
 async function checkUserAccess() {
     const supabase = await getSupabase();
     if (!supabase) return { hasAccess: false, reason: 'error' };
 
-    const { data: { session } } = await supabase.auth.getSession();
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-    if (!session) {
-        return { hasAccess: false, reason: 'not_logged_in' };
+        if (!session) {
+            return { hasAccess: false, reason: 'not_logged_in' };
+        }
+
+        // קבל פרופיל מלא מהטבלה
+        const { data: profile, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+        // אם אין פרופיל בטבלה, צור אחד
+        if (error || !profile) {
+            console.log('📝 יוצר פרופיל חדש למשתמש...');
+            const { data: newProfile, error: insertError } = await supabase
+                .from('user_profiles')
+                .upsert({
+                    id: session.user.id,
+                    email: session.user.email,
+                    full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+                    phone: session.user.user_metadata?.phone || '',
+                    role: 'user',
+                    status: 'trial',
+                    created_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (insertError) {
+                console.error('שגיאה ביצירת פרופיל:', insertError);
+                // אם נכשל, החזר גישה בסיסית
+                return {
+                    hasAccess: true,
+                    status: 'trial',
+                    daysLeft: 14,
+                    profile: { ...session.user, role: 'user', status: 'trial' }
+                };
+            }
+
+            return {
+                hasAccess: true,
+                status: newProfile.status || 'trial',
+                daysLeft: 14,
+                profile: newProfile
+            };
+        }
+
+        // בדוק סטטוס מנוי
+        let daysLeft = null;
+        if (profile.status === 'trial') {
+            const createdAt = new Date(profile.created_at);
+            const trialEnd = new Date(createdAt.getTime() + 14 * 24 * 60 * 60 * 1000);
+            daysLeft = Math.ceil((trialEnd - new Date()) / (24 * 60 * 60 * 1000));
+            
+            if (daysLeft <= 0) {
+                return { hasAccess: false, reason: 'trial_expired', profile };
+            }
+        } else if (profile.status === 'expired') {
+            return { hasAccess: false, reason: 'subscription_expired', profile };
+        } else if (profile.status === 'blocked') {
+            return { hasAccess: false, reason: 'blocked', profile };
+        } else if (profile.subscription_expires) {
+            const expiresAt = new Date(profile.subscription_expires);
+            daysLeft = Math.ceil((expiresAt - new Date()) / (24 * 60 * 60 * 1000));
+            
+            if (daysLeft <= 0 && !profile.has_lifetime_access) {
+                return { hasAccess: false, reason: 'subscription_expired', profile };
+            }
+        }
+
+        // עדכן last_login
+        await supabase
+            .from('user_profiles')
+            .update({ last_login: new Date().toISOString() })
+            .eq('id', session.user.id);
+
+        return {
+            hasAccess: true,
+            status: profile.status || 'active',
+            daysLeft: daysLeft,
+            profile: profile
+        };
+    } catch (error) {
+        console.error('שגיאה בבדיקת גישה:', error);
+        return { hasAccess: false, reason: 'error', error: error.message };
     }
-
-    // כאן אפשר להוסיף בדיקות מנוי בעתיד. כרגע נאשר גישה לכולם.
-    return {
-        hasAccess: true,
-        status: 'active', // סטטוס מנוי פעיל
-        daysLeft: 14,     // ימי ניסיון (דוגמה)
-        profile: session.user
-    };
 }
 
 // 1. הרשמה
