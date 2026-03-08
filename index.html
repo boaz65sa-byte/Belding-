@@ -158,6 +158,21 @@
                     <p class="section-subtitle">סקירה כללית של מצב הבניין</p>
                 </div>
 
+                <!-- Quick Access Buttons - Admin & Pricing -->
+                <div id="quickAccessButtons" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <!-- כפתור פאנל אדמין - מוצג רק לסופר אדמין -->
+                    <a href="admin.html" id="adminPanelBtnTop" style="display: none; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: transform 0.2s, box-shadow 0.2s; border: 2px solid #fca5a5;">
+                        <i class="fas fa-crown" style="margin-left: 8px;"></i>
+                        🔥 פאנל אדמין
+                    </a>
+                    
+                    <!-- כפתור מחירים ומנויים -->
+                    <a href="pricing.html" id="pricingBtnTop" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+                        <i class="fas fa-tags" style="margin-left: 8px;"></i>
+                        💎 מחירים ומנויים
+                    </a>
+                </div>
+
                 <!-- Subscription Banner -->
                 <div id="subscriptionBanner" class="subscription-banner" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
                     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
@@ -1904,8 +1919,14 @@
                 // === הצג כפתורים בתפריט ===
                 const userRole = accessCheck.profile?.role;
                 const userEmail = accessCheck.profile?.email;
+                
+                // כפתורים בסיידבר
                 const adminLink = document.getElementById('adminPanelLink');
                 const pricingLink = document.getElementById('pricingLink');
+                
+                // כפתורים חדשים בראש הדף (גלויים תמיד)
+                const adminBtnTop = document.getElementById('adminPanelBtnTop');
+                const pricingBtnTop = document.getElementById('pricingBtnTop');
                 
                 console.log('👤 תפקיד:', userRole, '| אימייל:', userEmail);
                 
@@ -1914,16 +1935,16 @@
                 console.log('🔑 סופר אדמין:', isSuperAdmin);
                 
                 // הצג כפתור פאנל אדמין לסופר אדמין
-                if (isSuperAdmin && adminLink) {
-                    adminLink.style.display = 'flex';
+                if (isSuperAdmin) {
+                    if (adminLink) adminLink.style.display = 'flex';
+                    if (adminBtnTop) adminBtnTop.style.display = 'inline-flex';
                     console.log('✅ כפתור פאנל אדמין מוצג');
                 }
                 
-                // הצג כפתור מחירים לכולם (גם לסופר אדמין לצורך בדיקה)
-                if (pricingLink) {
-                    pricingLink.style.display = 'flex';
-                    console.log('✅ כפתור מחירים מוצג');
-                }
+                // הצג כפתור מחירים לכולם
+                if (pricingLink) pricingLink.style.display = 'flex';
+                if (pricingBtnTop) pricingBtnTop.style.display = 'inline-flex';
+                console.log('✅ כפתור מחירים מוצג');
                 
             } catch (error) {
                 console.error('❌ שגיאה בבדיקת אימות:', error);
