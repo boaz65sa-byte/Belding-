@@ -1,7 +1,7 @@
 /**
  * Service Worker - מערכת ניהול דיירים
  * מפתח: בועז סעדה
- * גרסה: 2.5.0.5
+ * גרסה: 2.5.0.6
  * 
  * ⚠️ חשוב: Service Worker זה מטמן רק קבצי HTML/CSS/JS
  * הוא לא נוגע בנתוני המשתמש ב-LocalStorage!
@@ -9,30 +9,46 @@
  * ונשארים שם גם אחרי התקנה כ-PWA.
  */
 
-const CACHE_NAME = 'tenant-management-v2.5.0.5';
+const CACHE_NAME = 'tenant-management-v2.5.0.6';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/install.html',
     '/css/style.css',
     '/js/app.js',
-    '/manifest.json',
-    '/icon-512.png',
-    '/icon-192.png'
+    '/manifest.json'
 ];
 
-// התקנת Service Worker
+// התקנת Service Worker עם טיפול בשגיאות לכל קובץ בנפרד
 self.addEventListener('install', (event) => {
     console.log('[SW] התקנה מתבצעת...');
     
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('[SW] קבצים נשמרים במטמון');
-                return cache.addAll(ASSETS_TO_CACHE);
+            .then(async (cache) => {
+                console.log('[SW] מתחיל לשמור קבצים במטמון');
+                
+                // שמירת כל קובץ בנפרד עם try/catch
+                const results = await Promise.allSettled(
+                    ASSETS_TO_CACHE.map(async (url) => {
+                        try {
+                            await cache.add(url);
+                            console.log('[SW] ✅ נשמר במטמון:', url);
+                            return { url, success: true };
+                        } catch (error) {
+                            console.warn('[SW] ⚠️ לא ניתן לשמור במטמון:', url, error.message);
+                            return { url, success: false, error: error.message };
+                        }
+                    })
+                );
+                
+                const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+                const failed = results.filter(r => r.status === 'fulfilled' && !r.value.success).length;
+                
+                console.log(`[SW] סיכום: ${successful} קבצים נשמרו, ${failed} נכשלו`);
             })
             .catch((error) => {
-                console.error('[SW] שגיאה בשמירת קבצים במטמון:', error);
+                console.error('[SW] שגיאה בפתיחת מטמון:', error);
             })
     );
     
@@ -102,7 +118,7 @@ self.addEventListener('fetch', (event) => {
                         console.error('[SW] שגיאה בשליפה מהרשת:', error);
                         
                         // אם זה HTML, החזר את index.html מהמטמון
-                        if (event.request.headers.get('accept').includes('text/html')) {
+                        if (event.request.headers.get('accept')?.includes('text/html')) {
                             return caches.match('/index.html');
                         }
                     });
@@ -114,8 +130,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
     const options = {
         body: event.data ? event.data.text() : 'התראה חדשה',
-        icon: '/icon-192.png',
-        badge: '/icon-96.png',
+        icon: '/favicon.ico',
         vibrate: [200, 100, 200],
         dir: 'rtl',
         lang: 'he'
