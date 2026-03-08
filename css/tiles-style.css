@@ -739,6 +739,198 @@ body {
         right: var(--spacing-md);
         left: var(--spacing-md);
     }
+    
+    /* Mobile Actions Bar */
+    .actions-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .actions-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Mobile Filter */
+    .mobile-filter-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .mobile-filter-container .form-select,
+    .mobile-filter-container .form-input {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+    
+    /* Mobile Search */
+    .mobile-search {
+        position: relative;
+        width: 100%;
+    }
+    
+    .mobile-search input {
+        width: 100%;
+        padding: 14px 45px 14px 14px;
+        font-size: 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: white;
+        transition: all 0.3s;
+    }
+    
+    .mobile-search input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+    
+    .mobile-search i {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-size: 18px;
+    }
+}
+
+/* ===== Mobile Cards - Enhanced ===== */
+.mobile-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-right: 5px solid var(--primary);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mobile-card:active {
+    transform: scale(0.98);
+}
+
+.mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.mobile-card-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.mobile-card-info {
+    flex: 1;
+    margin-right: 12px;
+}
+
+.mobile-card-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.mobile-card-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.mobile-card-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mobile-card-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.mobile-card-detail {
+    font-size: 13px;
+}
+
+.mobile-card-detail-label {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.mobile-card-detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mobile-card-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.mobile-card-actions .btn {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 10px;
+    justify-content: center;
+}
+
+/* Status Colors for Mobile Cards */
+.mobile-card.status-paid {
+    border-right-color: var(--success);
+}
+
+.mobile-card.status-pending {
+    border-right-color: var(--warning);
+}
+
+.mobile-card.status-overdue {
+    border-right-color: var(--danger);
+}
+
+/* Filter Tabs Mobile */
+@media (max-width: 768px) {
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .filter-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .filter-tabs .btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 10px 16px;
+        border-radius: 20px;
+    }
 }
 
 /* ===== Print Styles ===== */
