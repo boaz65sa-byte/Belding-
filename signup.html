@@ -46,6 +46,9 @@
         .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 15px; }
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-google { background: white; color: #444; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; }
+        .btn-google:hover { background: #f7fafc; border-color: #cbd5e0; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-google svg { flex-shrink: 0; }
         .divider { text-align: center; margin: 25px 0; position: relative; }
         .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e2e8f0; }
         .divider span { background: white; padding: 0 15px; color: #718096; font-size: 14px; position: relative; z-index: 1; }
@@ -79,6 +82,19 @@
             <i class="fas fa-gift"></i>
             14 ימי ניסיון חינם - ללא צורך בכרטיס אשראי!
         </div>
+
+        <!-- כפתור הרשמה עם Google -->
+        <button type="button" class="btn btn-google" id="googleSignupBtn" onclick="handleGoogleSignup()">
+            <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            הירשם עם Google - מהיר וקל!
+        </button>
+
+        <div class="divider" style="margin: 20px 0;"><span>או הירשם עם אימייל</span></div>
 
         <div class="alert alert-error" id="errorAlert"></div>
         <div class="alert alert-success" id="successAlert"></div>
@@ -168,9 +184,31 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/auth.js"></script>
 
     <script>
+        // Handle Google Signup
+        async function handleGoogleSignup() {
+            const btn = document.getElementById('googleSignupBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border:3px solid #e2e8f0;border-top-color:#4285F4;border-radius:50%;animation:spin 0.8s linear infinite;"></div> מתחבר...';
+            
+            try {
+                const result = await signInWithGoogle();
+                if (!result.success) {
+                    alert(result.error || 'שגיאה בהרשמה עם Google');
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> הירשם עם Google - מהיר וקל!';
+                }
+            } catch (error) {
+                console.error('Google signup error:', error);
+                alert('שגיאה בהרשמה עם Google');
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> הירשם עם Google - מהיר וקל!';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
 
             // Check session

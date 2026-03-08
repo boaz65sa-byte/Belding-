@@ -119,6 +119,82 @@ async function resetPassword(email) {
     }
 }
 
+// 6. התחברות עם Google
+async function signInWithGoogle() {
+    const supabase = await getSupabase();
+    if (!supabase) return { success: false, error: 'Connection Error' };
+    
+    try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + '/index.html',
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent'
+                }
+            }
+        });
+        
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('Google sign-in error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// 7. קבלת משתמש נוכחי
+async function getCurrentUser() {
+    const supabase = await getSupabase();
+    if (!supabase) return null;
+    
+    try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        return user;
+    } catch (error) {
+        console.error('Error getting user:', error);
+        return null;
+    }
+}
+
+// 8. קבלת פרופיל משתמש מהטבלה
+async function getUserProfile(userId) {
+    const supabase = await getSupabase();
+    if (!supabase) return null;
+    
+    try {
+        const { data, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+        
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error('Error getting profile:', error);
+        return null;
+    }
+}
+
+// 9. התנתקות
+async function signOut() {
+    const supabase = await getSupabase();
+    if (!supabase) return false;
+    
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        localStorage.clear();
+        return true;
+    } catch (error) {
+        console.error('Sign out error:', error);
+        return false;
+    }
+}
+
 // חשיפה לחלון כדי ש-HTML יכיר את הפונקציות
 window.initSupabase = initSupabase;
 window.checkUserAccess = checkUserAccess;
@@ -127,3 +203,7 @@ window.login = login;
 window.logout = logout;
 window.getCurrentSession = getCurrentSession;
 window.resetPassword = resetPassword;
+window.signInWithGoogle = signInWithGoogle;
+window.getCurrentUser = getCurrentUser;
+window.getUserProfile = getUserProfile;
+window.signOut = signOut;
