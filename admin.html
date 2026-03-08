@@ -499,7 +499,7 @@
     </header>
 
     <div class="container">
-        <!-- Statistics -->
+        <!-- Statistics Row 1 -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>סה"כ משתמשים</h3>
@@ -520,6 +520,54 @@
                 <h3>הכנסות כוללות</h3>
                 <div class="stat-value" id="totalRevenue">₪0</div>
                 <div class="stat-change">💰 תשלומים</div>
+            </div>
+        </div>
+
+        <!-- Statistics Row 2 - Extended -->
+        <div class="stats-grid" style="margin-top: 20px;">
+            <div class="stat-card" style="border-right-color: #ef4444;">
+                <h3>מנויים שפגו</h3>
+                <div class="stat-value" id="expiredUsers">-</div>
+                <div class="stat-change negative">⏰ דורשים חידוש</div>
+            </div>
+            <div class="stat-card" style="border-right-color: #8b5cf6;">
+                <h3>חסומים</h3>
+                <div class="stat-value" id="blockedUsers">-</div>
+                <div class="stat-change">🚫 משתמשים חסומים</div>
+            </div>
+            <div class="stat-card" style="border-right-color: #10b981;">
+                <h3>מנויים חודשיים</h3>
+                <div class="stat-value" id="monthlyUsers">-</div>
+                <div class="stat-change">📅 ₪49/חודש</div>
+            </div>
+            <div class="stat-card" style="border-right-color: #f59e0b;">
+                <h3>מנויים שנתיים</h3>
+                <div class="stat-value" id="yearlyUsers">-</div>
+                <div class="stat-change">🎯 ₪490/שנה</div>
+            </div>
+        </div>
+
+        <!-- Statistics Row 3 - Lifetime & Buildings -->
+        <div class="stats-grid" style="margin-top: 20px;">
+            <div class="stat-card" style="border-right-color: #ec4899;">
+                <h3>מנויים לכל החיים</h3>
+                <div class="stat-value" id="lifetimeUsers">-</div>
+                <div class="stat-change">💎 ₪499 חד פעמי</div>
+            </div>
+            <div class="stat-card" style="border-right-color: #06b6d4;">
+                <h3>התחברויות היום</h3>
+                <div class="stat-value" id="todayLogins">-</div>
+                <div class="stat-change">📊 פעילות יומית</div>
+            </div>
+            <div class="stat-card" style="border-right-color: #84cc16;">
+                <h3>בניינים פעילים</h3>
+                <div class="stat-value" id="totalBuildings">-</div>
+                <div class="stat-change">🏢 בניינים במערכת</div>
+            </div>
+            <div class="stat-card" style="border-right-color: #6366f1;">
+                <h3>הכנסות החודש</h3>
+                <div class="stat-value" id="monthlyRevenue">₪0</div>
+                <div class="stat-change">📈 החודש הנוכחי</div>
             </div>
         </div>
 
@@ -555,6 +603,9 @@
                     <option value="super_admin">סופר אדמין</option>
                     <option value="admin">אדמין</option>
                     <option value="user">משתמש</option>
+                </select>
+                <select class="filter-select" id="buildingFilter" onchange="handleFilter()" style="display: none;">
+                    <option value="">כל הבניינים</option>
                 </select>
             </div>
 
@@ -618,19 +669,36 @@
                 const superAdmin = await isSuperAdmin();
                 if (superAdmin) {
                     document.getElementById('adminSubtitle').textContent = '🔥 מנהל כללי - צפייה בכל המשתמשים';
+                    // הצג פילטר בניינים לסופר-אדמין
+                    document.getElementById('buildingFilter').style.display = 'block';
                 }
 
-                // סטטיסטיקות
+                // סטטיסטיקות בסיסיות
                 const { stats } = await getAdminStats();
-                document.getElementById('totalUsers').textContent = stats.total;
-                document.getElementById('activeUsers').textContent = stats.active;
-                document.getElementById('trialUsers').textContent = stats.trial;
-                document.getElementById('totalRevenue').textContent = `₪${stats.totalRevenue.toLocaleString()}`;
+                document.getElementById('totalUsers').textContent = stats.total || 0;
+                document.getElementById('activeUsers').textContent = stats.active || 0;
+                document.getElementById('trialUsers').textContent = stats.trial || 0;
+                document.getElementById('totalRevenue').textContent = `₪${(stats.totalRevenue || 0).toLocaleString()}`;
+                
+                // סטטיסטיקות מורחבות
+                document.getElementById('expiredUsers').textContent = stats.expired || 0;
+                document.getElementById('blockedUsers').textContent = stats.blocked || 0;
+                document.getElementById('monthlyUsers').textContent = stats.monthly || 0;
+                document.getElementById('yearlyUsers').textContent = stats.yearly || 0;
+                document.getElementById('lifetimeUsers').textContent = stats.lifetime || 0;
+                document.getElementById('todayLogins').textContent = stats.todayLogins || '-';
+                document.getElementById('totalBuildings').textContent = stats.buildings || '-';
+                document.getElementById('monthlyRevenue').textContent = `₪${(stats.monthlyRevenue || 0).toLocaleString()}`;
 
                 // משתמשים
                 const { users, isSuperAdmin: isSA } = await getAllUsers();
-                allUsers = users;
-                renderUsers(users);
+                allUsers = users || [];
+                renderUsers(allUsers);
+                
+                // טען רשימת בניינים לפילטר (רק לסופר-אדמין)
+                if (superAdmin && allUsers.length > 0) {
+                    loadBuildingsFilter(allUsers);
+                }
             } catch (error) {
                 console.error('שגיאה בטעינת נתונים:', error);
                 document.getElementById('tableContainer').innerHTML = `
@@ -641,6 +709,19 @@
                     </div>
                 `;
             }
+        }
+        
+        // טעינת רשימת בניינים לפילטר
+        function loadBuildingsFilter(users) {
+            const buildingFilter = document.getElementById('buildingFilter');
+            const buildings = [...new Set(users.filter(u => u.building_name).map(u => u.building_name))];
+            
+            buildings.forEach(building => {
+                const option = document.createElement('option');
+                option.value = building;
+                option.textContent = building;
+                buildingFilter.appendChild(option);
+            });
         }
 
         // רינדור משתמשים
@@ -800,6 +881,7 @@
         function handleFilter() {
             const statusFilter = document.getElementById('statusFilter').value;
             const roleFilter = document.getElementById('roleFilter').value;
+            const buildingFilter = document.getElementById('buildingFilter').value;
             
             let filtered = allUsers;
             if (statusFilter) {
@@ -807,6 +889,9 @@
             }
             if (roleFilter) {
                 filtered = filtered.filter(u => u.role === roleFilter);
+            }
+            if (buildingFilter) {
+                filtered = filtered.filter(u => u.building_name === buildingFilter);
             }
             
             renderUsers(filtered);

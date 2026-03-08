@@ -259,7 +259,7 @@ async function getUserPayments(userId) {
 }
 
 /**
- * 📊 סטטיסטיקות אדמין
+ * 📊 סטטיסטיקות אדמין - מורחבות
  */
 async function getAdminStats() {
     try {
@@ -271,9 +271,12 @@ async function getAdminStats() {
         // ספירת משתמשים לפי סטטוס
         const { data: users, error: usersError } = await getSupabase()
             .from('user_profiles')
-            .select('status, subscription_type');
+            .select('status, subscription_type, building_id, building_name, created_at, last_login');
 
         if (usersError) throw usersError;
+
+        // חישוב בניינים ייחודיים
+        const uniqueBuildings = [...new Set(users.filter(u => u.building_id).map(u => u.building_id))];
 
         const stats = {
             total: users.length,
@@ -283,25 +286,46 @@ async function getAdminStats() {
             blocked: users.filter(u => u.status === USER_STATUS.BLOCKED).length,
             monthly: users.filter(u => u.subscription_type === 'monthly').length,
             yearly: users.filter(u => u.subscription_type === 'yearly').length,
-            lifetime: users.filter(u => u.subscription_type === 'lifetime').length
+            lifetime: users.filter(u => u.subscription_type === 'lifetime').length,
+            buildings: uniqueBuildings.length,
+            todayLogins: 0
         };
 
-        // סכום תשלומים
+        // ספירת התחברויות היום
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        stats.todayLogins = users.filter(u => {
+            if (!u.last_login) return false;
+            const loginDate = new Date(u.last_login);
+            return loginDate >= today;
+        }).length;
+
+        // סכום תשלומים כולל
         const { data: payments, error: paymentsError } = await getSupabase()
             .from('payments')
-            .select('amount, status')
+            .select('amount, status, created_at')
             .eq('status', 'completed');
 
         if (!paymentsError && payments) {
-            stats.totalRevenue = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            stats.totalRevenue = payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            
+            // הכנסות החודש הנוכחי
+            const firstOfMonth = new Date();
+            firstOfMonth.setDate(1);
+            firstOfMonth.setHours(0, 0, 0, 0);
+            
+            stats.monthlyRevenue = payments
+                .filter(p => new Date(p.created_at) >= firstOfMonth)
+                .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
         } else {
             stats.totalRevenue = 0;
+            stats.monthlyRevenue = 0;
         }
 
         return { success: true, stats };
     } catch (error) {
         console.error('שגיאה בקבלת סטטיסטיקות:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: error.message, stats: {} };
     }
 }
 
