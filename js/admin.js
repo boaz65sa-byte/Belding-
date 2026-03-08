@@ -234,6 +234,152 @@ async function updateUserSubscription(userId, subscriptionData) {
 }
 
 /**
+ * ⏸️ הפסקת מנוי משתמש
+ */
+async function cancelSubscription(userId) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                status: USER_STATUS.EXPIRED,
+                subscription_expires: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_cancel_subscription', `אדמין ביטל מנוי למשתמש: ${data.email}`);
+
+        return { success: true, user: data, message: 'המנוי בוטל בהצלחה' };
+    } catch (error) {
+        console.error('שגיאה בביטול מנוי:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 🔄 חידוש מנוי משתמש (הארכה)
+ */
+async function renewSubscription(userId, months = 1) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        // קבל פרטי משתמש נוכחיים
+        const { data: user, error: userError } = await getSupabase()
+            .from('user_profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (userError) throw userError;
+
+        // חשב תאריך תפוגה חדש
+        let newExpiry = new Date();
+        if (user.subscription_expires && new Date(user.subscription_expires) > new Date()) {
+            // אם יש תאריך תפוגה עתידי, הוסף עליו
+            newExpiry = new Date(user.subscription_expires);
+        }
+        newExpiry.setMonth(newExpiry.getMonth() + months);
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                status: USER_STATUS.ACTIVE,
+                subscription_expires: newExpiry.toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_renew_subscription', `אדמין חידש מנוי למשתמש ${data.email} ב-${months} חודשים`);
+
+        return { success: true, user: data, message: `המנוי חודש ב-${months} חודשים` };
+    } catch (error) {
+        console.error('שגיאה בחידוש מנוי:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 🏢 הקצאת משתמש לבניין
+ */
+async function assignUserToBuilding(userId, buildingId, buildingName) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                building_id: buildingId,
+                building_name: buildingName,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_assign_building', `אדמין הקצה משתמש ${data.email} לבניין: ${buildingName}`);
+
+        return { success: true, user: data, message: 'המשתמש הוקצה לבניין בהצלחה' };
+    } catch (error) {
+        console.error('שגיאה בהקצאת בניין:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 👑 הפיכת משתמש לאדמין של בניין
+ */
+async function makeUserBuildingAdmin(userId, buildingId, buildingName) {
+    try {
+        const superAdmin = await isSuperAdmin();
+        if (!superAdmin) {
+            throw new Error('רק סופר-אדמין יכול למנות אדמינים');
+        }
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                role: ROLES.ADMIN,
+                building_id: buildingId,
+                building_name: buildingName,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_make_building_admin', `סופר-אדמין מינה את ${data.email} כאדמין של בניין: ${buildingName}`);
+
+        return { success: true, user: data, message: 'המשתמש מונה כאדמין בניין בהצלחה' };
+    } catch (error) {
+        console.error('שגיאה במינוי אדמין בניין:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
  * 💳 קבלת תשלומי משתמש
  */
 async function getUserPayments(userId) {
@@ -609,5 +755,11 @@ async function exportUsersToCSV() {
         return { success: false, error: error.message };
     }
 }
+
+// חשיפה לחלון
+window.cancelSubscription = cancelSubscription;
+window.renewSubscription = renewSubscription;
+window.assignUserToBuilding = assignUserToBuilding;
+window.makeUserBuildingAdmin = makeUserBuildingAdmin;
 
 console.log('✅ Admin.js נטען בהצלחה');

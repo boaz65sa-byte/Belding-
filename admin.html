@@ -788,6 +788,14 @@
                                         <button class="btn btn-primary btn-sm" onclick="openSubscriptionModal('${user.id}')" title="עדכן מנוי">
                                             <i class="fas fa-credit-card"></i>
                                         </button>
+                                        <!-- חידוש מנוי -->
+                                        <button class="btn btn-sm" style="background: #10b981; color: white;" onclick="renewUserSubscription('${user.id}')" title="חדש מנוי +1 חודש">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                        <!-- ביטול מנוי -->
+                                        <button class="btn btn-sm" style="background: #f59e0b; color: white;" onclick="cancelUserSubscription('${user.id}')" title="בטל מנוי">
+                                            <i class="fas fa-times-circle"></i>
+                                        </button>
                                         <!-- מחיקה -->
                                         <button class="btn btn-danger btn-sm" onclick="deleteUserAction('${user.id}')" title="מחק משתמש">
                                             <i class="fas fa-trash"></i>
@@ -832,6 +840,31 @@
             const result = await deleteUser(userId);
             if (result.success) {
                 alert('המשתמש נמחק');
+                loadData();
+            } else {
+                alert('שגיאה: ' + result.error);
+            }
+        }
+
+        async function renewUserSubscription(userId) {
+            const months = prompt('כמה חודשים להוסיף?', '1');
+            if (!months) return;
+            
+            const result = await renewSubscription(userId, parseInt(months));
+            if (result.success) {
+                alert(result.message);
+                loadData();
+            } else {
+                alert('שגיאה: ' + result.error);
+            }
+        }
+
+        async function cancelUserSubscription(userId) {
+            if (!confirm('האם לבטל את המנוי של משתמש זה?')) return;
+            
+            const result = await cancelSubscription(userId);
+            if (result.success) {
+                alert(result.message);
                 loadData();
             } else {
                 alert('שגיאה: ' + result.error);
