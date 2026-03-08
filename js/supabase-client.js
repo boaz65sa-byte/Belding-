@@ -69,6 +69,7 @@ async function getCurrentUser() {
 
 /**
  * 📊 קבלת פרופיל משתמש מורחב מהטבלה
+ * אם הפרופיל לא קיים - יוצר אותו אוטומטית
  */
 async function getUserProfile(userId) {
     try {
@@ -78,7 +79,61 @@ async function getUserProfile(userId) {
             .eq('id', userId)
             .single();
 
-        if (error) throw error;
+        if (error || !data) {
+            console.log('📝 פרופיל לא נמצא, יוצר חדש...');
+            
+            // קבל פרטי משתמש מ-auth
+            const { data: { user } } = await getSupabase().auth.getUser();
+            
+            if (user) {
+                // בדוק אם זה המשתמש הראשי
+                const isBossUser = user.email === 'boaz65sa@gmail.com';
+                
+                const newProfile = {
+                    id: userId,
+                    email: user.email,
+                    full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+                    phone: user.user_metadata?.phone || '',
+                    role: isBossUser ? 'super_admin' : 'user',
+                    status: isBossUser ? 'active' : 'trial',
+                    subscription_type: isBossUser ? 'lifetime' : null,
+                    created_at: new Date().toISOString()
+                };
+                
+                const { data: createdProfile, error: insertError } = await getSupabase()
+                    .from('user_profiles')
+                    .upsert(newProfile)
+                    .select()
+                    .single();
+                
+                if (insertError) {
+                    console.error('שגיאה ביצירת פרופיל:', insertError);
+                    return newProfile;
+                }
+                
+                console.log('✅ פרופיל נוצר בהצלחה:', createdProfile);
+                return createdProfile;
+            }
+            return null;
+        }
+        
+        // אם זה המשתמש הראשי ואין לו הרשאות - עדכן
+        if (data.email === 'boaz65sa@gmail.com' && data.role !== 'super_admin') {
+            console.log('🔧 מעדכן הרשאות למשתמש ראשי...');
+            const { data: updatedProfile } = await getSupabase()
+                .from('user_profiles')
+                .update({ 
+                    role: 'super_admin', 
+                    status: 'active',
+                    subscription_type: 'lifetime'
+                })
+                .eq('id', userId)
+                .select()
+                .single();
+            
+            return updatedProfile || data;
+        }
+        
         return data;
     } catch (error) {
         console.error('שגיאה בקבלת פרופיל:', error);
