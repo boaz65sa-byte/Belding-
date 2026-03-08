@@ -2,10 +2,14 @@
  * ========================================
  * 👑 Admin.js - ניהול אדמין
  * ========================================
+ * תומך ב-3 רמות הרשאות:
+ * - super_admin: רואה את כל המשתמשים בכל הבניינים
+ * - admin: רואה רק משתמשים מהבניין שלו
+ * - user: אין גישה לפאנל אדמין
  */
 
 /**
- * 📊 קבלת כל המשתמשים (אדמין בלבד)
+ * 📊 קבלת כל המשתמשים (לפי הרשאות)
  */
 async function getAllUsers(filters = {}) {
     try {
@@ -15,10 +19,20 @@ async function getAllUsers(filters = {}) {
             throw new Error('אין הרשאות אדמין');
         }
 
+        // בדוק אם סופר-אדמין
+        const superAdmin = await isSuperAdmin();
+        const currentUser = await getCurrentUser();
+        const currentProfile = await getUserProfile(currentUser.id);
+
         let query = supabase
             .from('user_profiles')
             .select('*')
             .order('created_at', { ascending: false });
+
+        // אם לא סופר-אדמין, הצג רק משתמשים מאותו בניין
+        if (!superAdmin && currentProfile.building_id) {
+            query = query.eq('building_id', currentProfile.building_id);
+        }
 
         // פילטרים
         if (filters.status) {
@@ -30,12 +44,15 @@ async function getAllUsers(filters = {}) {
         if (filters.search) {
             query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
         }
+        if (filters.building_id) {
+            query = query.eq('building_id', filters.building_id);
+        }
 
         const { data, error } = await query;
 
         if (error) throw error;
 
-        return { success: true, users: data };
+        return { success: true, users: data, isSuperAdmin: superAdmin };
     } catch (error) {
         console.error('שגיאה בקבלת משתמשים:', error);
         return { success: false, error: error.message };
@@ -368,6 +385,158 @@ async function sendMessageToUser(userId, message) {
         console.error('שגיאה בשליחת הודעה:', error);
         return { success: false, error: error.message };
     }
+}
+
+/**
+ * 📱 שליחת תזכורת תשלום בוואטסאפ
+ */
+async function sendPaymentReminderWhatsApp(userId) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        // קבל פרטי משתמש
+        const { data: user, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+
+        if (!user.phone) {
+            return { success: false, error: 'למשתמש אין מספר טלפון' };
+        }
+
+        // נקה את מספר הטלפון (הסר מקפים, רווחים וכו')
+        let phone = user.phone.replace(/[\s\-\(\)]/g, '');
+        
+        // אם מתחיל ב-0, החלף ל-972
+        if (phone.startsWith('0')) {
+            phone = '972' + phone.substring(1);
+        }
+        
+        // אם לא מתחיל ב-+, הוסף
+        if (!phone.startsWith('+')) {
+            phone = '+' + phone;
+        }
+
+        // הכן את ההודעה
+        const userName = user.full_name || 'לקוח יקר';
+        const subscriptionType = user.subscription_type || 'trial';
+        const status = user.status;
+        
+        let message = '';
+        
+        if (status === 'expired' || status === 'blocked') {
+            message = `שלום ${userName}! 👋
+
+המנוי שלך למערכת ניהול הדיירים פג תוקף.
+
+💳 לחידוש המנוי והמשך השימוש במערכת:
+https://belding.vercel.app/pricing.html
+
+📞 לשאלות ותמיכה אנחנו כאן!
+
+בברכה,
+צוות ניהול הדיירים`;
+        } else if (status === 'trial') {
+            const trialEnds = user.trial_ends ? new Date(user.trial_ends) : null;
+            const daysLeft = trialEnds ? Math.ceil((trialEnds - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+            
+            message = `שלום ${userName}! 👋
+
+תקופת הניסיון שלך ${daysLeft > 0 ? `מסתיימת בעוד ${daysLeft} ימים` : 'הסתיימה'}.
+
+🎁 שדרג עכשיו ותיהנה מכל התכונות:
+https://belding.vercel.app/pricing.html
+
+✅ מנוי חודשי: ₪49
+✅ מנוי שנתי: ₪490 (חיסכון של 17%!)
+✅ לכל החיים: ₪499 בלבד!
+
+בברכה,
+צוות ניהול הדיירים`;
+        } else {
+            message = `שלום ${userName}! 👋
+
+תודה שאתה משתמש במערכת ניהול הדיירים שלנו!
+
+📊 סטטוס המנוי שלך: ${getSubscriptionTypeText(subscriptionType)}
+
+לכל שאלה אנחנו כאן!
+
+בברכה,
+צוות ניהול הדיירים`;
+        }
+
+        // קידוד ההודעה ל-URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // יצירת קישור וואטסאפ
+        const whatsappUrl = `https://wa.me/${phone.replace('+', '')}?text=${encodedMessage}`;
+        
+        // רישום פעילות
+        await logActivity('admin_whatsapp_reminder', `נשלחה תזכורת תשלום ב-WhatsApp ל: ${user.email}`);
+
+        return { 
+            success: true, 
+            url: whatsappUrl,
+            message: 'קישור וואטסאפ נוצר בהצלחה'
+        };
+    } catch (error) {
+        console.error('שגיאה בשליחת תזכורת וואטסאפ:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 📱 שליחת תזכורת תשלום לכל המשתמשים שפג להם המנוי
+ */
+async function sendBulkPaymentReminders() {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        // קבל משתמשים עם מנוי שפג או בניסיון
+        const { data: users, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .in('status', ['expired', 'trial'])
+            .not('phone', 'is', null);
+
+        if (error) throw error;
+
+        const results = [];
+        for (const user of users) {
+            const result = await sendPaymentReminderWhatsApp(user.id);
+            results.push({ user: user.email, ...result });
+        }
+
+        return { 
+            success: true, 
+            count: results.length,
+            results 
+        };
+    } catch (error) {
+        console.error('שגיאה בשליחת תזכורות:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// פונקציית עזר לטקסט סוג מנוי
+function getSubscriptionTypeText(type) {
+    const texts = {
+        monthly: 'חודשי',
+        yearly: 'שנתי',
+        lifetime: 'לכל החיים',
+        trial: 'ניסיון'
+    };
+    return texts[type] || type;
 }
 
 /**

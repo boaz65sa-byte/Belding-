@@ -168,7 +168,7 @@ async function checkUserAccess() {
 }
 
 /**
- * 👑 בדיקה אם המשתמש הוא אדמין
+ * 👑 בדיקה אם המשתמש הוא אדמין (כולל super_admin)
  */
 async function isAdmin() {
     try {
@@ -176,9 +176,25 @@ async function isAdmin() {
         if (!user) return false;
 
         const profile = await getUserProfile(user.id);
-        return profile && profile.role === ROLES.ADMIN;
+        return profile && (profile.role === ROLES.ADMIN || profile.role === ROLES.SUPER_ADMIN);
     } catch (error) {
         console.error('שגיאה בבדיקת אדמין:', error);
+        return false;
+    }
+}
+
+/**
+ * 🔥 בדיקה אם המשתמש הוא סופר-אדמין (מנהל כללי)
+ */
+async function isSuperAdmin() {
+    try {
+        const user = await getCurrentUser();
+        if (!user) return false;
+
+        const profile = await getUserProfile(user.id);
+        return profile && profile.role === ROLES.SUPER_ADMIN;
+    } catch (error) {
+        console.error('שגיאה בבדיקת סופר-אדמין:', error);
         return false;
     }
 }

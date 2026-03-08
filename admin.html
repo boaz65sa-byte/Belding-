@@ -274,6 +274,11 @@
             font-weight: 600;
         }
 
+        .role-super_admin {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
         .role-admin {
             background: #fef3c7;
             color: #92400e;
@@ -474,9 +479,13 @@
         <div class="header-content">
             <div class="header-title">
                 <h1><i class="fas fa-shield-alt"></i> פאנל אדמין</h1>
-                <p>ניהול משתמשים ומנויים</p>
+                <p id="adminSubtitle">ניהול משתמשים ומנויים</p>
             </div>
             <div class="header-actions">
+                <button class="btn btn-white" onclick="sendBulkReminders()" title="שלח תזכורת לכל מי שפג לו המנוי">
+                    <i class="fab fa-whatsapp"></i>
+                    תזכורות תשלום
+                </button>
                 <button class="btn btn-white" onclick="exportUsers()">
                     <i class="fas fa-download"></i>
                     ייצוא לExcel
@@ -543,6 +552,7 @@
                 </select>
                 <select class="filter-select" id="roleFilter" onchange="handleFilter()">
                     <option value="">כל התפקידים</option>
+                    <option value="super_admin">סופר אדמין</option>
                     <option value="admin">אדמין</option>
                     <option value="user">משתמש</option>
                 </select>
@@ -604,6 +614,12 @@
         // טעינת נתונים
         async function loadData() {
             try {
+                // בדוק אם סופר-אדמין ועדכן כותרת
+                const superAdmin = await isSuperAdmin();
+                if (superAdmin) {
+                    document.getElementById('adminSubtitle').textContent = '🔥 מנהל כללי - צפייה בכל המשתמשים';
+                }
+
                 // סטטיסטיקות
                 const { stats } = await getAdminStats();
                 document.getElementById('totalUsers').textContent = stats.total;
@@ -612,7 +628,7 @@
                 document.getElementById('totalRevenue').textContent = `₪${stats.totalRevenue.toLocaleString()}`;
 
                 // משתמשים
-                const { users } = await getAllUsers();
+                const { users, isSuperAdmin: isSA } = await getAllUsers();
                 allUsers = users;
                 renderUsers(users);
             } catch (error) {
@@ -648,10 +664,10 @@
                         <tr>
                             <th>שם מלא</th>
                             <th>אימייל</th>
+                            <th>טלפון</th>
                             <th>תפקיד</th>
                             <th>סטטוס</th>
                             <th>מנוי</th>
-                            <th>תאריך הצטרפות</th>
                             <th>פעולות</th>
                         </tr>
                     </thead>
@@ -660,9 +676,10 @@
                             <tr>
                                 <td><strong>${user.full_name || 'לא צוין'}</strong></td>
                                 <td>${user.email}</td>
+                                <td>${user.phone || '-'}</td>
                                 <td>
                                     <span class="role-badge role-${user.role}">
-                                        ${user.role === 'admin' ? '👑 אדמין' : '👤 משתמש'}
+                                        ${getRoleText(user.role)}
                                     </span>
                                 </td>
                                 <td>
@@ -671,21 +688,27 @@
                                     </span>
                                 </td>
                                 <td>${getSubscriptionText(user.subscription_type)}</td>
-                                <td>${new Date(user.created_at).toLocaleDateString('he-IL')}</td>
                                 <td>
                                     <div class="action-buttons">
+                                        <!-- כפתור וואטסאפ -->
+                                        <button class="btn btn-sm" style="background: #25D366; color: white;" onclick="sendWhatsAppReminder('${user.id}')" title="שלח תזכורת בוואטסאפ">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </button>
+                                        <!-- חסום/שחרר -->
                                         ${user.status === 'blocked' 
-                                            ? `<button class="btn btn-success btn-sm" onclick="unblockUserAction('${user.id}')">
-                                                <i class="fas fa-unlock"></i> שחרר
+                                            ? `<button class="btn btn-success btn-sm" onclick="unblockUserAction('${user.id}')" title="שחרר משתמש">
+                                                <i class="fas fa-unlock"></i>
                                               </button>`
-                                            : `<button class="btn btn-warning btn-sm" onclick="blockUserAction('${user.id}')">
-                                                <i class="fas fa-ban"></i> חסום
+                                            : `<button class="btn btn-warning btn-sm" onclick="blockUserAction('${user.id}')" title="חסום משתמש">
+                                                <i class="fas fa-ban"></i>
                                               </button>`
                                         }
-                                        <button class="btn btn-primary btn-sm" onclick="openSubscriptionModal('${user.id}')">
+                                        <!-- עדכון מנוי -->
+                                        <button class="btn btn-primary btn-sm" onclick="openSubscriptionModal('${user.id}')" title="עדכן מנוי">
                                             <i class="fas fa-credit-card"></i>
                                         </button>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteUserAction('${user.id}')">
+                                        <!-- מחיקה -->
+                                        <button class="btn btn-danger btn-sm" onclick="deleteUserAction('${user.id}')" title="מחק משתמש">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -810,6 +833,15 @@
             return texts[type] || type;
         }
 
+        function getRoleText(role) {
+            const texts = {
+                super_admin: '🔥 סופר אדמין',
+                admin: '👑 אדמין',
+                user: '👤 משתמש'
+            };
+            return texts[role] || role;
+        }
+
         function refreshData() {
             loadData();
         }
@@ -821,6 +853,46 @@
             } else {
                 alert('שגיאה: ' + result.error);
             }
+        }
+
+        // שליחת תזכורת וואטסאפ למשתמש בודד
+        async function sendWhatsAppReminder(userId) {
+            const result = await sendPaymentReminderWhatsApp(userId);
+            if (result.success) {
+                // פתח את וואטסאפ בחלון חדש
+                window.open(result.url, '_blank');
+            } else {
+                alert('שגיאה: ' + result.error);
+            }
+        }
+
+        // שליחת תזכורות לכל המשתמשים שפג להם המנוי
+        async function sendBulkReminders() {
+            if (!confirm('האם לשלוח תזכורות תשלום לכל המשתמשים שפג להם המנוי או בתקופת ניסיון?')) {
+                return;
+            }
+
+            const expiredUsers = allUsers.filter(u => 
+                (u.status === 'expired' || u.status === 'trial') && u.phone
+            );
+
+            if (expiredUsers.length === 0) {
+                alert('אין משתמשים עם טלפון שצריכים תזכורת');
+                return;
+            }
+
+            alert(`נמצאו ${expiredUsers.length} משתמשים. לחץ אישור כדי לפתוח וואטסאפ לכל אחד מהם.`);
+
+            for (const user of expiredUsers) {
+                const result = await sendPaymentReminderWhatsApp(user.id);
+                if (result.success) {
+                    window.open(result.url, '_blank');
+                    // המתן קצת בין הודעות
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+
+            alert('סיימנו! בדוק את חלונות הוואטסאפ שנפתחו.');
         }
 
         // עדכון מחיר לפי סוג

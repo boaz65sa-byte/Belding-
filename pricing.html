@@ -554,41 +554,106 @@
     <script src="js/payment.js"></script>
     
     <script>
-        // בדיקה אם הגיע מ-expired
-        window.addEventListener('DOMContentLoaded', () => {
+        // Check URL parameters on page load
+        window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
+            
+            // Show expired alert if redirected from expired trial
             if (urlParams.get('expired') === 'true') {
                 document.getElementById('expiredAlert').style.display = 'block';
             }
+            
+            // Handle successful payment return from Stripe
+            if (urlParams.get('success') === 'true') {
+                document.getElementById('successModal').classList.add('active');
+                // Clear URL params and redirect after delay
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2500);
+            }
+            
+            // Handle canceled payment
+            if (urlParams.get('canceled') === 'true') {
+                alert('התשלום בוטל. תוכל לנסות שוב בכל עת.');
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         });
 
-        // רכישת תוכנית
+        /**
+         * Purchase a plan via Stripe Checkout
+         * @param {string} planType - 'monthly', 'yearly', or 'lifetime'
+         */
         async function purchasePlan(planType) {
             try {
-                // הצג מודל עיבוד
+                // Show processing modal
                 document.getElementById('processingModal').classList.add('active');
 
-                // סימולציית עיכוב (כמו תשלום אמיתי)
+                // Get current user session
+                const session = await getCurrentSession();
+                if (!session) {
+                    document.getElementById('processingModal').classList.remove('active');
+                    alert('יש להתחבר כדי לרכוש מנוי');
+                    window.location.href = 'login.html?redirect=pricing';
+                    return;
+                }
+
+                const userId = session.user.id;
+                const userEmail = session.user.email;
+
+                // Call the Stripe checkout API
+                const response = await fetch('/api/create-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        planType,
+                        userId,
+                        userEmail,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create checkout session');
+                }
+
+                // Redirect to Stripe Checkout
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    throw new Error('No checkout URL returned');
+                }
+
+            } catch (error) {
+                console.error('Purchase error:', error);
+                document.getElementById('processingModal').classList.remove('active');
+                alert('שגיאה ביצירת תשלום: ' + error.message);
+            }
+        }
+
+        /**
+         * Fallback to simulation mode (for testing without Stripe)
+         * @param {string} planType
+         */
+        async function purchasePlanSimulation(planType) {
+            try {
+                document.getElementById('processingModal').classList.add('active');
                 await new Promise(resolve => setTimeout(resolve, 2000));
-
-                // בצע תשלום
+                
                 const result = await processPayment(planType, 'simulation');
-
-                // סגור מודל עיבוד
                 document.getElementById('processingModal').classList.remove('active');
 
                 if (result.success) {
-                    // הצג הצלחה
                     document.getElementById('successModal').classList.add('active');
-
-                    // המתן 2 שניות והעבר לדף הראשי
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 2000);
                 } else {
                     alert('שגיאה בתשלום: ' + result.error);
                 }
-
             } catch (error) {
                 document.getElementById('processingModal').classList.remove('active');
                 alert('שגיאה: ' + error.message);

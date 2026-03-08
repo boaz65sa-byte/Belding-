@@ -72,7 +72,11 @@ const NOTIFICATION_CONFIG = {
 /**
  * 👑 הגדרות תפקידים
  */
-const ROLES = { ADMIN: 'admin', USER: 'user' };
+const ROLES = { 
+    SUPER_ADMIN: 'super_admin',  // בועז - מנהל כללי של כל המערכת
+    ADMIN: 'admin',              // מנהל בניין ספציפי
+    USER: 'user'                 // משתמש רגיל
+};
 
 /**
  * 🔒 הגדרות סטטוס משתמש

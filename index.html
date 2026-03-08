@@ -123,6 +123,12 @@
                     <i class="fas fa-cog"></i>
                     <span>הגדרות</span>
                 </a>
+                
+                <!-- כפתור פאנל אדמין - מוצג רק לאדמינים -->
+                <a href="admin.html" class="menu-item admin-only" id="adminPanelLink" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 20px; border-radius: 10px;">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>פאנל אדמין</span>
+                </a>
             </div>
         </aside>
 
@@ -1858,6 +1864,15 @@
                 // שמור מידע על המשתמש ב-appState
                 if (typeof window.appState !== 'undefined' && accessCheck.profile) {
                     window.appState.currentUser = accessCheck.profile;
+                }
+                
+                // הצג כפתור אדמין אם המשתמש הוא אדמין או סופר-אדמין
+                if (accessCheck.profile && 
+                    (accessCheck.profile.role === 'admin' || accessCheck.profile.role === 'super_admin')) {
+                    const adminLink = document.getElementById('adminPanelLink');
+                    if (adminLink) {
+                        adminLink.style.display = 'flex';
+                    }
                 }
                 
             } catch (error) {
