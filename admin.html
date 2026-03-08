@@ -643,6 +643,32 @@
         </div>
     </div>
 
+    <!-- Building Assignment Modal -->
+    <div class="modal" id="buildingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏢 הקצאת בניין</h3>
+            </div>
+            <div class="form-group">
+                <label>שם הבניין</label>
+                <input type="text" class="form-input" id="buildingName" placeholder="לדוגמה: רחוב הרצל 15">
+            </div>
+            <div class="form-group">
+                <label>מזהה בניין (אופציונלי)</label>
+                <input type="text" class="form-input" id="buildingId" placeholder="מזהה ייחודי">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="makeAdmin"> מנה כאדמין של הבניין
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveBuildingAssignment()">שמור</button>
+                <button class="btn btn-outline" onclick="closeBuildingModal()">ביטול</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
@@ -746,6 +772,7 @@
                             <th>שם מלא</th>
                             <th>אימייל</th>
                             <th>טלפון</th>
+                            <th>בניין</th>
                             <th>תפקיד</th>
                             <th>סטטוס</th>
                             <th>מנוי</th>
@@ -758,6 +785,7 @@
                                 <td><strong>${user.full_name || 'לא צוין'}</strong></td>
                                 <td>${user.email}</td>
                                 <td>${user.phone || '-'}</td>
+                                <td>${user.building_name || '<span style="color:#a0aec0;">לא הוקצה</span>'}</td>
                                 <td>
                                     <span class="role-badge role-${user.role}">
                                         ${getRoleText(user.role)}
@@ -795,6 +823,10 @@
                                         <!-- ביטול מנוי -->
                                         <button class="btn btn-sm" style="background: #f59e0b; color: white;" onclick="cancelUserSubscription('${user.id}')" title="בטל מנוי">
                                             <i class="fas fa-times-circle"></i>
+                                        </button>
+                                        <!-- הקצאת בניין -->
+                                        <button class="btn btn-sm" style="background: #06b6d4; color: white;" onclick="openBuildingModal('${user.id}', '${user.building_name || ''}', '${user.building_id || ''}')" title="הקצה לבניין">
+                                            <i class="fas fa-building"></i>
                                         </button>
                                         <!-- מחיקה -->
                                         <button class="btn btn-danger btn-sm" onclick="deleteUserAction('${user.id}')" title="מחק משתמש">
@@ -868,6 +900,57 @@
                 loadData();
             } else {
                 alert('שגיאה: ' + result.error);
+            }
+        }
+
+        // ניהול בניינים
+        let currentBuildingUserId = null;
+
+        function openBuildingModal(userId, buildingName, buildingId) {
+            currentBuildingUserId = userId;
+            document.getElementById('buildingName').value = buildingName || '';
+            document.getElementById('buildingId').value = buildingId || '';
+            document.getElementById('makeAdmin').checked = false;
+            document.getElementById('buildingModal').classList.add('active');
+        }
+
+        function closeBuildingModal() {
+            document.getElementById('buildingModal').classList.remove('active');
+            currentBuildingUserId = null;
+        }
+
+        async function saveBuildingAssignment() {
+            const buildingName = document.getElementById('buildingName').value.trim();
+            const buildingId = document.getElementById('buildingId').value.trim() || buildingName.replace(/\s+/g, '_').toLowerCase();
+            const makeAdmin = document.getElementById('makeAdmin').checked;
+
+            if (!buildingName) {
+                alert('נא להזין שם בניין');
+                return;
+            }
+
+            try {
+                if (makeAdmin) {
+                    const result = await makeUserBuildingAdmin(currentBuildingUserId, buildingId, buildingName);
+                    if (result.success) {
+                        alert('המשתמש מונה כאדמין של הבניין בהצלחה');
+                    } else {
+                        alert('שגיאה: ' + result.error);
+                        return;
+                    }
+                } else {
+                    const result = await assignUserToBuilding(currentBuildingUserId, buildingId, buildingName);
+                    if (result.success) {
+                        alert('המשתמש הוקצה לבניין בהצלחה');
+                    } else {
+                        alert('שגיאה: ' + result.error);
+                        return;
+                    }
+                }
+                closeBuildingModal();
+                loadData();
+            } catch (error) {
+                alert('שגיאה: ' + error.message);
             }
         }
 

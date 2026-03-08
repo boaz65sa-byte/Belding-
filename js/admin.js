@@ -414,10 +414,22 @@ async function getAdminStats() {
             throw new Error('אין הרשאות אדמין');
         }
 
+        // בדוק אם סופר-אדמין
+        const superAdmin = await isSuperAdmin();
+        const currentUser = await getCurrentUser();
+        const currentProfile = currentUser ? await getUserProfile(currentUser.id) : null;
+
         // ספירת משתמשים לפי סטטוס
-        const { data: users, error: usersError } = await getSupabase()
+        let query = getSupabase()
             .from('user_profiles')
             .select('status, subscription_type, building_id, building_name, created_at, last_login');
+
+        // אם לא סופר-אדמין, הצג רק משתמשים מאותו בניין
+        if (!superAdmin && currentProfile?.building_id) {
+            query = query.eq('building_id', currentProfile.building_id);
+        }
+
+        const { data: users, error: usersError } = await query;
 
         if (usersError) throw usersError;
 
