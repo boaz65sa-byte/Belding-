@@ -274,16 +274,21 @@ function setupNavigation() {
             e.preventDefault();
             const targetSection = item.dataset.section;
             
+            // Skip if no target section defined
+            if (!targetSection) return;
+            
             // Update active menu item
             menuItems.forEach(mi => mi.classList.remove('active'));
             item.classList.add('active');
             
-            // Show target section
+            // Show target section (with null check)
             sections.forEach(section => section.classList.remove('active'));
-            document.getElementById(`${targetSection}Section`).classList.add('active');
-            
-            // Render section-specific content
-            renderSectionContent(targetSection);
+            const targetElement = document.getElementById(`${targetSection}Section`);
+            if (targetElement) {
+                targetElement.classList.add('active');
+                // Render section-specific content
+                renderSectionContent(targetSection);
+            }
         });
     });
     
