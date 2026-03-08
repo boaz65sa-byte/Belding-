@@ -4,14 +4,21 @@
  * ========================================
  */
 
-// ייבוא Supabase מ-CDN
-let supabase = null;
+// שימוש ב-supabaseClient שכבר הוגדר ב-config.js
+let supabase = window.supabaseClient || null;
 
 /**
  * אתחול Supabase Client
  */
 async function initSupabase() {
     try {
+        // אם כבר מוגדר מ-config.js, השתמש בו
+        if (window.supabaseClient) {
+            supabase = window.supabaseClient;
+            console.log('✅ Supabase Client נטען מ-config.js');
+            return supabase;
+        }
+
         // בדיקה אם Supabase JS SDK נטען
         if (typeof window.supabase === 'undefined') {
             throw new Error('Supabase JS SDK לא נטען. ודא שהוספת את ה-CDN ב-HTML');
@@ -22,7 +29,8 @@ async function initSupabase() {
             SUPABASE_CONFIG.url,
             SUPABASE_CONFIG.anonKey
         );
-
+        
+        window.supabaseClient = supabase;
         console.log('✅ Supabase Client אותחל בהצלחה');
         return supabase;
     } catch (error) {
