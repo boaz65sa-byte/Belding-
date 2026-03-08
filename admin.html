@@ -1276,18 +1276,29 @@
                 
                 // בדוק אם מחובר
                 const user = await getCurrentUser();
+                console.log('👤 משתמש נוכחי:', user);
+                
                 if (!user) {
                     console.log('❌ לא מחובר - מעביר לדף התחברות');
                     window.location.href = 'admin-login.html';
                     return;
                 }
                 
-                // קבל פרופיל ובדוק הרשאות - רק super_admin
+                // בדיקה ישירה לפי אימייל - הכי אמין
+                const userEmail = user.email;
+                console.log('📧 אימייל משתמש:', userEmail);
+                
+                const isSuperAdminByEmail = userEmail === 'boaz65sa@gmail.com';
+                
+                // קבל פרופיל גם כן
                 const profile = await getUserProfile(user.id);
                 console.log('👤 פרופיל משתמש:', profile);
                 
-                if (!profile || profile.role !== 'super_admin') {
-                    console.log('❌ אין הרשאות סופר אדמין - רק boaz65sa@gmail.com יכול לגשת');
+                const isSuperAdminByRole = profile && profile.role === 'super_admin';
+                
+                // אפשר גישה אם אחד מהתנאים מתקיים
+                if (!isSuperAdminByEmail && !isSuperAdminByRole) {
+                    console.log('❌ אין הרשאות סופר אדמין');
                     alert('אין לך הרשאות גישה לפאנל זה. רק מנהל ראשי יכול לגשת.');
                     window.location.href = 'index.html';
                     return;
