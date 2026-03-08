@@ -780,62 +780,121 @@
 
         // הגנת גישה - רק אדמין
         (async function() {
-            await initSupabase();
-            const hasAccess = await requireAuth({ requireAdmin: true });
-            if (hasAccess) {
-                loadData();
+            try {
+                await initSupabase();
+                
+                // בדוק אם מחובר
+                const user = await getCurrentUser();
+                if (!user) {
+                    console.log('❌ לא מחובר - מעביר לדף התחברות');
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+                
+                // קבל פרופיל ובדוק הרשאות
+                const profile = await getUserProfile(user.id);
+                console.log('👤 פרופיל משתמש:', profile);
+                
+                if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
+                    console.log('❌ אין הרשאות אדמין');
+                    alert('אין לך הרשאות גישה לפאנל זה');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                console.log('✅ יש הרשאות - טוען נתונים...');
+                await loadData();
+                
+            } catch (error) {
+                console.error('❌ שגיאה באתחול:', error);
+                alert('שגיאה בטעינת הדף: ' + error.message);
             }
         })();
 
         // טעינת נתונים
         async function loadData() {
+            console.log('📊 מתחיל לטעון נתונים...');
+            
             try {
                 // בדוק אם סופר-אדמין ועדכן כותרת
                 const superAdmin = await isSuperAdmin();
+                console.log('👑 סופר אדמין:', superAdmin);
+                
                 if (superAdmin) {
                     document.getElementById('adminSubtitle').textContent = '🔥 מנהל כללי - צפייה בכל המשתמשים';
-                    // הצג פילטר בניינים לסופר-אדמין
                     document.getElementById('buildingFilter').style.display = 'block';
-                    // הצג סקשן הנחות לסופר-אדמין
                     document.getElementById('discountsSection').style.display = 'block';
                 }
 
-                // סטטיסטיקות בסיסיות
-                const { stats } = await getAdminStats();
-                document.getElementById('totalUsers').textContent = stats.total || 0;
-                document.getElementById('activeUsers').textContent = stats.active || 0;
-                document.getElementById('trialUsers').textContent = stats.trial || 0;
-                document.getElementById('totalRevenue').textContent = `₪${(stats.totalRevenue || 0).toLocaleString()}`;
+                // טען משתמשים ישירות מ-Supabase
+                console.log('📥 טוען משתמשים...');
+                const supabase = getSupabase();
                 
-                // סטטיסטיקות מורחבות
-                document.getElementById('expiredUsers').textContent = stats.expired || 0;
-                document.getElementById('blockedUsers').textContent = stats.blocked || 0;
-                document.getElementById('monthlyUsers').textContent = stats.monthly || 0;
-                document.getElementById('yearlyUsers').textContent = stats.yearly || 0;
-                document.getElementById('lifetimeUsers').textContent = stats.lifetime || 0;
-                document.getElementById('todayLogins').textContent = stats.todayLogins || '-';
-                document.getElementById('totalBuildings').textContent = stats.buildings || '-';
-                document.getElementById('monthlyRevenue').textContent = `₪${(stats.monthlyRevenue || 0).toLocaleString()}`;
-
-                // משתמשים
-                const { users, isSuperAdmin: isSA } = await getAllUsers();
+                const { data: users, error: usersError } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (usersError) {
+                    console.error('❌ שגיאה בטעינת משתמשים:', usersError);
+                    throw usersError;
+                }
+                
+                console.log('✅ נטענו משתמשים:', users?.length || 0);
                 allUsers = users || [];
+                
+                // חישוב סטטיסטיקות
+                const stats = {
+                    total: allUsers.length,
+                    active: allUsers.filter(u => u.status === 'active').length,
+                    trial: allUsers.filter(u => u.status === 'trial').length,
+                    expired: allUsers.filter(u => u.status === 'expired').length,
+                    blocked: allUsers.filter(u => u.status === 'blocked').length,
+                    monthly: allUsers.filter(u => u.subscription_type === 'monthly').length,
+                    yearly: allUsers.filter(u => u.subscription_type === 'yearly').length,
+                    lifetime: allUsers.filter(u => u.subscription_type === 'lifetime').length,
+                    buildings: [...new Set(allUsers.filter(u => u.building_id).map(u => u.building_id))].length,
+                    totalRevenue: 0,
+                    monthlyRevenue: 0
+                };
+                
+                // עדכון סטטיסטיקות בדף
+                document.getElementById('totalUsers').textContent = stats.total;
+                document.getElementById('activeUsers').textContent = stats.active;
+                document.getElementById('trialUsers').textContent = stats.trial;
+                document.getElementById('totalRevenue').textContent = `₪${stats.totalRevenue.toLocaleString()}`;
+                document.getElementById('expiredUsers').textContent = stats.expired;
+                document.getElementById('blockedUsers').textContent = stats.blocked;
+                document.getElementById('monthlyUsers').textContent = stats.monthly;
+                document.getElementById('yearlyUsers').textContent = stats.yearly;
+                document.getElementById('lifetimeUsers').textContent = stats.lifetime;
+                document.getElementById('todayLogins').textContent = '-';
+                document.getElementById('totalBuildings').textContent = stats.buildings;
+                document.getElementById('monthlyRevenue').textContent = `₪${stats.monthlyRevenue.toLocaleString()}`;
+
+                // רינדור משתמשים
                 renderUsers(allUsers);
                 
-                // טען רשימת בניינים לפילטר (רק לסופר-אדמין)
+                // טען רשימת בניינים לפילטר
                 if (superAdmin && allUsers.length > 0) {
                     loadBuildingsFilter(allUsers);
                 }
                 
                 // טען סיכום בניינים
                 loadBuildingsSummary();
+                
+                console.log('✅ טעינת נתונים הושלמה');
+                
             } catch (error) {
-                console.error('שגיאה בטעינת נתונים:', error);
+                console.error('❌ שגיאה בטעינת נתונים:', error);
                 document.getElementById('tableContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>שגיאה בטעינת נתונים</h3>
-                        <p>${error.message}</p>
+                    <div class="empty-state" style="padding: 40px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 20px;"></i>
+                        <h3 style="color: #ef4444;">שגיאה בטעינת נתונים</h3>
+                        <p style="color: #64748b;">${error.message}</p>
+                        <button onclick="loadData()" class="btn btn-primary" style="margin-top: 20px;">
+                            <i class="fas fa-redo"></i> נסה שוב
+                        </button>
                     </div>
                 `;
             }
