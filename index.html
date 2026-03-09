@@ -17,49 +17,21 @@
     <meta name="author" content="בועז סעדה">
     <meta name="copyright" content="© 2024 בועז סעדה">
     <title>מערכת ניהול דיירים מתקדמת | Tenant Management Pro</title>
-    <meta name="description" content="מערכת מתקדמת לניהול דיירים, תשלומים, קבלות PDF, דוחות והוצאות. תמיכה מלאה ב-WhatsApp וחתימה דיגיטלית.">
+    <meta name="description" content="מערכת מתקדמת לניהול דיירים, תשלומים, קבלות PDF, דוחות והוצאות.">
     <meta name="keywords" content="ניהול דיירים, ועד בית, תשלומים, קבלות, דוחות, WhatsApp">
     
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ניהול דיירים">
-    <meta name="application-name" content="ניהול דיירים">
-    <meta name="msapplication-TileColor" content="#2563eb">
-    <meta name="msapplication-tap-highlight" content="no">
     
-    <!-- Manifest -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Icons -->
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="icon-96.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="icon-144.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="icon-72.png">
+    <link rel="apple-touch-icon" href="icon-180.png">
     
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'Heebo', 'system-ui', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Chart.js for Graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -104,6 +76,14 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                <a href="admin.html" id="adminPanelBtnTop" class="hidden items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg shadow transition" title="פאנל אדמין">
+                    <i class="fas fa-crown"></i>
+                    <span class="hidden sm:inline">אדמין</span>
+                </a>
+                <a href="pricing.html" id="pricingBtnTop" class="inline-flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow transition" title="מחירים ומנויים">
+                    <i class="fas fa-tags"></i>
+                    <span>מחירים</span>
+                </a>
                 <button id="themeToggle" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95" title="החלף מצב">
                     <i class="fas fa-moon text-gray-600"></i>
                 </button>
@@ -172,17 +152,7 @@
                     <p class="text-gray-500 mt-1">סקירה כללית של מצב הבניין</p>
                 </div>
 
-                <!-- Quick Access - Admin & Pricing -->
-                <div id="quickAccessButtons" class="flex flex-wrap gap-3 mb-6">
-                    <a href="admin.html" id="adminPanelBtnTop" class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition active:scale-95" style="display: none;">
-                        <i class="fas fa-crown"></i>
-                        פאנל אדמין
-                    </a>
-                    <a href="pricing.html" id="pricingBtnTop" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition active:scale-95">
-                        <i class="fas fa-tags"></i>
-                        מחירים ומנויים
-                    </a>
-                </div>
+                <div id="quickAccessButtons" class="hidden"></div>
 
                 <!-- Subscription Banner -->
                 <div id="subscriptionBanner" class="subscription-banner hidden mb-6 p-5 rounded-xl shadow-md bg-gradient-to-br from-amber-500 to-amber-600">

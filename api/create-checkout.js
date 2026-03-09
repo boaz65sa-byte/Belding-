@@ -36,6 +36,34 @@ const PLAN_CONFIG = {
 };
 
 module.exports = async (req, res) => {
+    // Validate required env vars
+    if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({
+            error: 'Server misconfiguration',
+            message: 'STRIPE_SECRET_KEY is not set in Vercel Environment Variables',
+        });
+    }
+        if (!PRICE_IDS.monthly || !PRICE_IDS.yearly || !PRICE_IDS.lifetime) {
+        const missing = [];
+        if (!PRICE_IDS.monthly) missing.push('STRIPE_PRICE_MONTHLY');
+        if (!PRICE_IDS.yearly) missing.push('STRIPE_PRICE_YEARLY');
+        if (!PRICE_IDS.lifetime) missing.push('STRIPE_PRICE_LIFETIME');
+        return res.status(500).json({
+            error: 'Server misconfiguration',
+            message: `${missing.join(', ')} not set. Create Products & Prices in Stripe Dashboard, add the price_xxx IDs to Vercel env.`,
+        });
+    }
+    let siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl || siteUrl === 'http://localhost:3000') {
+        siteUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
+    }
+    if (!siteUrl) {
+        return res.status(500).json({
+            error: 'Server misconfiguration',
+            message: 'Set NEXT_PUBLIC_SITE_URL in Vercel (e.g. https://belding.vercel.app)',
+        });
+    }
+
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -69,7 +97,6 @@ module.exports = async (req, res) => {
         }
 
         const config = PLAN_CONFIG[planType];
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
         // Create or retrieve Stripe customer
         let customer;
@@ -105,7 +132,7 @@ module.exports = async (req, res) => {
                 },
             ],
             mode: config.mode,
-            success_url: `${siteUrl}/pricing.html?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${siteUrl}/index.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${siteUrl}/pricing.html?canceled=true`,
             metadata: {
                 supabase_user_id: userId,

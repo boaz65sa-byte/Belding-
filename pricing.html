@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>מחירים - ועד בית</title>
     
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -589,7 +590,7 @@
                     <div class="feature"><i class="fas fa-check"></i><span>דוחות ויצוא נתונים</span></div>
                     <div class="feature"><i class="fas fa-check"></i><span>תמיכה טכנית</span></div>
                 </div>
-                <button class="btn btn-primary" onclick="pay('monthly')">
+                <button class="btn btn-primary" id="planMonthly" data-plan="monthly">
                     <i class="fas fa-arrow-left"></i>
                     בחר תוכנית
                 </button>
@@ -620,7 +621,7 @@
                     <div class="feature"><i class="fas fa-check"></i><span>גיבוי יומי אוטומטי</span></div>
                     <div class="feature"><i class="fas fa-check"></i><span>נעילת מחיר לשנה</span></div>
                 </div>
-                <button class="btn btn-featured" onclick="pay('yearly')">
+                <button class="btn btn-featured" id="planYearly" data-plan="yearly">
                     <i class="fas fa-crown"></i>
                     בחר תוכנית
                 </button>
@@ -650,7 +651,7 @@
                     <div class="feature"><i class="fas fa-check"></i><span>תמיכה VIP לצמיתות</span></div>
                     <div class="feature"><i class="fas fa-check"></i><span>ההשקעה הטובה ביותר</span></div>
                 </div>
-                <button class="btn btn-primary" onclick="pay('lifetime')">
+                <button class="btn btn-primary" id="planLifetime" data-plan="lifetime">
                     <i class="fas fa-gem"></i>
                     בחר תוכנית
                 </button>
@@ -712,7 +713,8 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             await initSupabase();
-            
+            attachPlanButtonListeners();
+
             const urlParams = new URLSearchParams(window.location.search);
             
             if (urlParams.get('expired') === 'true') {
@@ -763,20 +765,29 @@
             }
         }
 
-        async function pay(planType) {
+        // Placeholder: Replace with your Stripe publishable key from https://dashboard.stripe.com/apikeys
+        const STRIPE_PUBLIC_KEY = 'pk_test_51ShyWJFlne5qEGBWGijhMmB0OIRqpgJDPf4G9yqcZiC026xg6wYKBox9y3gWF1LUBC1G9NjeV5w8dDmwcuNqWpSW00RyDQ1Jzn';
+
+        async function handleStripePayment(planId) {
+            const processingModal = document.getElementById('processingModal');
             try {
-                document.getElementById('processingModal').classList.add('active');
+                if (typeof Stripe === 'undefined') {
+                    throw new Error('Stripe.js failed to load. Check your internet connection.');
+                }
+
+                const stripe = Stripe(STRIPE_PUBLIC_KEY);
+                if (processingModal) processingModal.classList.add('active');
 
                 const session = await getCurrentSession();
                 if (!session) {
-                    document.getElementById('processingModal').classList.remove('active');
+                    if (processingModal) processingModal.classList.remove('active');
                     alert('יש להתחבר כדי לרכוש מנוי');
                     window.location.href = 'login.html?redirect=pricing';
                     return;
                 }
 
                 const payload = {
-                    planType,
+                    planType: planId,
                     userId: session.user.id,
                     userEmail: session.user.email,
                     promoCode: appliedPromoCode,
@@ -789,23 +800,47 @@
                     body: JSON.stringify(payload),
                 });
 
-                const data = await response.json();
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    throw new Error('השרת החזיר תשובה לא תקינה');
+                }
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Failed to create checkout session');
+                    const errMsg = data.message || data.error || 'Failed to create checkout session';
+                    throw new Error(errMsg);
                 }
 
-                if (data.url) {
+                if (data.sessionId) {
+                    const { error } = await stripe.redirectToCheckout({
+                        sessionId: data.sessionId
+                    });
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+                } else if (data.url) {
                     window.location.href = data.url;
                 } else {
-                    throw new Error('No checkout URL returned');
+                    throw new Error('No checkout session or URL returned from server');
                 }
-
             } catch (error) {
-                console.error('Payment error:', error);
-                document.getElementById('processingModal').classList.remove('active');
-                alert('שגיאה ביצירת תשלום: ' + error.message);
+                console.error('Stripe checkout error:', error);
+                if (processingModal) processingModal.classList.remove('active');
+                const msg = error.message || 'נסה שוב מאוחר יותר';
+                alert('שגיאה ביצירת תשלום:\n\n' + msg);
             }
+        }
+
+        function attachPlanButtonListeners() {
+            const planButtons = document.querySelectorAll('[data-plan]');
+            planButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const planId = btn.getAttribute('data-plan');
+                    if (planId) handleStripePayment(planId);
+                });
+            });
         }
     </script>
 </body>
