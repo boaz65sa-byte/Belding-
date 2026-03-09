@@ -3494,5 +3494,169 @@ body, button, input, select, textarea {
     select {
         font-size: 16px !important;
     }
-}
+
+    /* ---- Payments & Expenses: Table → Cards on Mobile ---- */
+
+    /* Remove table container styling */
+    #paymentsSection .table-container,
+    #expensesSection .table-container {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+        padding: 0 !important;
+    }
+
+    /* Make table elements block */
+    #paymentsSection .data-table,
+    #expensesSection .data-table,
+    #paymentsSection .data-table thead,
+    #expensesSection .data-table thead,
+    #paymentsSection .data-table tbody,
+    #expensesSection .data-table tbody,
+    #paymentsSection .data-table tr,
+    #expensesSection .data-table tr,
+    #paymentsSection .data-table td,
+    #expensesSection .data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    /* Hide table headers */
+    #paymentsSection .data-table thead,
+    #expensesSection .data-table thead {
+        display: none !important;
+    }
+
+    /* Hide checkbox column */
+    #paymentsSection .data-table td.col-checkbox {
+        display: none !important;
+    }
+
+    /* Each row = card */
+    #paymentsSection .data-table tbody tr,
+    #expensesSection .data-table tbody tr {
+        background: #ffffff;
+        border-radius: 16px;
+        margin-bottom: 10px;
+        padding: 4px 16px 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Empty state row */
+    #paymentsSection .data-table tbody tr td[colspan],
+    #expensesSection .data-table tbody tr td[colspan] {
+        padding: 2rem !important;
+        text-align: center;
+        border: none;
+    }
+    #paymentsSection .data-table tbody tr td[colspan]::before,
+    #expensesSection .data-table tbody tr td[colspan]::before {
+        display: none;
+    }
+
+    /* Each cell = label + value row */
+    #paymentsSection .data-table td[data-label],
+    #expensesSection .data-table td[data-label] {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+        min-height: 36px;
+    }
+
+    #paymentsSection .data-table td[data-label]:last-of-type,
+    #expensesSection .data-table td[data-label]:last-of-type {
+        border-bottom: none;
+    }
+
+    /* Label shown before value */
+    #paymentsSection .data-table td[data-label]::before,
+    #expensesSection .data-table td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #94a3b8;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        min-width: 90px;
+        flex-shrink: 0;
+    }
+
+    /* Highlight amount cell */
+    #paymentsSection .data-table td[data-label="סכום"],
+    #expensesSection .data-table td[data-label="סכום"] {
+        background: #f8faff;
+        border-radius: 8px;
+        padding: 8px;
+        margin: 2px 0;
+    }
+
+    /* Actions cell - full width buttons */
+    #paymentsSection .data-table td[data-label="פעולות"],
+    #expensesSection .data-table td[data-label="פעולות"] {
+        justify-content: flex-end;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 10px;
+        gap: 8px;
+    }
+    #paymentsSection .data-table td[data-label="פעולות"]::before,
+    #expensesSection .data-table td[data-label="פעולות"]::before {
+        display: none;
+    }
+
+    /* Action buttons bigger on mobile */
+    .action-btn {
+        min-width: 40px !important;
+        min-height: 40px !important;
+        border-radius: 10px !important;
+        padding: 8px 12px !important;
+    }
+
+    /* ---- Notices Section ---- */
+    .card-header {
+        padding: 16px !important;
+    }
+
+    .card-body {
+        padding: 16px !important;
+    }
+
+    /* ---- Reports Section ---- */
+    #reportsSection .grid {
+        gap: 12px;
+    }
+
+    /* ---- Settings Section ---- */
+    .settings-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 14px !important;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        font-size: 16px !important;
+        min-height: 44px !important;
+    }
+
+    /* ---- Bulk Actions ---- */
+    .bulk-actions {
+        position: fixed !important;
+        bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 90 !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        box-shadow: 0 -4px 16px rgba(0,0,0,0.12) !important;
+    }
 }

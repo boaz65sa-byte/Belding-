@@ -924,15 +924,15 @@ function renderPaymentsTable(tenantId = null) {
         const paymentStatus = getPaymentStatus(payment);
         return `
             <tr>
-                <td><input type="checkbox" class="payment-checkbox" data-id="${payment.id}" ${appState.selectedPayments.has(payment.id) ? 'checked' : ''}></td>
-                <td>${formatDate(payment.date)}</td>
-                <td>${tenant ? tenant.apartment : '-'}</td>
-                <td>${tenant ? tenant.name : 'דייר לא נמצא'}</td>
-                <td><strong>₪${payment.amount}</strong></td>
-                <td>${getPaymentMethodText(payment.method)}</td>
-                <td><span class="status-badge status-${paymentStatus}">${getStatusText(paymentStatus)}</span></td>
-                <td>${payment.notes || '-'}</td>
-                <td>
+                <td class="col-checkbox"><input type="checkbox" class="payment-checkbox" data-id="${payment.id}" ${appState.selectedPayments.has(payment.id) ? 'checked' : ''}></td>
+                <td data-label="תאריך">${formatDate(payment.date)}</td>
+                <td data-label="דירה">${tenant ? tenant.apartment : '-'}</td>
+                <td data-label="שם הדייר">${tenant ? tenant.name : 'דייר לא נמצא'}</td>
+                <td data-label="סכום"><strong>₪${payment.amount}</strong></td>
+                <td data-label="אמצעי תשלום">${getPaymentMethodText(payment.method)}</td>
+                <td data-label="סטטוס"><span class="status-badge status-${paymentStatus}">${getStatusText(paymentStatus)}</span></td>
+                <td data-label="הערות">${payment.notes || '-'}</td>
+                <td data-label="פעולות">
                     <button class="action-btn delete" onclick="deletePayment('${payment.id}')" title="מחק">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -3015,23 +3015,23 @@ function renderExpensesTable() {
     
     tbody.innerHTML = filteredExpenses.map(expense => `
         <tr>
-            <td>${formatDate(expense.date)}</td>
-            <td>${getCategoryNameHe(expense.category)}</td>
-            <td>
+            <td data-label="תאריך">${formatDate(expense.date)}</td>
+            <td data-label="קטגוריה">${getCategoryNameHe(expense.category)}</td>
+            <td data-label="תיאור">
                 ${expense.description}
                 ${expense.isRecurring ? `<span style="color: #3b82f6; margin-right: 8px;" title="הוצאה קבועה - ${getFrequencyLabel(expense.frequency)}">🔄</span>` : ''}
             </td>
-            <td><strong>₪${expense.amount}</strong></td>
-            <td>${expense.paidBy || '-'}</td>
-            <td>
+            <td data-label="סכום"><strong>₪${expense.amount}</strong></td>
+            <td data-label="שולם ע״י">${expense.paidBy || '-'}</td>
+            <td data-label="קבלה">
                 ${expense.receiptImage ? `
                     <button class="action-btn" style="background: #10b981; color: white;" onclick="viewExpenseReceipt('${expense.id}')" title="צפה בקבלה">
                         <i class="fas fa-image"></i>
                     </button>
                 ` : '<span style="color: #9ca3af;">-</span>'}
             </td>
-            <td>${expense.notes || '-'}</td>
-            <td>
+            <td data-label="הערות">${expense.notes || '-'}</td>
+            <td data-label="פעולות">
                 <div class="table-actions">
                     <button class="action-btn edit" onclick="editExpense('${expense.id}')" title="ערוך">
                         <i class="fas fa-edit"></i>
