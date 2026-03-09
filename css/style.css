@@ -3659,4 +3659,183 @@ body, button, input, select, textarea {
         margin: 0 !important;
         box-shadow: 0 -4px 16px rgba(0,0,0,0.12) !important;
     }
+
+    /* ---- Settings Grid Fix ---- */
+    .settings-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    .settings-card {
+        padding: 18px !important;
+        border-radius: 16px !important;
+    }
+
+    .settings-card h3 {
+        font-size: 16px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .setting-item {
+        margin-bottom: 14px !important;
+    }
+
+    .setting-item label {
+        font-size: 14px !important;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .setting-actions {
+        gap: 10px !important;
+    }
+
+    .setting-actions .btn {
+        width: 100% !important;
+        min-height: 46px !important;
+        justify-content: center;
+    }
+
+    /* ---- Reports Section Fix ---- */
+    .report-filters {
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 14px !important;
+    }
+
+    .filter-item {
+        min-width: unset !important;
+        width: 100% !important;
+    }
+
+    .filter-item .form-input {
+        width: 100% !important;
+    }
+
+    .report-display {
+        padding: 16px !important;
+        min-height: 200px !important;
+    }
+
+    /* ---- Notices Section Fix ---- */
+    .card-header {
+        padding: 14px 16px !important;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-body {
+        padding: 16px !important;
+    }
+
+    #noticeForm .btn {
+        width: 100% !important;
+        min-height: 46px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .notice-preview {
+        padding: 1rem !important;
+        font-size: 14px !important;
+    }
+
+    /* ---- Modals - Full Width on Mobile ---- */
+    .modal-content {
+        width: 96% !important;
+        max-width: 96% !important;
+        max-height: 88vh !important;
+        border-radius: 20px !important;
+        overflow-y: auto !important;
+    }
+
+    .modal-header {
+        padding: 16px 20px !important;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .modal-body {
+        padding: 16px 20px !important;
+    }
+
+    .modal-footer,
+    .modal-actions {
+        padding: 12px 20px 20px !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .modal-actions .btn,
+    .modal-footer .btn {
+        width: 100% !important;
+        min-height: 46px !important;
+        justify-content: center !important;
+    }
+
+    /* ---- Form inputs inside modals ---- */
+    .modal .form-input,
+    .modal .form-select,
+    .modal .form-textarea,
+    .form-input,
+    .form-select {
+        font-size: 16px !important;
+        min-height: 46px !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+    }
+
+    .form-textarea {
+        font-size: 16px !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+    }
+
+    /* ---- Form rows - single column ---- */
+    .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    /* ---- Debtor list ---- */
+    .debtor-list-card {
+        padding: 16px !important;
+        border-radius: 16px !important;
+    }
+
+    /* ---- General buttons ---- */
+    .btn {
+        min-height: 44px !important;
+        font-size: 14px !important;
+        border-radius: 10px !important;
+    }
+
+    /* ---- Overflow protection ---- */
+    .content-section {
+        overflow-x: hidden !important;
+    }
+
+    /* ---- Payment Summary Cards ---- */
+    #paymentsSection .grid.grid-cols-1 {
+        gap: 10px !important;
+    }
+
+    /* ---- Annual Payments Table - horizontal scroll only ---- */
+    #paymentsTableTab .annual-payments-table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border-radius: 12px !important;
+    }
+
+    /* ---- Tenant Filter row ---- */
+    #paymentsSection .flex.flex-col {
+        gap: 10px !important;
+    }
+
+    #paymentTenantFilter,
+    #paymentStatusFilter {
+        width: 100% !important;
+        min-height: 46px !important;
+    }
 }
