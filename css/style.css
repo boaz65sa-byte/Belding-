@@ -3281,3 +3281,218 @@ body.dark-mode .payments-table-actions {
         overflow: visible;
     }
 }
+
+/* ============================================
+   PREMIUM MOBILE UI REDESIGN
+   ============================================ */
+
+/* Hebrew Font Override */
+body, button, input, select, textarea {
+    font-family: 'Heebo', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ---- Bottom Navigation - Premium Style ---- */
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.06), 0 -8px 32px rgba(0,0,0,0.08);
+        border-top: none;
+        z-index: 999;
+        padding: 6px 8px;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom));
+        justify-content: space-around;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .mobile-bottom-nav .nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 8px 6px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.6rem;
+        font-weight: 600;
+        min-height: 54px;
+        border-radius: 14px;
+        letter-spacing: 0.02em;
+        position: relative;
+    }
+
+    .mobile-bottom-nav .nav-item i {
+        font-size: 1.25rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 1;
+    }
+
+    .mobile-bottom-nav .nav-item span {
+        font-size: 0.62rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+        transition: color 0.25s ease;
+    }
+
+    .mobile-bottom-nav .nav-item::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        transform: translateX(-50%) scale(0);
+        width: 48px;
+        height: 36px;
+        background: rgba(37, 99, 235, 0.1);
+        border-radius: 12px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mobile-bottom-nav .nav-item.active {
+        color: #2563eb;
+    }
+
+    .mobile-bottom-nav .nav-item.active::before {
+        transform: translateX(-50%) scale(1);
+    }
+
+    .mobile-bottom-nav .nav-item.active i {
+        transform: translateY(-2px);
+        color: #2563eb;
+    }
+
+    .mobile-bottom-nav .nav-item:active {
+        transform: scale(0.9);
+    }
+
+    /* Dark mode bottom nav */
+    body.dark-mode .mobile-bottom-nav {
+        background: rgba(17, 24, 39, 0.97);
+        border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    body.dark-mode .mobile-bottom-nav .nav-item {
+        color: #6b7280;
+    }
+
+    body.dark-mode .mobile-bottom-nav .nav-item.active {
+        color: #60a5fa;
+    }
+
+    body.dark-mode .mobile-bottom-nav .nav-item::before {
+        background: rgba(96, 165, 250, 0.1);
+    }
+
+    /* ---- Header Cleanup on Mobile ---- */
+    #themeToggle {
+        display: none !important;
+    }
+
+    /* ---- Stat Cards - Mobile Premium ---- */
+    .stat-card {
+        border-radius: 16px !important;
+        padding: 14px !important;
+        border-right-width: 0 !important;
+        border-top: 3px solid transparent;
+        overflow: hidden;
+    }
+
+    .stat-card:nth-child(1) {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+        border-top-color: #2563eb;
+    }
+
+    .stat-card:nth-child(2) {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+        border-top-color: #10b981;
+    }
+
+    .stat-card:nth-child(3) {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+        border-top-color: #f59e0b;
+    }
+
+    .stat-card:nth-child(4) {
+        background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%) !important;
+        border-top-color: #06b6d4;
+    }
+
+    /* ---- Tenant Cards - Premium ---- */
+    .tenant-card {
+        border-radius: 16px !important;
+        padding: 16px !important;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+        margin-bottom: 10px !important;
+    }
+
+    .tenant-card-name {
+        font-size: 17px !important;
+        font-weight: 700 !important;
+    }
+
+    .tenant-card-action-btn {
+        border-radius: 10px !important;
+        padding: 11px 8px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        min-height: 44px !important;
+    }
+
+    .tenant-card-action-btn.primary {
+        background: #2563eb !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+    }
+
+    /* ---- More Menu - Bottom Sheet Style ---- */
+    .more-menu {
+        border-radius: 24px 24px 0 0 !important;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .more-menu-item {
+        border-radius: 12px !important;
+        margin-bottom: 4px !important;
+        min-height: 52px !important;
+    }
+
+    /* ---- Dashboard Action Cards ---- */
+    .grid .bg-gradient-to-br.from-emerald-500,
+    .grid .bg-gradient-to-br.from-blue-500 {
+        border-radius: 20px !important;
+    }
+
+    /* ---- Main Content Padding ---- */
+    .content-area {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    }
+
+    /* ---- Section Headings ---- */
+    h1.text-2xl, h1.text-xl {
+        font-size: 1.35rem !important;
+        font-weight: 800 !important;
+    }
+
+    /* ---- Search Input ---- */
+    #searchInput {
+        font-size: 16px !important; /* Prevents iOS zoom on focus */
+    }
+
+    select {
+        font-size: 16px !important;
+    }
+}
+}
