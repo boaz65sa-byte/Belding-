@@ -104,17 +104,33 @@
 
         /* Pricing Grid */
         .pricing-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
             margin-bottom: 32px;
+        }
+
+        @media (min-width: 480px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
+
+            .pricing-card.featured {
+                grid-column: 1 / -1;
+                order: -1;
+            }
         }
 
         @media (min-width: 768px) {
             .pricing-grid {
-                display: grid;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 20px;
+            }
+
+            .pricing-card.featured {
+                grid-column: auto;
+                order: 0;
             }
         }
 

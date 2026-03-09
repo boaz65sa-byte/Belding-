@@ -3811,9 +3811,9 @@ body, button, input, select, textarea {
         border-radius: 10px !important;
     }
 
-    /* ---- Overflow protection ---- */
+    /* ---- Overflow protection (do NOT use overflow-x:hidden - breaks fixed nav) ---- */
     .content-section {
-        overflow-x: hidden !important;
+        max-width: 100vw;
     }
 
     /* ---- Payment Summary Cards ---- */
