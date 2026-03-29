@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שדרוג מנוי - ועד 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f7fafc; margin: 0; padding: 40px 20px; text-align: center; color: #2d3748; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        h1 { font-size: 36px; font-weight: 800; color: #667eea; margin-bottom: 10px; }
+        p.subtitle { font-size: 18px; color: #718096; margin-bottom: 50px; }
+
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        
+        .card {
+            background: white; border-radius: 20px; padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s;
+            position: relative; border: 2px solid transparent;
+        }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .card.popular { border-color: #667eea; }
+        
+        .badge {
+            position: absolute; top: -15px; right: 50%; transform: translateX(50%);
+            background: #667eea; color: white; padding: 8px 20px; border-radius: 20px;
+            font-weight: 600; font-size: 14px;
+        }
+
+        .price { font-size: 48px; font-weight: 800; color: #2d3748; margin: 20px 0; }
+        .price span { font-size: 18px; color: #718096; font-weight: 500; }
+        
+        ul { list-style: none; padding: 0; margin: 30px 0; text-align: right; }
+        li { margin-bottom: 15px; font-size: 15px; color: #4a5568; }
+        li i { color: #48bb78; margin-left: 10px; }
+
+        .btn {
+            display: block; width: 100%; padding: 15px; border-radius: 10px;
+            font-weight: 700; text-decoration: none; transition: 0.3s;
+            cursor: pointer; border: none; font-size: 16px;
+        }
+        .btn-outline { background: white; border: 2px solid #667eea; color: #667eea; }
+        .btn-outline:hover { background: #ebf4ff; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>בחר את המסלול המתאים לך</h1>
+        <p class="subtitle">המשך ליהנות מניהול חכם, שקוף ופשוט של הבניין</p>
+
+        <div class="pricing-grid">
+            <div class="card">
+                <h3>מנוי חודשי</h3>
+                <div class="price">₪49<span>/חודש</span></div>
+                <ul>
+                    <li><i class="fas fa-check"></i> ניהול דיירים ללא הגבלה</li>
+                    <li><i class="fas fa-check"></i> הפקת קבלות אוטומטית</li>
+                    <li><i class="fas fa-check"></i> שליחת הודעות בוואטסאפ</li>
+                    <li><i class="fas fa-check"></i> דוחות כספיים</li>
+                </ul>
+                <button class="btn btn-outline" onclick="startCheckout('monthly')">בחר חודשי</button>
+            </div>
+
+            <div class="card popular">
+                <div class="badge">הכי משתלם! 🌟</div>
+                <h3>מנוי שנתי</h3>
+                <div class="price">₪490<span>/שנה</span></div>
+                <ul>
+                    <li><i class="fas fa-check"></i> <strong>חודשיים חינם!</strong></li>
+                    <li><i class="fas fa-check"></i> ניהול דיירים ללא הגבלה</li>
+                    <li><i class="fas fa-check"></i> הפקת קבלות אוטומטית</li>
+                    <li><i class="fas fa-check"></i> עדיפות בתמיכה טכנית</li>
+                </ul>
+                <button class="btn btn-primary" onclick="startCheckout('yearly')">בחר שנתי</button>
+            </div>
+        </div>
+        
+        <p style="margin-top: 40px; font-size: 14px; color: #a0aec0;">
+            <a href="index.html" style="color: #667eea;">חזור למערכת (אם יש לך גישה)</a>
+        </p>
+    </div>
+
+    <script>
+        function startCheckout(plan) {
+            // כאן נחבר בעתיד את מערכת הסליקה (כמו Meshulam או Stripe)
+            // בינתיים נעשה סימולציה
+            const message = plan === 'monthly' 
+                ? "שלום, אני מעוניין להצטרף למנוי חודשי ב-49 שח" 
+                : "שלום, אני מעוניין להצטרף למנוי שנתי ב-490 שח";
+            
+            // מפנה לוואטסאפ שלך לתשלום ידני (בתור התחלה)
+            // תחליף את המספר למספר שלך!
+            const myPhone = "972500000000"; 
+            const url = `https://wa.me/${myPhone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html> 

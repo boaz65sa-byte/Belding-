@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דשבורד - ועד 2025</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1f2937;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .header .welcome {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        
+        .user-info-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            color: white;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        /* Dashboard Grid */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            animation: fadeInUp 0.6s ease;
+        }
+        
+        /* Tile Card */
+        .tile {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--tile-color, #667eea);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .tile:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .tile:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .tile:active {
+            transform: translateY(-4px);
+        }
+        
+        .tile-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            background: var(--tile-color, #667eea);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .tile:hover .tile-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .tile-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .tile-subtitle {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+        
+        .tile-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Color Variants */
+        .tile-dashboard { --tile-color: #667eea; }
+        .tile-tenants { --tile-color: #10b981; }
+        .tile-payments { --tile-color: #f59e0b; }
+        .tile-expenses { --tile-color: #ef4444; }
+        .tile-messages { --tile-color: #8b5cf6; }
+        .tile-reports { --tile-color: #06b6d4; }
+        .tile-settings { --tile-color: #6b7280; }
+        .tile-profile { --tile-color: #ec4899; }
+        
+        /* Logout Button */
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .tiles-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .tile {
+                padding: 20px 15px;
+            }
+            
+            .tile-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.75rem;
+            }
+            
+            .tile-title {
+                font-size: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .logout-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .tiles-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 50px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Logout Button -->
+    <button class="logout-btn" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>התנתק</span>
+    </button>
+
+    <!-- Loading State -->
+    <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p>טוען נתונים...</p>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-container" id="dashboardContent" style="display: none;">
+        <!-- Header -->
+        <div class="header">
+            <h1>ועד 2025 - מערכת ניהול</h1>
+            <p class="welcome">ברוך הבא! בחר את הפעולה הרצויה</p>
+            
+            <div class="user-info-top">
+                <div class="user-avatar" id="userAvatar">ב</div>
+                <div style="text-align: right;">
+                    <div style="font-weight: 600;" id="userName">בועז סעדה</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;" id="userEmail">boaz65sa@gmail.com</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tiles Grid -->
+        <div class="tiles-grid">
+            <!-- Dashboard Overview -->
+            <a href="overview-tiles.html" class="tile tile-dashboard">
+                <div class="tile-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="tile-title">לוח מחוונים</div>
+                <div class="tile-subtitle">סקירה כללית וגרפים</div>
+            </a>
+
+            <!-- Tenants -->
+            <a href="tenants-tiles.html" class="tile tile-tenants">
+                <span class="tile-badge" id="tenantsCount">0</span>
+                <div class="tile-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="tile-title">דיירים</div>
+                <div class="tile-subtitle">ניהול דיירים</div>
+            </a>
+
+            <!-- Payments -->
+            <a href="payments-tiles.html" class="tile tile-payments">
+                <span class="tile-badge" id="paymentsCount">0</span>
+                <div class="tile-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="tile-title">תשלומים</div>
+                <div class="tile-subtitle">חשבוניות ותשלומים</div>
+            </a>
+
+            <!-- Expenses -->
+            <a href="expenses-tiles.html" class="tile tile-expenses">
+                <div class="tile-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="tile-title">הוצאות</div>
+                <div class="tile-subtitle">ניהול הוצאות</div>
+            </a>
+
+            <!-- Messages -->
+            <a href="messages-tiles.html" class="tile tile-messages">
+                <div class="tile-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div class="tile-title">הודעות</div>
+                <div class="tile-subtitle">הודעות לדיירים</div>
+            </a>
+
+            <!-- Reports -->
+            <a href="overview-tiles.html" class="tile tile-reports">
+                <div class="tile-icon">
+                    <i class="fas fa-file-chart-line"></i>
+                </div>
+                <div class="tile-title">דוחות</div>
+                <div class="tile-subtitle">דוחות וניתוחים</div>
+            </a>
+
+            <!-- Settings -->
+            <a href="profile.html" class="tile tile-settings">
+                <div class="tile-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="tile-title">הגדרות</div>
+                <div class="tile-subtitle">הגדרות מערכת</div>
+            </a>
+
+            <!-- Profile -->
+            <a href="profile.html" class="tile tile-profile">
+                <div class="tile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="tile-title">פרופיל</div>
+                <div class="tile-subtitle">פרטים אישיים</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Supabase & Auth -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        // Initialize Dashboard
+        (async function() {
+            try {
+                // Get Supabase client
+                const supabase = await getSupabase();
+                
+                if (!supabase) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Check authentication
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error || !session) {
+                    console.log('לא מחובר, מפנה ל-login');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const user = session.user;
+                console.log('✅ משתמש מחובר:', user.email);
+
+                // Get user profile
+                const { data: profile, error: profileError } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile) {
+                    console.log('✅ פרופיל נטען:', profile);
+                    
+                    // Update UI with user info
+                    const displayName = profile.full_name || user.email?.split('@')[0] || 'משתמש';
+                    const displayEmail = user.email || '';
+                    
+                    document.getElementById('userName').textContent = displayName;
+                    document.getElementById('userEmail').textContent = displayEmail;
+                    
+                    // Set avatar initial
+                    const initial = displayName.charAt(0).toUpperCase();
+                    document.getElementById('userAvatar').textContent = initial;
+                }
+
+                // Load statistics from Supabase
+                try {
+                    // Count tenants
+                    const { count: tenantsCount } = await supabase
+                        .from('tenants')
+                        .select('*', { count: 'exact', head: true });
+                    
+                    if (tenantsCount) {
+                        document.getElementById('tenantsCount').textContent = tenantsCount;
+                    }
+
+                    // Count pending payments
+                    const { count: paymentsCount } = await supabase
+                        .from('payments')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('status', 'pending');
+                    
+                    if (paymentsCount && paymentsCount > 0) {
+                        document.getElementById('paymentsCount').textContent = paymentsCount;
+                    } else {
+                        document.getElementById('paymentsCount').style.display = 'none';
+                    }
+                } catch (statsError) {
+                    console.warn('שגיאה בטעינת סטטיסטיקות:', statsError);
+                    // Hide badges if data not available
+                    document.getElementById('tenantsCount').style.display = 'none';
+                    document.getElementById('paymentsCount').style.display = 'none';
+                }
+
+                // Show dashboard
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('dashboardContent').style.display = 'block';
+
+            } catch (error) {
+                console.error('❌ שגיאה באתחול:', error);
+                alert('שגיאה בטעינת הדשבורד');
+                window.location.href = 'login.html';
+            }
+        })();
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            if (confirm('האם אתה בטוח שברצונך להתנתק?')) {
+                try {
+                    const supabase = await getSupabase();
+                    if (supabase) {
+                        await supabase.auth.signOut();
+                    }
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('שגיאה בהתנתקות:', error);
+                    alert('שגיאה בהתנתקות. מנסה שוב...');
+                    window.location.href = 'login.html';
+                }
+            }
+        });
+
+        // Add click animation
+        document.querySelectorAll('.tile').forEach(tile => {
+            tile.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('div');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255,255,255,0.6)';
+                ripple.style.width = ripple.style.height = '100px';
+                ripple.style.left = e.offsetX - 50 + 'px';
+                ripple.style.top = e.offsetY - 50 + 'px';
+                ripple.style.animation = 'ripple 0.6s ease-out';
+                ripple.style.pointerEvents = 'none';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

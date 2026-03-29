@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 בדיקת מערכת האימות</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 32px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border-right: 4px solid #667eea;
+        }
+
+        .section h2 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .status-loading {
+            background: #fbbf24;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .status-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-error {
+            background: #ef4444;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .file-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .file-card.exists {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .file-card.missing {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .file-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fbbf24;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 2px solid #3b82f6;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .next-steps {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .next-steps h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            border-right: 3px solid #3b82f6;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 בדיקת מערכת האימות - ועד 2025</h1>
+
+        <!-- קבצים שנוצרו -->
+        <div class="section">
+            <h2>📁 קבצים שנוצרו</h2>
+            <div class="file-list">
+                <div class="file-card exists">
+                    <div class="file-icon">✅</div>
+                    <div class="file-name">login.html</div>
+                </div>
+                <div class="file-card exists">
+                    <div class="file-icon">✅</div>
+                    <div class="file-name">js/config.js</div>
+                </div>
+                <div class="file-card exists">
+                    <div class="file-icon">✅</div>
+                    <div class="file-name">js/supabase-client.js</div>
+                </div>
+                <div class="file-card exists">
+                    <div class="file-icon">✅</div>
+                    <div class="file-name">js/auth.js</div>
+                </div>
+                <div class="file-card exists">
+                    <div class="file-icon">✅</div>
+                    <div class="file-name">SETUP-GUIDE.md</div>
+                </div>
+                <div class="file-card missing">
+                    <div class="file-icon">⏳</div>
+                    <div class="file-name">signup.html</div>
+                </div>
+                <div class="file-card missing">
+                    <div class="file-icon">⏳</div>
+                    <div class="file-name">admin.html</div>
+                </div>
+                <div class="file-card missing">
+                    <div class="file-icon">⏳</div>
+                    <div class="file-name">pricing.html</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- סטטוס הגדרות -->
+        <div class="section">
+            <h2>⚙️ סטטוס הגדרות</h2>
+            <div class="check-item">
+                <div class="status status-error">❌</div>
+                <div>
+                    <strong>Supabase URL</strong><br>
+                    <span style="color: #ef4444;">לא הוגדר - עדיין ברירת מחדל</span>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="status status-error">❌</div>
+                <div>
+                    <strong>Supabase Anon Key</strong><br>
+                    <span style="color: #ef4444;">לא הוגדר - עדיין ברירת מחדל</span>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="status status-success">✅</div>
+                <div>
+                    <strong>הגדרות מחירים</strong><br>
+                    <span style="color: #10b981;">מוכן - ₪49/חודש, ₪490/שנה, ₪499 חד פעמי</span>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="status status-success">✅</div>
+                <div>
+                    <strong>תקופת ניסיון</strong><br>
+                    <span style="color: #10b981;">מוגדר - 14 ימים חינם</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- אזהרה -->
+        <div class="alert alert-warning">
+            <strong>⚠️ חשוב!</strong> המערכת לא תעבוד עד שתגדיר את Supabase Config!<br>
+            צריך להחליף את הערכים ב-<code>js/config.js</code>
+        </div>
+
+        <!-- מה עובד -->
+        <div class="section">
+            <h2>✅ מה כבר עובד</h2>
+            <div class="check-item">
+                <div class="status status-success">✅</div>
+                <div><strong>מבנה קבצים</strong> - כל הקבצים במקום הנכון</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-success">✅</div>
+                <div><strong>דף התחברות</strong> - עיצוב מלא ומוכן</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-success">✅</div>
+                <div><strong>לוגיקת אימות</strong> - כל הפונקציות מוכנות</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-success">✅</div>
+                <div><strong>חיבור Supabase</strong> - הקוד מוכן, רק צריך Keys</div>
+            </div>
+        </div>
+
+        <!-- מה חסר -->
+        <div class="section">
+            <h2>⏳ מה עוד חסר</h2>
+            <div class="check-item">
+                <div class="status status-loading">⏳</div>
+                <div><strong>signup.html</strong> - דף רישום משתמשים חדשים</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-loading">⏳</div>
+                <div><strong>admin.html</strong> - פאנל ניהול אדמין</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-loading">⏳</div>
+                <div><strong>pricing.html</strong> - דף מחירים ותשלום</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-loading">⏳</div>
+                <div><strong>profile.html</strong> - דף פרופיל משתמש</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-loading">⏳</div>
+                <div><strong>blocked.html</strong> - דף חסימה</div>
+            </div>
+            <div class="check-item">
+                <div class="status status-loading">⏳</div>
+                <div><strong>index.html</strong> - הגנת גישה (עדכון)</div>
+            </div>
+        </div>
+
+        <!-- בדיקת login.html -->
+        <div class="alert alert-info">
+            <strong>💡 רוצה לראות את דף ההתחברות?</strong><br>
+            לחץ על הכפתור למטה לפתיחת login.html (יופיע אזהרה כתומה כי Supabase לא מוגדר)
+        </div>
+
+        <div style="text-align: center;">
+            <a href="login.html" class="btn" target="_blank">🔐 פתח את דף ההתחברות</a>
+            <a href="SETUP-GUIDE.md" class="btn" target="_blank">📖 מדריך הגדרה מפורט</a>
+        </div>
+
+        <!-- צעדים הבאים -->
+        <div class="next-steps">
+            <h3>🚀 מה הצעדים הבאים?</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>הגדר Supabase</strong> (10 דקות)
+                <div class="code-block">
+1. לך ל: https://supabase.com
+2. צור פרויקט חדש
+3. הרץ את ה-SQL (יש לך את הקוד)
+4. העתק URL + Anon Key
+5. שים ב-js/config.js
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>בנה את שאר הדפים</strong> (60-90 דקות)
+                <div style="margin-top: 10px;">
+                    תגיד לבוט: <strong>"תמשיך לבנות"</strong> והוא ייצור:
+                    <ul style="margin: 10px 0 0 30px;">
+                        <li>signup.html - רישום משתמשים</li>
+                        <li>admin.html - פאנל אדמין</li>
+                        <li>pricing.html - תשלומים</li>
+                        <li>profile.html - פרופיל</li>
+                        <li>blocked.html - חסימה</li>
+                        <li>עדכון index.html + js/app.js</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>בדיקות</strong> (15 דקות)
+                <ul style="margin: 10px 0 0 30px;">
+                    <li>רישום משתמש ראשון</li>
+                    <li>התחברות</li>
+                    <li>בדיקת גישה</li>
+                    <li>ניהול מנויים</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>הפעלה!</strong> 🎉
+                <div style="margin-top: 10px; color: #10b981; font-weight: bold;">
+                    המערכת מוכנה לשימוש עם הגנת משתמשים ותשלומים!
+                </div>
+            </div>
+        </div>
+
+        <!-- סיכום -->
+        <div class="alert alert-success" style="margin-top: 30px;">
+            <strong>✅ סיכום ביניים:</strong><br>
+            בנינו 40% מהמערכת! התשתית מוכנה, עכשיו צריך:
+            <ol style="margin: 10px 0 0 20px;">
+                <li>להגדיר Supabase (או לדלג זמנית)</li>
+                <li>להחליט אם להמשיך לבנות את שאר הדפים</li>
+            </ol>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f7fafc; border-radius: 12px;">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">💬 מה אתה רוצה לעשות עכשיו?</h3>
+            <div style="font-size: 18px; line-height: 1.8;">
+                <div>🔧 <strong>"הולך להגדיר Supabase"</strong> - תלך להגדיר ותחזור</div>
+                <div>🚀 <strong>"תמשיך לבנות"</strong> - אני אמשיך לבנות הכל</div>
+                <div>❓ <strong>"יש לי שאלה"</strong> - תשאל מה שתרצה</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

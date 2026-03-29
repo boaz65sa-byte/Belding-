@@ -1,0 +1,79 @@
+# ===================================
+# Backup files - DON'T UPLOAD!
+# ===================================
+*.backup*
+*.IRON-BACKUP*
+*-before-*
+*.backup-v*
+*backup-before*
+
+# ===================================
+# Documentation files (Optional)
+# ===================================
+# Uncomment these if you don't want to upload docs
+# CHECKPOINT*.md
+# RELEASE*.md
+# BUGFIX*.md
+# HOTFIX*.md
+# VERIFICATION*.md
+# UPDATE-NOTES*.md
+# SYNC-FIX*.md
+# MOBILE-FIX*.md
+# PRINT-FIX*.md
+# QUICK-*.md
+# FINAL-*.md
+# ALL-FIXES*.md
+# FIX-*.md
+# RESTORE-POINT*.md
+# BACKUP-*.md
+# CHANGES-PLAN*.md
+# UPGRADE-GUIDE*.md
+# SUMMARY*.md
+
+# ===================================
+# Node modules (if any)
+# ===================================
+node_modules/
+package-lock.json
+
+# ===================================
+# OS files
+# ===================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===================================
+# IDE files
+# ===================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===================================
+# Logs
+# ===================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================================
+# Temporary files
+# ===================================
+*.tmp
+*.temp
+.cache/
+
+# ===================================
+# Build output (if any)
+# ===================================
+dist/
+build/

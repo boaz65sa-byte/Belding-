@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חשבון חסום - ועד 2025</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .blocked-container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .blocked-icon {
+            font-size: 100px;
+            color: #ef4444;
+            margin-bottom: 30px;
+        }
+
+        .blocked-container h1 {
+            font-size: 36px;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .blocked-container p {
+            font-size: 18px;
+            color: #718096;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .reasons {
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: right;
+        }
+
+        .reasons h3 {
+            color: #991b1b;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .reasons ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .reasons li {
+            color: #7f1d1d;
+            margin-bottom: 10px;
+            padding-right: 25px;
+            position: relative;
+        }
+
+        .reasons li:before {
+            content: "•";
+            position: absolute;
+            right: 0;
+            color: #ef4444;
+            font-size: 20px;
+        }
+
+        .contact-info {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .contact-info h3 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .contact-item i {
+            font-size: 24px;
+            color: #667eea;
+            width: 30px;
+        }
+
+        .contact-item a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #a0aec0;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .blocked-container {
+                padding: 40px 25px;
+            }
+
+            .blocked-container h1 {
+                font-size: 28px;
+            }
+
+            .blocked-icon {
+                font-size: 80px;
+            }
+
+            .contact-item {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="blocked-container">
+        <div class="blocked-icon">
+            <i class="fas fa-ban"></i>
+        </div>
+
+        <h1>🚫 החשבון שלך חסום</h1>
+        
+        <p>
+            הגישה לחשבון זה הושעתה זמנית על ידי מנהל המערכת.
+        </p>
+
+        <div class="reasons">
+            <h3>סיבות אפשריות לחסימה:</h3>
+            <ul>
+                <li>הפרת תנאי השימוש</li>
+                <li>פעילות חשודה בחשבון</li>
+                <li>אי תשלום עבור המנוי</li>
+                <li>שימוש לא מורשה במערכת</li>
+                <li>דיווח ממשתמשים אחרים</li>
+            </ul>
+        </div>
+
+        <p style="font-weight: 600; color: #2d3748;">
+            אם אתה חושב שזו טעות, אנא צור קשר עם התמיכה שלנו.
+        </p>
+
+        <div class="contact-info">
+            <h3>📞 צור קשר</h3>
+            <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <span>אימייל: <a href="mailto:support@vaad2025.com">support@vaad2025.com</a></span>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-phone"></i>
+                <span>טלפון: <a href="tel:+972501234567">050-123-4567</a></span>
+            </div>
+            <div class="contact-item">
+                <i class="fab fa-whatsapp"></i>
+                <span>WhatsApp: <a href="https://wa.me/972501234567">לחץ לשליחת הודעה</a></span>
+            </div>
+        </div>
+
+        <div>
+            <button class="btn btn-primary" onclick="window.location.href='mailto:support@vaad2025.com?subject=בקשה לשחרור חסימה'">
+                <i class="fas fa-envelope"></i>
+                שלח אימייל לתמיכה
+            </button>
+            <button class="btn btn-outline" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt"></i>
+                התנתק
+            </button>
+        </div>
+
+        <div class="footer">
+            <p><strong>ועד 2025</strong> - מערכת ניהול דיירים מתקדמת</p>
+            <p>© 2024-2026 בועז סעדה | כל הזכויות שמורות</p>
+        </div>
+    </div>
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        async function handleLogout() {
+            await initSupabase();
+            await signOut();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

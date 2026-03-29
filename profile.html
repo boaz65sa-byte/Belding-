@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>החשבון שלי - ועד 2025</title>
+    
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f7fafc;
+            padding: 40px 20px;
+        }
+
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+
+        .profile-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .profile-header p {
+            opacity: 0.9;
+        }
+
+        .profile-content {
+            background: white;
+            padding: 40px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            font-size: 22px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .info-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #718096;
+        }
+
+        .info-value {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-trial {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 0;
+            }
+
+            .profile-header {
+                border-radius: 0;
+                padding: 30px 20px;
+            }
+
+            .profile-content {
+                border-radius: 0;
+                padding: 25px 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1><i class="fas fa-user-circle"></i> החשבון שלי</h1>
+            <p>נהל את הפרטים האישיים והמנוי שלך</p>
+        </div>
+
+        <div class="profile-content">
+            <!-- Account Info -->
+            <div class="section">
+                <h2><i class="fas fa-info-circle"></i> מידע על החשבון</h2>
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">סטטוס:</span>
+                        <span class="info-value"><span class="status-badge status-active" id="statusBadge">טוען...</span></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">סוג מנוי:</span>
+                        <span class="info-value" id="subscriptionType">טוען...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">תאריך הצטרפות:</span>
+                        <span class="info-value" id="joinDate">טוען...</span>
+                    </div>
+                    <div class="info-row" id="expiryRow" style="display: none;">
+                        <span class="info-label">המנוי פג ב:</span>
+                        <span class="info-value" id="expiryDate"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile -->
+            <div class="section">
+                <h2><i class="fas fa-edit"></i> עריכת פרטים</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>שם מלא</label>
+                        <input type="text" class="form-input" id="fullName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>אימייל</label>
+                        <input type="email" class="form-input" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>טלפון</label>
+                        <input type="tel" class="form-input" id="phone" placeholder="אופציונלי">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        שמור שינויים
+                    </button>
+                </form>
+            </div>
+
+            <!-- Actions -->
+            <div class="section">
+                <h2><i class="fas fa-tools"></i> פעולות</h2>
+                <div class="actions">
+                    <button class="btn btn-outline" onclick="window.location.href='pricing.html'">
+                        <i class="fas fa-crown"></i>
+                        שדרג מנוי
+                    </button>
+                    <button class="btn btn-danger" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        התנתק
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">
+                <i class="fas fa-arrow-right"></i>
+                חזרה לדף הראשי
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        // הגנת גישה
+        (async function() {
+            await initSupabase();
+            const hasAccess = await requireAuth();
+            if (hasAccess) {
+                loadProfile();
+            }
+        })();
+
+        // טעינת פרופיל
+        async function loadProfile() {
+            try {
+                const user = await getCurrentUser();
+                if (!user) return;
+
+                const profile = await getUserProfile(user.id);
+                if (!profile) return;
+
+                // מלא טופס
+                document.getElementById('fullName').value = profile.full_name || '';
+                document.getElementById('email').value = profile.email || '';
+                document.getElementById('phone').value = profile.phone || '';
+
+                // מידע
+                const statusText = {
+                    active: '✅ פעיל',
+                    trial: '🎁 תקופת ניסיון',
+                    expired: '⏰ פג',
+                    blocked: '🚫 חסום'
+                };
+                document.getElementById('statusBadge').textContent = statusText[profile.status] || profile.status;
+                document.getElementById('statusBadge').className = `status-badge status-${profile.status}`;
+
+                const subText = {
+                    monthly: '📅 חודשי',
+                    yearly: '🎯 שנתי',
+                    lifetime: '💎 לכל החיים',
+                    trial: '🎁 ניסיון'
+                };
+                document.getElementById('subscriptionType').textContent = subText[profile.subscription_type] || profile.subscription_type;
+                
+                document.getElementById('joinDate').textContent = new Date(profile.created_at).toLocaleDateString('he-IL');
+
+                if (profile.subscription_expires) {
+                    document.getElementById('expiryRow').style.display = 'flex';
+                    document.getElementById('expiryDate').textContent = new Date(profile.subscription_expires).toLocaleDateString('he-IL');
+                }
+
+            } catch (error) {
+                console.error('שגיאה בטעינת פרופיל:', error);
+                alert('שגיאה בטעינת הפרטים');
+            }
+        }
+
+        // שמירת שינויים
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            try {
+                const result = await updateProfile({
+                    full_name: fullName,
+                    email: email,
+                    phone: phone || null
+                });
+
+                if (result.success) {
+                    alert('הפרטים עודכנו בהצלחה!');
+                    loadProfile();
+                } else {
+                    alert('שגיאה: ' + result.error);
+                }
+            } catch (error) {
+                alert('שגיאה בשמירה: ' + error.message);
+            }
+        });
+
+        // התנתקות
+        async function handleLogout() {
+            if (confirm('האם להתנתק?')) {
+                const result = await logout();
+                if (result.success) {
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

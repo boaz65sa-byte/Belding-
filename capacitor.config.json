@@ -1,0 +1,6 @@
+{
+  "appId": "com.boazsaada.tenantmanagement",
+  "appName": "ניהול דיירים",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
