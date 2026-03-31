@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דוגמה C - כרטיסים</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #86868b;
+            font-size: 14px;
+        }
+        
+        .tenant-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .tenant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .tenant-info {
+            flex: 1;
+        }
+        
+        .tenant-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 4px;
+        }
+        
+        .tenant-apartment {
+            font-size: 14px;
+            color: #86868b;
+        }
+        
+        .tenant-status {
+            font-size: 24px;
+        }
+        
+        .tenant-details {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 12px;
+        }
+        
+        .detail-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #86868b;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .tenant-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            flex: 1;
+            min-width: calc(50% - 4px);
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .action-btn.primary {
+            background: #007aff;
+            color: white;
+        }
+        
+        .action-btn.secondary {
+            background: #f0f0f0;
+            color: #1d1d1f;
+        }
+        
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .info-banner {
+            background: #007aff;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .info-banner h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .info-banner p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 דוגמה C - כרטיסים</h1>
+        <p>כל דייר = כרטיס נפרד (כמו WhatsApp)</p>
+    </div>
+    
+    <div class="info-banner">
+        <h2>✨ יתרונות</h2>
+        <p>✅ כל המידע נראה בבירור<br>✅ כפתורים גדולים ונוחים<br>✅ אין צורך בגלילה צידית</p>
+    </div>
+
+    <!-- Tenant Card 1 -->
+    <div class="tenant-card">
+        <div class="tenant-header">
+            <div class="tenant-info">
+                <div class="tenant-name">יוסי כהן</div>
+                <div class="tenant-apartment">דירה 1</div>
+            </div>
+            <div class="tenant-status">💚</div>
+        </div>
+        
+        <div class="tenant-details">
+            <div class="detail-item">
+                <div class="detail-label">סכום חודשי</div>
+                <div class="detail-value">₪500</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">תשלומים</div>
+                <div class="detail-value">10/12</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">יתרה</div>
+                <div class="detail-value">-₪1,000</div>
+            </div>
+        </div>
+        
+        <div class="tenant-actions">
+            <button class="action-btn primary">
+                <i class="fas fa-dollar-sign"></i>
+                רשום תשלום
+            </button>
+            <button class="action-btn secondary">
+                <i class="fas fa-edit"></i>
+                ערוך
+            </button>
+            <button class="action-btn secondary">
+                <i class="fas fa-calendar"></i>
+                מעקב
+            </button>
+            <button class="action-btn secondary">
+                <i class="fab fa-whatsapp"></i>
+                WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Tenant Card 2 -->
+    <div class="tenant-card">
+        <div class="tenant-header">
+            <div class="tenant-info">
+                <div class="tenant-name">שרה לוי</div>
+                <div class="tenant-apartment">דירה 2</div>
+            </div>
+            <div class="tenant-status">⚠️</div>
+        </div>
+        
+        <div class="tenant-details">
+            <div class="detail-item">
+                <div class="detail-label">סכום חודשי</div>
+                <div class="detail-value">₪450</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">תשלומים</div>
+                <div class="detail-value">8/12</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">חוב</div>
+                <div class="detail-value" style="color: #ff3b30;">₪1,800</div>
+            </div>
+        </div>
+        
+        <div class="tenant-actions">
+            <button class="action-btn primary">
+                <i class="fas fa-dollar-sign"></i>
+                רשום תשלום
+            </button>
+            <button class="action-btn secondary">
+                <i class="fas fa-edit"></i>
+                ערוך
+            </button>
+            <button class="action-btn secondary">
+                <i class="fas fa-calendar"></i>
+                מעקב
+            </button>
+            <button class="action-btn secondary">
+                <i class="fab fa-whatsapp"></i>
+                WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Tenant Card 3 -->
+    <div class="tenant-card">
+        <div class="tenant-header">
+            <div class="tenant-info">
+                <div class="tenant-name">דוד ישראלי</div>
+                <div class="tenant-apartment">דירה 3</div>
+            </div>
+            <div class="tenant-status">✅</div>
+        </div>
+        
+        <div class="tenant-details">
+            <div class="detail-item">
+                <div class="detail-label">סכום חודשי</div>
+                <div class="detail-value">₪600</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">תשלומים</div>
+                <div class="detail-value">12/12</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">סטטוס</div>
+                <div class="detail-value" style="color: #34c759;">שולם</div>
+            </div>
+        </div>
+        
+        <div class="tenant-actions">
+            <button class="action-btn primary">
+                <i class="fas fa-dollar-sign"></i>
+                רשום תשלום
+            </button>
+            <button class="action-btn secondary">
+                <i class="fas fa-edit"></i>
+                ערוך
+            </button>
+            <button class="action-btn secondary">
+                <i class="fas fa-calendar"></i>
+                מעקב
+            </button>
+            <button class="action-btn secondary">
+                <i class="fab fa-whatsapp"></i>
+                WhatsApp
+            </button>
+        </div>
+    </div>
+
+</body>
+</html>

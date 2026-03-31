@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הודעות לדיירים - ועד 2025</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icon-192.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tiles Style -->
+    <link rel="stylesheet" href="css/tiles-style.css">
+</head>
+<body>
+    <!-- Loading State -->
+    <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p>טוען נתונים...</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="tiles-container" id="mainContent" style="display: none;">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <a href="dashboard-tiles.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                <span>חזרה לדשבורד</span>
+            </a>
+            
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>התנתק</span>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <div class="tiles-header">
+            <h1><i class="fas fa-bullhorn"></i> הודעות לדיירים</h1>
+            <p class="subtitle">שליחת הודעות ועדכונים</p>
+        </div>
+
+        <!-- Actions Bar -->
+        <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openSendMessageModal()">
+                <i class="fas fa-paper-plane"></i>
+                <span>שלח הודעה חדשה</span>
+            </button>
+            
+            <button class="btn btn-outline" onclick="exportMessages()">
+                <i class="fas fa-download"></i>
+                <span>ייצא</span>
+            </button>
+        </div>
+
+        <!-- Messages Grid -->
+        <div class="cards-grid" id="messagesGrid">
+            <!-- Messages will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <h3 class="empty-title">אין הודעות במערכת</h3>
+            <p class="empty-text">שלח את ההודעה הראשונה שלך לדיירים</p>
+            <button class="btn btn-primary btn-lg" onclick="openSendMessageModal()">
+                <i class="fas fa-paper-plane"></i>
+                <span>שלח הודעה חדשה</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Send Message Modal -->
+    <div class="modal" id="messageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">שלח הודעה לדיירים</h2>
+                <button class="modal-close" onclick="closeMessageModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="messageForm" onsubmit="sendMessage(event)">
+                <div class="form-group">
+                    <label class="form-label">נמענים *</label>
+                    <select class="form-select" id="recipients" required>
+                        <option value="all">כל הדיירים</option>
+                        <option value="active">דיירים פעילים בלבד</option>
+                        <option value="select">בחר דיירים...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="tenantsListGroup" style="display: none;">
+                    <label class="form-label">בחר דיירים</label>
+                    <div id="tenantsList" style="max-height: 200px; overflow-y: auto; border: 2px solid #e5e7eb; border-radius: 10px; padding: 15px;">
+                        <!-- Tenants checkboxes will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">נושא *</label>
+                    <input type="text" class="form-input" id="messageSubject" required placeholder="לדוגמה: עדכון חשוב">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">הודעה *</label>
+                    <textarea class="form-textarea" id="messageContent" required placeholder="כתוב את ההודעה כאן..." style="min-height: 150px;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="sendEmail" checked>
+                        <span>שלח גם באימייל (אם קיים)</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="sendSMS">
+                        <span>שלח גם ב-SMS (דורש הגדרה)</span>
+                    </label>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeMessageModal()">
+                        ביטול
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>שלח הודעה</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase & Auth -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tiles-app.js"></script>
+
+    <script>
+        let messages = [];
+        let tenants = [];
+
+        // ===== Initialize =====
+        window.addEventListener('DOMContentLoaded', async () => {
+            const initialized = await window.TilesApp.init();
+            if (!initialized) return;
+            
+            await loadTenants();
+            loadMessages();
+            
+            // Recipients change handler
+            document.getElementById('recipients').addEventListener('change', function() {
+                document.getElementById('tenantsListGroup').style.display = 
+                    this.value === 'select' ? 'block' : 'none';
+            });
+        });
+
+        // ===== Load Tenants =====
+        async function loadTenants() {
+            try {
+                const { data, error } = await window.TilesApp.supabase
+                    .from('tenants')
+                    .select('*')
+                    .order('apartment_number');
+                
+                if (error) throw error;
+                
+                tenants = data || [];
+                populateTenantsList();
+                
+            } catch (error) {
+                console.error('❌ שגיאה בטעינת דיירים:', error);
+            }
+        }
+
+        // ===== Populate Tenants List =====
+        function populateTenantsList() {
+            const list = document.getElementById('tenantsList');
+            list.innerHTML = tenants.map(t => `
+                <label style="display: flex; align-items: center; gap: 10px; padding: 8px; cursor: pointer; border-radius: 8px; transition: background 0.2s;" 
+                       onmouseover="this.style.background='#f3f4f6'" 
+                       onmouseout="this.style.background='transparent'">
+                    <input type="checkbox" name="selectedTenants" value="${t.id}">
+                    <span><strong>דירה ${t.apartment_number}</strong> - ${t.name}</span>
+                </label>
+            `).join('');
+        }
+
+        // ===== Load Messages =====
+        function loadMessages() {
+            // For demo purposes, showing empty state
+            // In real app, load from database
+            messages = [];
+            renderMessages();
+        }
+
+        // ===== Render Messages =====
+        function renderMessages() {
+            const grid = document.getElementById('messagesGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (messages.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = messages.map(msg => `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${msg.subject}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                <i class="fas fa-users"></i> ${msg.recipients} נמענים
+                            </div>
+                        </div>
+                        <div class="card-icon" style="background: var(--primary);">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <p style="margin-bottom: 10px;">${msg.content}</p>
+                        <div style="display: flex; gap: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+                            <span><i class="fas fa-calendar"></i> ${window.formatDate(msg.date)}</span>
+                            ${msg.email ? '<span><i class="fas fa-envelope"></i> אימייל</span>' : ''}
+                            ${msg.sms ? '<span><i class="fas fa-sms"></i> SMS</span>' : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <button class="btn btn-danger btn-sm" onclick="deleteMessage('${msg.id}')">
+                            <i class="fas fa-trash"></i>
+                            <span>מחק</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== Open Send Message Modal =====
+        function openSendMessageModal() {
+            document.getElementById('messageForm').reset();
+            document.getElementById('tenantsListGroup').style.display = 'none';
+            window.TilesApp.openModal('messageModal');
+        }
+
+        // ===== Close Message Modal =====
+        function closeMessageModal() {
+            window.TilesApp.closeModal('messageModal');
+            document.getElementById('messageForm').reset();
+        }
+
+        // ===== Send Message =====
+        async function sendMessage(event) {
+            event.preventDefault();
+            
+            try {
+                const recipients = document.getElementById('recipients').value;
+                const subject = document.getElementById('messageSubject').value;
+                const content = document.getElementById('messageContent').value;
+                const sendEmail = document.getElementById('sendEmail').checked;
+                const sendSMS = document.getElementById('sendSMS').checked;
+                
+                let recipientsList = [];
+                
+                if (recipients === 'all') {
+                    recipientsList = tenants.map(t => t.id);
+                } else if (recipients === 'active') {
+                    recipientsList = tenants.filter(t => t.status !== 'inactive').map(t => t.id);
+                } else {
+                    const checkboxes = document.querySelectorAll('input[name="selectedTenants"]:checked');
+                    recipientsList = Array.from(checkboxes).map(cb => cb.value);
+                }
+                
+                if (recipientsList.length === 0) {
+                    window.showToast('יש לבחור לפחות נמען אחד', 'warning');
+                    return;
+                }
+                
+                // Simulate message sending
+                console.log('שולח הודעה:', {
+                    recipients: recipientsList.length,
+                    subject,
+                    content,
+                    sendEmail,
+                    sendSMS
+                });
+                
+                window.showToast(`ההודעה נשלחה ל-${recipientsList.length} דיירים בהצלחה!`, 'success');
+                closeMessageModal();
+                
+                // Add to messages list for display
+                messages.unshift({
+                    id: Date.now(),
+                    subject,
+                    content,
+                    recipients: recipientsList.length,
+                    email: sendEmail,
+                    sms: sendSMS,
+                    date: new Date().toISOString()
+                });
+                
+                renderMessages();
+                
+            } catch (error) {
+                console.error('❌ שגיאה בשליחת הודעה:', error);
+                window.TilesApp.handleError(error, 'שגיאה בשליחת ההודעה');
+            }
+        }
+
+        // ===== Delete Message =====
+        function deleteMessage(messageId) {
+            if (confirm('האם למחוק הודעה זו?')) {
+                messages = messages.filter(m => m.id !== parseInt(messageId));
+                renderMessages();
+                window.showToast('ההודעה נמחקה', 'success');
+            }
+        }
+
+        // ===== Export Messages =====
+        function exportMessages() {
+            if (messages.length === 0) {
+                window.showToast('אין הודעות לייצא', 'warning');
+                return;
+            }
+            
+            const exportData = messages.map(m => ({
+                'נושא': m.subject,
+                'תוכן': m.content,
+                'נמענים': m.recipients,
+                'תאריך': window.formatDate(m.date),
+                'אימייל': m.email ? 'כן' : 'לא',
+                'SMS': m.sms ? 'כן' : 'לא'
+            }));
+            
+            window.TilesApp.exportToCSV(exportData, 'הודעות');
+        }
+        
+        window.TilesApp.hideLoading();
+    </script>
+</body>
+</html>

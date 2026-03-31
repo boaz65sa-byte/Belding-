@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ניהול דיירים | מובייל</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2563eb">
+    
+    <!-- Icons -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Mobile CSS -->
+    <link rel="stylesheet" href="css/mobile.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+            padding-bottom: 70px; /* Space for bottom nav */
+        }
+        
+        /* Top Bar */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .mobile-header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .mobile-header .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        /* Content Area */
+        .mobile-content {
+            margin-top: 60px;
+            padding: 15px;
+            min-height: calc(100vh - 130px);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .stat-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* Tenant Cards */
+        .tenant-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .tenant-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .tenant-card .name {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .tenant-card .apartment {
+            background: #2563eb;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .tenant-card .info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .tenant-card .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .tenant-card .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        /* FAB Button */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            cursor: pointer;
+            z-index: 999;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .nav-item.active {
+            color: #2563eb;
+        }
+        
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+        }
+        
+        /* Quick Add Form */
+        .quick-form {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <button class="menu-btn" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 id="pageTitle">דשבורד</h1>
+        <button class="menu-btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-desktop"></i>
+        </button>
+    </div>
+    
+    <!-- FAB Button -->
+    <button class="fab" id="fabBtn" onclick="handleFabClick()">
+        <i class="fas fa-plus"></i>
+    </button>
+    
+    <!-- Mobile Content -->
+    <div class="mobile-content">
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="icon">👥</div>
+                    <div class="value" id="totalTenants">0</div>
+                    <div class="label">דיירים</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">✅</div>
+                    <div class="value" id="paidTenants">0</div>
+                    <div class="label">שילמו</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">⏳</div>
+                    <div class="value" id="pendingTenants">0</div>
+                    <div class="label">ממתינים</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">💰</div>
+                    <div class="value" id="monthlyIncome">₪0</div>
+                    <div class="label">הכנסות</div>
+                </div>
+            </div>
+            
+            <h2 style="margin: 20px 0 10px; font-size: 1.1rem;">פעילות אחרונה</h2>
+            <div id="recentActivity"></div>
+        </div>
+        
+        <!-- Tenants Tab -->
+        <div id="tenants" class="tab-content">
+            <div id="tenantsList"></div>
+        </div>
+        
+        <!-- Payments Tab -->
+        <div id="payments" class="tab-content">
+            <div class="quick-form">
+                <h2 style="margin-bottom: 15px;">רישום תשלום מהיר</h2>
+                <form id="quickPaymentForm">
+                    <div class="form-group">
+                        <label>דייר</label>
+                        <select id="mobilePaymentTenant" required>
+                            <option value="">בחר דייר...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>סכום</label>
+                        <input type="number" id="mobilePaymentAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label>תאריך</label>
+                        <input type="date" id="mobilePaymentDate" required>
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-save"></i> שמור תשלום
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="empty-state">
+                <i class="fas fa-chart-bar"></i>
+                <h3>דוחות</h3>
+                <p>סטטיסטיקות ודוחות יופיעו כאן</p>
+            </div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="stat-card" style="text-align: right; margin-bottom: 15px;" onclick="window.location.href='index.html'">
+                <h3><i class="fas fa-desktop"></i> מעבר לגרסת מחשב</h3>
+                <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">גרסה מלאה עם כל התכונות</p>
+            </div>
+            
+            <div class="stat-card" style="text-align: right;">
+                <h3><i class="fas fa-info-circle"></i> אודות</h3>
+                <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                    גרסה: 2.6.0<br>
+                    מפתח: בועז סעדה<br>
+                    © 2024
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a class="nav-item active" onclick="switchMobileTab('dashboard', this)">
+            <i class="fas fa-home"></i>
+            <span>דשבורד</span>
+        </a>
+        <a class="nav-item" onclick="switchMobileTab('tenants', this)">
+            <i class="fas fa-users"></i>
+            <span>דיירים</span>
+        </a>
+        <a class="nav-item" onclick="switchMobileTab('payments', this)">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>תשלומים</span>
+        </a>
+        <a class="nav-item" onclick="switchMobileTab('reports', this)">
+            <i class="fas fa-chart-bar"></i>
+            <span>דוחות</span>
+        </a>
+        <a class="nav-item" onclick="switchMobileTab('settings', this)">
+            <i class="fas fa-cog"></i>
+            <span>הגדרות</span>
+        </a>
+    </div>
+    
+    <!-- Load Main App JavaScript -->
+    <script src="js/app.js"></script>
+    
+    <!-- Mobile Specific JavaScript -->
+    <script>
+        // Switch tabs
+        function switchMobileTab(tabName, element) {
+            // Update active tab
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Update page title
+            const titles = {
+                dashboard: 'דשבורד',
+                tenants: 'דיירים',
+                payments: 'תשלומים',
+                reports: 'דוחות',
+                settings: 'הגדרות'
+            };
+            document.getElementById('pageTitle').textContent = titles[tabName];
+            
+            // Update FAB
+            updateFab(tabName);
+            
+            // Load content
+            loadTabContent(tabName);
+        }
+        
+        // Update FAB button
+        function updateFab(tabName) {
+            const fab = document.getElementById('fabBtn');
+            if (tabName === 'tenants') {
+                fab.style.display = 'block';
+                fab.innerHTML = '<i class="fas fa-user-plus"></i>';
+            } else if (tabName === 'payments') {
+                fab.style.display = 'none';
+            } else {
+                fab.style.display = 'block';
+                fab.innerHTML = '<i class="fas fa-plus"></i>';
+            }
+        }
+        
+        // Handle FAB click
+        function handleFabClick() {
+            const activeTab = document.querySelector('.tab-content.active').id;
+            if (activeTab === 'tenants') {
+                addTenant();
+            }
+        }
+        
+        // Load tab content
+        function loadTabContent(tabName) {
+            if (tabName === 'dashboard') {
+                loadDashboard();
+            } else if (tabName === 'tenants') {
+                loadTenants();
+            } else if (tabName === 'payments') {
+                loadPayments();
+            }
+        }
+        
+        // Load dashboard
+        function loadDashboard() {
+            const paidThisMonth = appState.tenants.filter(t => 
+                t.status === 'paid' || isCurrentMonthPaid(t)
+            ).length;
+            
+            const monthlyIncome = appState.payments
+                .filter(p => isCurrentMonth(p.date))
+                .reduce((sum, p) => sum + p.amount, 0);
+            
+            document.getElementById('totalTenants').textContent = appState.tenants.length;
+            document.getElementById('paidTenants').textContent = paidThisMonth;
+            document.getElementById('pendingTenants').textContent = appState.tenants.length - paidThisMonth;
+            document.getElementById('monthlyIncome').textContent = `₪${monthlyIncome}`;
+            
+            // Recent activity
+            const activityHtml = appState.activities.slice(0, 5).map(act => `
+                <div class="tenant-card">
+                    <div style="display: flex; gap: 10px; align-items: start;">
+                        <i class="fas fa-${act.type === 'add' ? 'plus' : act.type === 'edit' ? 'edit' : 'trash'}" 
+                           style="color: #2563eb; margin-top: 3px;"></i>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600;">${act.action}</div>
+                            <div style="font-size: 0.8rem; color: #999; margin-top: 5px;">
+                                ${new Date(act.timestamp).toLocaleDateString('he-IL')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('recentActivity').innerHTML = activityHtml || '<div class="empty-state"><p>אין פעילות</p></div>';
+        }
+        
+        // Load tenants
+        function loadTenants() {
+            const tenantsHtml = appState.tenants.map(tenant => `
+                <div class="tenant-card">
+                    <div class="header">
+                        <div class="name">${tenant.name}</div>
+                        <div class="apartment">דירה ${tenant.apartment}</div>
+                    </div>
+                    <div class="info">
+                        <div><i class="fas fa-phone"></i> ${tenant.phone}</div>
+                        <div><i class="fas fa-money-bill"></i> ₪${tenant.monthlyAmount}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-success" onclick="openMonthlyTracking('${tenant.id}')">
+                            <i class="fas fa-calendar-check"></i> מעקב
+                        </button>
+                        <button class="btn btn-primary" onclick="editTenant('${tenant.id}')">
+                            <i class="fas fa-edit"></i> ערוך
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('tenantsList').innerHTML = tenantsHtml || '<div class="empty-state"><i class="fas fa-users"></i><h3>אין דיירים</h3></div>';
+        }
+        
+        // Load payments
+        function loadPayments() {
+            const select = document.getElementById('mobilePaymentTenant');
+            select.innerHTML = '<option value="">בחר דייר...</option>' + 
+                appState.tenants.map(t => `<option value="${t.id}">${t.name} (${t.apartment})</option>`).join('');
+            
+            document.getElementById('mobilePaymentDate').valueAsDate = new Date();
+            
+            document.getElementById('mobilePaymentTenant').onchange = function() {
+                const tenant = appState.tenants.find(t => t.id === this.value);
+                if (tenant) {
+                    document.getElementById('mobilePaymentAmount').value = tenant.monthlyAmount;
+                }
+            };
+        }
+        
+        // Quick payment form submit
+        document.getElementById('quickPaymentForm').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const tenantId = document.getElementById('mobilePaymentTenant').value;
+            const amount = parseFloat(document.getElementById('mobilePaymentAmount').value);
+            const date = document.getElementById('mobilePaymentDate').value;
+            
+            const tenant = appState.tenants.find(t => t.id === tenantId);
+            if (!tenant) return;
+            
+            const payment = {
+                id: generateId(),
+                tenantId: tenantId,
+                tenantName: tenant.name,
+                apartment: tenant.apartment,
+                amount: amount,
+                date: date,
+                status: 'paid',
+                paymentMethod: 'cash',
+                createdAt: new Date().toISOString()
+            };
+            
+            appState.payments.push(payment);
+            saveDataToStorage();
+            
+            showToast('התשלום נרשם בהצלחה!', 'success');
+            this.reset();
+            document.getElementById('mobilePaymentDate').valueAsDate = new Date();
+        };
+        
+        // Initialize
+        window.onload = function() {
+            loadDashboard();
+        };
+        
+        // Helper: check if current month paid
+        function isCurrentMonthPaid(tenant) {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            if (tenant.monthlyTracking && tenant.monthlyTracking[currentYear]) {
+                return tenant.monthlyTracking[currentYear][currentMonth];
+            }
+            return false;
+        }
+        
+        // Helper: check if date is current month
+        function isCurrentMonth(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            return date.getMonth() === now.getMonth() && 
+                   date.getFullYear() === now.getFullYear();
+        }
+    </script>
+</body>
+</html>
