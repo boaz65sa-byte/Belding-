@@ -1,0 +1,314 @@
+/* === NATIVE MOBILE UI ENHANCEMENTS & PREMIUM REDESIGN === */
+/* Imported in index.html to apply mobile-first logic */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Heebo:wght@400;500;600;700&display=swap');
+
+@media (max-width: 768px) {
+    /* 1. OVERRIDE ROOT VARIABLES FOR PREMIUM DARK MODE */
+    :root {
+        --primary-color: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: #818cf8;
+        
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        
+        --bg-secondary: #0d0e15; /* Absolute Dark App bg */
+        --bg-primary: rgba(255, 255, 255, 0.05); /* Glass Cards */
+        --bg-tertiary: rgba(15, 23, 42, 0.6); /* Input Bg */
+        
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --text-light: #475569;
+        
+        --border-color: rgba(255, 255, 255, 0.1);
+        
+        --shadow-sm: 0 4px 6px rgba(0,0,0,0.2);
+        --shadow-md: 0 10px 20px rgba(0,0,0,0.3);
+        --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.5);
+        
+        --font-primary: 'Heebo', sans-serif;
+        --font-numbers: 'Outfit', sans-serif;
+    }
+
+    /* 2. AMBIENT BACKGROUND APP */
+    body {
+        background-color: var(--bg-secondary) !important;
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%) !important;
+        background-attachment: fixed !important;
+        color: var(--text-primary) !important;
+    }
+
+    /* Override any specific bg-white forced classes in tailwind/style.css */
+    .bg-white {
+        background-color: var(--bg-primary) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary) !important;
+    }
+    
+    .text-gray-800, .text-gray-900, .text-gray-700 {
+        color: var(--text-primary) !important;
+    }
+    
+    .text-gray-500, .text-gray-600 {
+        color: var(--text-secondary) !important;
+    }
+
+    /* Typography Upgrades for Numbers */
+    h1, h2, h3, h4, .text-2xl, .text-3xl, .text-4xl {
+        font-family: var(--font-numbers), 'Heebo', sans-serif !important;
+        letter-spacing: -0.5px;
+    }
+
+    /* Typography for specific numbers (balance, amounts) */
+    .dashboard-balance, .stat-value, .mobile-card-title, .amount {
+        font-family: var(--font-numbers) !important;
+        font-weight: 700;
+    }
+
+    /* 3. FLOATING ACTION BUTTON (PREMIUM) */
+    .fab-container {
+        position: fixed;
+        bottom: 85px; 
+        right: 20px;
+        z-index: 1000;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .fab-button {
+        width: 64px;
+        height: 64px;
+        border-radius: 32px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .fab-button:active {
+        transform: scale(0.9) rotate(5deg);
+        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .hide-on-mobile-fab, .btn-primary.hide-on-mobile {
+        display: none !important;
+    }
+
+    /* 4. NATIVE APP HEADER SIVER */
+    .top-nav {
+        background: rgba(13, 14, 21, 0.8) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        height: 60px !important;
+        box-shadow: none !important;
+    }
+    
+    .nav-brand { color: white !important; font-family: var(--font-numbers); }
+    .nav-brand i { color: var(--primary-light); }
+
+    .main-container { margin-top: 60px; }
+    
+    /* 5. GLASSMORPHISM CARDS */
+    .mobile-cards-container {
+        display: flex; flex-direction: column; gap: 16px; padding-bottom: 90px;
+    }
+
+    .mobile-card {
+        background: var(--bg-primary);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+    
+    .mobile-card:active {
+        transform: scale(0.98);
+    }
+
+    .mobile-card-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding-bottom: 12px;
+    }
+
+    .mobile-card-title {
+        font-size: 1.25rem;
+        color: white;
+        display: flex; align-items: center; gap: 10px;
+    }
+    
+    .mobile-card-title i { color: var(--primary-light); }
+
+    .mobile-card-body {
+        display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .mobile-card-row {
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .mobile-card-label { color: var(--text-secondary); font-weight: 500; }
+    .mobile-card-value { color: white; font-weight: 600; }
+
+    .mobile-card-actions {
+        display: flex; gap: 10px; margin-top: 16px; padding-top: 16px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        justify-content: flex-end;
+    }
+
+    /* Buttons inside cards */
+    .mobile-card .btn {
+        background: rgba(255,255,255,0.1) !important;
+        color: white !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 12px;
+        padding: 8px 16px !important;
+        backdrop-filter: blur(10px);
+        min-height: 40px !important;
+    }
+    
+    .mobile-card .btn-danger {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #fca5a5 !important;
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    /* 6. BOTTOM NAV (PREMIUM FLOATING) */
+    .mobile-bottom-nav, nav.fixed.bottom-0 {
+        background: rgba(13, 14, 21, 0.85) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        border-top: 1px solid rgba(255,255,255,0.1) !important;
+        padding-bottom: env(safe-area-inset-bottom);
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.5) !important;
+    }
+    
+    .mobile-bottom-nav .nav-item, nav.fixed.bottom-0 .menu-item {
+        color: var(--text-secondary) !important;
+        transition: all 0.3s;
+    }
+    
+    .mobile-bottom-nav .nav-item.active, nav.fixed.bottom-0 .menu-item.active {
+        color: var(--primary-light) !important;
+        text-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+    }
+    
+    .mobile-bottom-nav .nav-item.active i, nav.fixed.bottom-0 .menu-item.active i {
+        transform: translateY(-4px) scale(1.1);
+    }
+
+    /* 7. BOTTOM SHEET MODALS (NATIVE FEEL) */
+    .modal {
+        align-items: flex-end !important; /* Force bottom alignment */
+        background: rgba(0,0,0,0.7) !important;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 32px 32px 0 0 !important;
+        padding: 24px !important;
+        padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+        animation: bottomSheetSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+        background: var(--bg-secondary) !important;
+        border-top: 1px solid var(--border-color);
+        box-shadow: 0 -20px 40px rgba(0,0,0,0.5) !important;
+    }
+    
+    /* Pull indicator for Bottom Sheet */
+    .modal-content::before {
+        content: ''; display: block; width: 40px; height: 5px;
+        background: rgba(255,255,255,0.2); border-radius: 3px;
+        margin: -10px auto 20px auto;
+    }
+
+    @keyframes bottomSheetSlideIn {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+    
+    /* Form Inputs Overrides for Modals & Sections */
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+        background: var(--bg-tertiary) !important;
+        border: 1px solid var(--border-color) !important;
+        color: white !important;
+        border-radius: 14px !important;
+        padding: 12px 16px !important;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--primary-light) !important;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    /* 8. HORIZONTAL SCROLL DASHBOARD CARDS */
+    .stats-grid, .grid-cols-2.md\\:grid-cols-4 {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 16px;
+        margin: 0 -16px 20px -16px;
+        padding: 4px 16px 24px 16px;
+    }
+
+    .stats-grid::-webkit-scrollbar, .grid-cols-2.md\\:grid-cols-4::-webkit-scrollbar {
+        display: none;
+    }
+
+    .stat-card, .grid .bg-white.rounded-xl {
+        flex: 0 0 85%;
+        scroll-snap-align: center;
+        margin-bottom: 0;
+        background: var(--bg-primary) !important; /* Force glass */
+        border: 1px solid var(--border-color) !important;
+        border-radius: 24px !important;
+        backdrop-filter: blur(16px);
+        padding: 24px !important;
+    }
+    
+    .stat-card i {
+        background: rgba(255,255,255,0.05) !important;
+        padding: 12px; border-radius: 16px;
+    }
+
+    /* Primary Action Buttons */
+    .btn { min-height: 52px !important; border-radius: 16px !important; font-weight: 600 !important; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary-color), var(--primary-light)) !important; border: none !important;}
+
+    /* Action sheets */
+    .item-action-menu {
+        background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color);
+        border-radius: 24px 24px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    }
+    .item-action-menu .action-btn { color: white !important; }
+    .item-action-menu .action-btn:hover { background: rgba(255,255,255,0.05) !important; }
+
+    /* Hide standard tables entirely */
+    .table-container, table.data-table { display: none !important; }
+}

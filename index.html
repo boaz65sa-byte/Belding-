@@ -47,6 +47,7 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile-native.css">
     
     <style>
         /* SaaS Dashboard overrides - keep for app.js compatibility */
@@ -1948,6 +1949,7 @@
     <!-- Main App -->
     <script src="js/app.js"></script>
     <script src="js/payments-table.js"></script>
+    <script src="js/mobile.js"></script>
     
     <!-- PWA Service Worker Registration -->
     <script>
@@ -2063,6 +2065,13 @@
         
         // Note: PWA installation code is in js/app.js
     </script>
+
+    <!-- Global Floating Action Button (FAB) - Mobile Only -->
+    <div id="globalFab" class="fab-container md:hidden">
+        <button id="fabBtn" class="fab-button" aria-label="פעולה מהירה">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
 
     <!-- Bottom Navigation - Mobile Only -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden pb-[env(safe-area-inset-bottom)]" aria-label="ניווט תחתון">

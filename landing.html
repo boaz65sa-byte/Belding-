@@ -2,274 +2,445 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ועד 2025 - ניהול בניין חכם</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d0e15">
+    <title>ברוכים הבאים - ועד בית (App)</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #667eea;
-            --primary-dark: #5a67d8;
-            --secondary: #764ba2;
-            --text-dark: #2d3748;
-            --text-light: #718096;
-            --white: #ffffff;
-            --bg-light: #f7fafc;
+            --primary: #6366f1; /* Indigo */
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #ec4899; /* Pink */
+            --dark-bg: #0d0e15;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; color: var(--text-dark); line-height: 1.6; overflow-x: hidden; }
-        a { text-decoration: none; transition: 0.3s; }
-
-        /* --- Navbar --- */
-        .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%; background: rgba(255,255,255,0.95);
-            position: fixed; width: 100%; top: 0; z-index: 1000;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-            backdrop-filter: blur(10px);
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        .logo { font-size: 24px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .nav-links { display: flex; gap: 30px; align-items: center; }
-        .nav-links a { color: var(--text-dark); font-weight: 500; font-size: 15px; }
-        .nav-links a:hover { color: var(--primary); }
+
+        body {
+            font-family: 'Heebo', 'Outfit', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            overflow: hidden; /* Prevent scrolling, entirely carousel based */
+            height: 100vh;
+            height: 100dvh; /* Mobile viewport fix */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Abstract Premium Background */
+        .bg-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at top right, #1e1b4b, var(--dark-bg) 60%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            top: -10%; right: -10%;
+            width: 300px; height: 300px;
+            background: var(--primary);
+        }
+
+        .orb-2 {
+            bottom: 10%; left: -10%;
+            width: 250px; height: 250px;
+            background: var(--secondary);
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-30px, 30px) scale(1.1); }
+        }
+
+        /* Navbar (Skip) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            position: absolute;
+            top: 0; width: 100%; z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .skip-btn {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
         
-        .btn-nav {
-            padding: 10px 25px; border-radius: 50px; font-weight: 600; font-size: 14px;
-        }
-        .btn-outline { border: 2px solid var(--primary); color: var(--primary); margin-left: 10px; }
-        .btn-outline:hover { background: var(--primary); color: white; }
-        .btn-solid { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; border: none; }
-        .btn-solid:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(118, 75, 162, 0.3); }
+        .skip-btn:hover { color: white; }
 
-        /* --- Hero Section --- */
-        .hero {
-            padding: 160px 5% 100px;
-            background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
-            text-align: center;
+        /* Carousel Content */
+        .carousel {
+            flex: 1;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Firefox */
+            scroll-behavior: smooth;
+        }
+        
+        .carousel::-webkit-scrollbar { display: none; /* Safari/Chrome */ }
+
+        .slide {
+            min-width: 100vw;
+            height: 100%;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 24px 100px 24px;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.5s ease;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .illustration {
+            width: 100%;
+            max-width: 320px;
+            height: 300px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
         }
-        .hero h1 {
-            font-size: 56px; line-height: 1.1; font-weight: 800;
-            background: linear-gradient(135deg, #2d3748 0%, #667eea 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 25px; max-width: 900px; margin-left: auto; margin-right: auto;
+
+        .icon-glass {
+            width: 140px;
+            height: 140px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
         }
-        .hero p {
-            font-size: 20px; color: var(--text-light); max-width: 700px; margin: 0 auto 40px;
-        }
-        .hero-buttons { display: flex; gap: 15px; justify-content: center; margin-bottom: 60px; }
-        .btn-hero { padding: 16px 40px; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; }
         
-        .hero-image {
-            max-width: 1000px; width: 100%; margin: 0 auto;
-            border-radius: 20px;
-            box-shadow: 0 20px 80px rgba(0,0,0,0.15);
-            background: white; padding: 10px;
-            animation: float 6s ease-in-out infinite;
+        .icon-glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.0));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
-        .hero-image img { width: 100%; border-radius: 15px; display: block; }
 
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
-
-        /* --- Features --- */
-        .features { padding: 100px 5%; background: white; }
-        .section-title { text-align: center; margin-bottom: 70px; }
-        .section-title h2 { font-size: 36px; font-weight: 700; margin-bottom: 15px; }
-        .section-title p { color: var(--text-light); font-size: 18px; }
-
-        .features-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto;
+        /* Abstract decorative shapes behind icons */
+        .shape-bg {
+            position: absolute;
+            width: 120px; height: 120px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            z-index: 1;
+            filter: blur(20px);
+            opacity: 0.8;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
         }
-        .feature-card {
-            padding: 40px; border-radius: 20px; background: white;
-            border: 1px solid #edf2f7; transition: 0.3s;
+
+        .text-content {
+            text-align: center;
+            max-width: 400px;
         }
-        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); border-color: transparent; }
-        .icon-box {
-            width: 60px; height: 60px; border-radius: 15px;
-            background: rgba(102, 126, 234, 0.1); color: var(--primary);
-            display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 25px;
+
+        .text-content h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
         }
-        .feature-card h3 { font-size: 22px; margin-bottom: 15px; }
-        .feature-card p { color: var(--text-light); line-height: 1.6; }
 
-        /* --- Stats --- */
-        .stats { background: var(--primary); color: white; padding: 80px 5%; }
-        .stats-container { display: flex; justify-content: space-around; max-width: 1000px; margin: 0 auto; text-align: center; flex-wrap: wrap; gap: 40px; }
-        .stat-item h3 { font-size: 48px; font-weight: 800; margin-bottom: 10px; }
-        .stat-item p { font-size: 18px; opacity: 0.9; }
-
-        /* --- CTA --- */
-        .cta { padding: 100px 5%; text-align: center; background: #f8faff; }
-        .cta-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 30px; padding: 80px 40px; color: white;
-            max-width: 1000px; margin: 0 auto;
-            box-shadow: 0 30px 60px rgba(102, 126, 234, 0.3);
+        .text-content p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.5;
         }
-        .cta-box h2 { font-size: 40px; margin-bottom: 20px; }
-        .cta-box p { font-size: 20px; margin-bottom: 40px; opacity: 0.9; }
-        .btn-white { background: white; color: var(--primary); padding: 18px 45px; border-radius: 50px; font-weight: 700; font-size: 18px; }
-        .btn-white:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
 
-        /* --- Footer --- */
-        footer { padding: 50px 5% 20px; background: white; border-top: 1px solid #edf2f7; }
-        .footer-content { display: flex; justify-content: space-between; max-width: 1200px; margin: 0 auto 50px; flex-wrap: wrap; gap: 40px; }
-        .footer-col h4 { font-size: 18px; margin-bottom: 20px; }
-        .footer-links a { display: block; color: var(--text-light); margin-bottom: 10px; }
-        .footer-links a:hover { color: var(--primary); }
-        .copyright { text-align: center; color: var(--text-light); font-size: 14px; border-top: 1px solid #edf2f7; padding-top: 20px; }
+        /* Bottom Controls */
+        .bottom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0; width: 100%;
+            padding: 0 24px 40px 24px;
+            padding-bottom: calc(40px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            background: linear-gradient(to top, var(--dark-bg) 60%, transparent);
+        }
 
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 36px; }
-            .nav-links { display: none; } /* במובייל נסתיר את הלינקים הפשוטים */
-            .hero-buttons { flex-direction: column; }
-            .stats-container { flex-direction: column; }
+        .indicators {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px; height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            width: 24px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .btn-main {
+            width: 100%;
+            max-width: 360px;
+            padding: 18px 24px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px var(--primary-glow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-main:active {
+            transform: scale(0.96);
+        }
+
+        /* Desktop specific overriding */
+        @media (min-width: 768px) {
+            .slide { padding: 40px 10%; }
+            .icon-glass { width: 180px; height: 180px; font-size: 5rem; }
+            .text-content h2 { font-size: 3rem; }
+            .text-content p { font-size: 1.3rem; }
+            .btn-main { max-width: 400px; padding: 20px 32px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
+    <!-- Dynamic Background -->
+    <div class="bg-layer">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <!-- Top Navigation -->
+    <div class="top-bar">
         <div class="logo">
-            <i class="fas fa-building"></i>
-            ועד 2025
+            <i class="fas fa-building text-primary"></i> ועד <span style="font-weight:300;">2025</span>
         </div>
-        <div class="nav-links">
-            <a href="#features">פיצ'רים</a>
-            <a href="#about">אודות</a>
-            <a href="#contact">צור קשר</a>
-            <div>
-                <a href="login.html" class="btn-nav btn-outline">התחברות</a>
-                <a href="signup.html" class="btn-nav btn-solid">נסה חינם</a>
-            </div>
-        </div>
-    </nav>
+        <a href="login.html" class="skip-btn">דלג</a>
+    </div>
 
-    <section class="hero">
-        <h1>ניהול ועד בית מעולם לא היה פשוט יותר</h1>
-        <p>תשכחו מאקסלים מסובכים ורדיפה אחרי שכנים. המערכת החכמה לניהול דיירים, גבייה ותחזוקה - הכל במקום אחד, שקוף ופשוט.</p>
+    <!-- Swipeable Carousel -->
+    <div class="carousel" id="onboardingCarousel">
         
-        <div class="hero-buttons">
-            <a href="signup.html" class="btn-hero btn-solid">התחל 14 ימי ניסיון חינם</a>
-            <a href="#features" class="btn-hero btn-outline" style="background:white;">איך זה עובד?</a>
-        </div>
-
-        <div class="hero-image">
-            <img src="https://cdn.dribbble.com/users/1615584/screenshots/15949449/media/c05872719c8366964a4086665049a46a.jpg?compress=1&resize=1600x1200" alt="מערכת ועד 2025">
-        </div>
-    </section>
-
-    <section id="features" class="features">
-        <div class="section-title">
-            <h2>למה לבחור בועד 2025?</h2>
-            <p>כל הכלים שצריך כדי לנהל בניין בשקט נפשי</p>
-        </div>
-
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="icon-box"><i class="fas fa-credit-card"></i></div>
-                <h3>גבייה אוטומטית</h3>
-                <p>מערכת חכמה שעוקבת אחרי תשלומים, שולחת תזכורות אוטומטיות לדיירים ומפיקה קבלות דיגיטליות בלחיצת כפתור.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon-box"><i class="fas fa-chart-pie"></i></div>
-                <h3>שקיפות מלאה</h3>
-                <p>כל דייר יכול לראות את מצב הקופה, הוצאות והכנסות בזמן אמת. בונים אמון מלא בין הוועד לדיירים.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon-box"><i class="fas fa-tools"></i></div>
-                <h3>ניהול תקלות</h3>
-                <p>דיווח על תקלות בבניין ישירות מהנייד, מעקב אחרי טיפול והזמנת בעלי מקצוע מומלצים בקלות.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon-box"><i class="fas fa-users"></i></div>
-                <h3>ניהול דיירים</h3>
-                <p>ספר דיירים דיגיטלי, ניהול חוזים, פרטי קשר וגישה מהירה לכל המידע החשוב על הבניין.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
-                <h3>אבטחת מידע</h3>
-                <p>המידע שלכם מאובטח ברמה הגבוהה ביותר. גיבויים יומיים והצפנה מלאה לשקט הנפשי שלכם.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
-                <h3>נגיש מכל מקום</h3>
-                <p>המערכת עובדת נהדר במחשב, בטאבלט ובנייד. נהלו את הבניין מהמשרד, מהבית או מחוף הים.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="stats">
-        <div class="stats-container">
-            <div class="stat-item">
-                <h3>500+</h3>
-                <p>בניינים מרוצים</p>
-            </div>
-            <div class="stat-item">
-                <h3>₪2M+</h3>
-                <p>דמי ועד נגבו</p>
-            </div>
-            <div class="stat-item">
-                <h3>98%</h3>
-                <p>שביעות רצון</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta">
-        <div class="cta-box">
-            <h2>מוכנים לשדרג את הבניין?</h2>
-            <p>הצטרפו למאות ועדים שכבר חוסכים זמן וכסף. ההרשמה לוקחת דקה, אין צורך בכרטיס אשראי.</p>
-            <a href="signup.html" class="btn-white">נסה עכשיו בחינם</a>
-        </div>
-    </section>
-
-    <footer>
-        <div class="footer-content">
-            <div class="footer-col" style="max-width: 300px;">
-                <div class="logo" style="margin-bottom: 15px;">
-                    <i class="fas fa-building"></i> ועד 2025
-                </div>
-                <p style="color: var(--text-light); font-size: 14px;">
-                    המערכת המתקדמת בישראל לניהול ועדי בית. אנחנו הופכים את הניהול לפשוט, שקוף ויעיל יותר לכולם.
-                </p>
-            </div>
-            <div class="footer-col">
-                <h4>מוצר</h4>
-                <div class="footer-links">
-                    <a href="#">פיצ'רים</a>
-                    <a href="#">מחירון</a>
-                    <a href="#">שאלות ותשובות</a>
+        <!-- Slide 1 -->
+        <div class="slide active" id="slide-0">
+            <div class="illustration">
+                <div class="shape-bg" style="background: linear-gradient(135deg, #6366f1, #3b82f6);"></div>
+                <div class="icon-glass">
+                    <i class="fas fa-money-check-alt"></i>
                 </div>
             </div>
-            <div class="footer-col">
-                <h4>חברה</h4>
-                <div class="footer-links">
-                    <a href="#">אודות</a>
-                    <a href="#">צור קשר</a>
-                    <a href="#">תנאי שימוש</a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <h4>צור קשר</h4>
-                <div class="footer-links">
-                    <a href="#">support@vaad2025.co.il</a>
-                    <a href="#">03-123-4567</a>
-                </div>
-                <div style="margin-top: 15px; font-size: 20px; color: var(--primary);">
-                    <i class="fab fa-facebook margin-right: 10px;"></i>
-                    <i class="fab fa-instagram"></i>
-                </div>
+            <div class="text-content">
+                <h2>גבייה מתקדמת וחכמה</h2>
+                <p>תשכחו ממעקב ידני או רדיפה אחרי שכנים. המערכת דואגת לתיעוד תשלומים דיגיטלי ואוטומטי.</p>
             </div>
         </div>
-        <div class="copyright">
-            &copy; 2025 ועד 2025. כל הזכויות שמורות.
-        </div>
-    </footer>
 
+        <!-- Slide 2 -->
+        <div class="slide" id="slide-1">
+            <div class="illustration">
+                <div class="shape-bg" style="background: linear-gradient(135deg, #ec4899, #f43f5e);"></div>
+                <div class="icon-glass">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+            </div>
+            <div class="text-content">
+                <h2>שקיפות מלאה לדיירים</h2>
+                <p>בלחיצת כפתור, כולם רואים לאן הולך הכסף. גרפים מרשימים, פירוט הוצאות ואמון מלא בין דיירי הבניין.</p>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide" id="slide-2">
+            <div class="illustration">
+                <div class="shape-bg" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+                <div class="icon-glass">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+            </div>
+            <div class="text-content">
+                <h2>כל הבניין בכיס שלך</h2>
+                <p>אפליקציה מתקדמת לניהול דיירים, דיווח תקלות ותקשורת שוטפת הישר מהסמארטפון - מכל מקום בעולם.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+        <div class="indicators" id="indicators">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        
+        <a href="#" id="actionBtn" class="btn-main">
+            המשך <i class="fas fa-arrow-left"></i>
+        </a>
+        <a href="login.html" id="loginText" style="color: var(--text-muted); text-decoration: none; font-size: 0.95rem; margin-top: -10px; display: none;">
+            כבר יש לך חשבון? <span style="color: var(--primary); font-weight: 600;">התחבר</span>
+        </a>
+    </div>
+
+    <!-- Carousel Logic -->
+    <script>
+        const carousel = document.getElementById('onboardingCarousel');
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const actionBtn = document.getElementById('actionBtn');
+        const loginText = document.getElementById('loginText');
+        const skipBtn = document.querySelector('.skip-btn');
+        let currentIndex = 0;
+
+        // Update UI based on scroll position
+        carousel.addEventListener('scroll', () => {
+            const scrollLeft = carousel.scrollLeft;
+            const slideWidth = carousel.clientWidth;
+            
+            // RTL environment implies scrollLeft is 0 or negative, 
+            // but standard JS often treats it as positive from the right depending on browser.
+            // A safer approach:
+            let index = Math.round(Math.abs(scrollLeft) / slideWidth);
+            if (index >= slides.length) index = slides.length - 1;
+            
+            if (index !== currentIndex) {
+                updateUI(index);
+            }
+        });
+
+        function updateUI(index) {
+            currentIndex = index;
+            
+            // Update dots
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            // Update slide animations
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            // Update button if last slide
+            if (index === slides.length - 1) {
+                actionBtn.innerHTML = 'התחל עכשיו <i class="fas fa-rocket"></i>';
+                actionBtn.href = 'signup.html';
+                actionBtn.onclick = null;
+                loginText.style.display = 'block';
+                skipBtn.style.opacity = '0';
+                skipBtn.style.pointerEvents = 'none';
+            } else {
+                actionBtn.innerHTML = 'המשך <i class="fas fa-arrow-left"></i>';
+                actionBtn.href = '#';
+                actionBtn.onclick = (e) => {
+                    e.preventDefault();
+                    nextSlide();
+                };
+                loginText.style.display = 'none';
+                skipBtn.style.opacity = '1';
+                skipBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        function nextSlide() {
+            if (currentIndex < slides.length - 1) {
+                const nextIndex = currentIndex + 1;
+                const slide = slides[nextIndex];
+                slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        // Initialize click to advance
+        actionBtn.onclick = (e) => {
+            e.preventDefault();
+            nextSlide();
+        };
+
+        // Dots click to navigate
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                slides[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            });
+        });
+
+        // Initialize first view
+        updateUI(0);
+    </script>
 </body>
-</html> 
+</html>
