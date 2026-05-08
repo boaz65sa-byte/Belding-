@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d0e15">
+    <title>ברוכים הבאים - ועד בית (App)</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1; /* Indigo */
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #ec4899; /* Pink */
+            --dark-bg: #0d0e15;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Heebo', 'Outfit', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            overflow: hidden; /* Prevent scrolling, entirely carousel based */
+            height: 100vh;
+            height: 100dvh; /* Mobile viewport fix */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Abstract Premium Background */
+        .bg-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at top right, #1e1b4b, var(--dark-bg) 60%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            top: -10%; right: -10%;
+            width: 300px; height: 300px;
+            background: var(--primary);
+        }
+
+        .orb-2 {
+            bottom: 10%; left: -10%;
+            width: 250px; height: 250px;
+            background: var(--secondary);
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-30px, 30px) scale(1.1); }
+        }
+
+        /* Navbar (Skip) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            position: absolute;
+            top: 0; width: 100%; z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .skip-btn {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+        
+        .skip-btn:hover { color: white; }
+
+        /* Carousel Content */
+        .carousel {
+            flex: 1;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Firefox */
+            scroll-behavior: smooth;
+        }
+        
+        .carousel::-webkit-scrollbar { display: none; /* Safari/Chrome */ }
+
+        .slide {
+            min-width: 100vw;
+            height: 100%;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 24px 100px 24px;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.5s ease;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .illustration {
+            width: 100%;
+            max-width: 320px;
+            height: 300px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .icon-glass {
+            width: 140px;
+            height: 140px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .icon-glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.0));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Abstract decorative shapes behind icons */
+        .shape-bg {
+            position: absolute;
+            width: 120px; height: 120px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            z-index: 1;
+            filter: blur(20px);
+            opacity: 0.8;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .text-content {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .text-content h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .text-content p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Bottom Controls */
+        .bottom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0; width: 100%;
+            padding: 0 24px 40px 24px;
+            padding-bottom: calc(40px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            background: linear-gradient(to top, var(--dark-bg) 60%, transparent);
+        }
+
+        .indicators {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px; height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            width: 24px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .btn-main {
+            width: 100%;
+            max-width: 360px;
+            padding: 18px 24px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px var(--primary-glow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-main:active {
+            transform: scale(0.96);
+        }
+
+        /* Desktop specific overriding */
+        @media (min-width: 768px) {
+            .slide { padding: 40px 10%; }
+            .icon-glass { width: 180px; height: 180px; font-size: 5rem; }
+            .text-content h2 { font-size: 3rem; }
+            .text-content p { font-size: 1.3rem; }
+            .btn-main { max-width: 400px; padding: 20px 32px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Background -->
+    <div class="bg-layer">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <!-- Top Navigation -->
+    <div class="top-bar">
+        <div class="logo">
+            <i class="fas fa-building text-primary"></i> ועד <span style="font-weight:300;">2025</span>
+        </div>
+        <a href="login.html" class="skip-btn">דלג</a>
+    </div>
+
+    <!-- Swipeable Carousel -->
+    <div class="carousel" id="onboardingCarousel">
+        
+        <!-- Slide 1 -->
+        <div class="slide active" id="slide-0">
+            <div class="illustration">
+                <div class="shape-bg" style="background: linear-gradient(135deg, #6366f1, #3b82f6);"></div>
+                <div class="icon-glass">
+                    <i class="fas fa-money-check-alt"></i>
+                </div>
+            </div>
+            <div class="text-content">
+                <h2>גבייה מתקדמת וחכמה</h2>
+                <p>תשכחו ממעקב ידני או רדיפה אחרי שכנים. המערכת דואגת לתיעוד תשלומים דיגיטלי ואוטומטי.</p>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide" id="slide-1">
+            <div class="illustration">
+                <div class="shape-bg" style="background: linear-gradient(135deg, #ec4899, #f43f5e);"></div>
+                <div class="icon-glass">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+            </div>
+            <div class="text-content">
+                <h2>שקיפות מלאה לדיירים</h2>
+                <p>בלחיצת כפתור, כולם רואים לאן הולך הכסף. גרפים מרשימים, פירוט הוצאות ואמון מלא בין דיירי הבניין.</p>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide" id="slide-2">
+            <div class="illustration">
+                <div class="shape-bg" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+                <div class="icon-glass">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+            </div>
+            <div class="text-content">
+                <h2>כל הבניין בכיס שלך</h2>
+                <p>אפליקציה מתקדמת לניהול דיירים, דיווח תקלות ותקשורת שוטפת הישר מהסמארטפון - מכל מקום בעולם.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+        <div class="indicators" id="indicators">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        
+        <a href="#" id="actionBtn" class="btn-main">
+            המשך <i class="fas fa-arrow-left"></i>
+        </a>
+        <a href="login.html" id="loginText" style="color: var(--text-muted); text-decoration: none; font-size: 0.95rem; margin-top: -10px; display: none;">
+            כבר יש לך חשבון? <span style="color: var(--primary); font-weight: 600;">התחבר</span>
+        </a>
+    </div>
+
+    <!-- Carousel Logic -->
+    <script>
+        const carousel = document.getElementById('onboardingCarousel');
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const actionBtn = document.getElementById('actionBtn');
+        const loginText = document.getElementById('loginText');
+        const skipBtn = document.querySelector('.skip-btn');
+        let currentIndex = 0;
+
+        // Update UI based on scroll position
+        carousel.addEventListener('scroll', () => {
+            const scrollLeft = carousel.scrollLeft;
+            const slideWidth = carousel.clientWidth;
+            
+            // RTL environment implies scrollLeft is 0 or negative, 
+            // but standard JS often treats it as positive from the right depending on browser.
+            // A safer approach:
+            let index = Math.round(Math.abs(scrollLeft) / slideWidth);
+            if (index >= slides.length) index = slides.length - 1;
+            
+            if (index !== currentIndex) {
+                updateUI(index);
+            }
+        });
+
+        function updateUI(index) {
+            currentIndex = index;
+            
+            // Update dots
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            // Update slide animations
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            // Update button if last slide
+            if (index === slides.length - 1) {
+                actionBtn.innerHTML = 'התחל עכשיו <i class="fas fa-rocket"></i>';
+                actionBtn.href = 'signup.html';
+                actionBtn.onclick = null;
+                loginText.style.display = 'block';
+                skipBtn.style.opacity = '0';
+                skipBtn.style.pointerEvents = 'none';
+            } else {
+                actionBtn.innerHTML = 'המשך <i class="fas fa-arrow-left"></i>';
+                actionBtn.href = '#';
+                actionBtn.onclick = (e) => {
+                    e.preventDefault();
+                    nextSlide();
+                };
+                loginText.style.display = 'none';
+                skipBtn.style.opacity = '1';
+                skipBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        function nextSlide() {
+            if (currentIndex < slides.length - 1) {
+                const nextIndex = currentIndex + 1;
+                const slide = slides[nextIndex];
+                slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        // Initialize click to advance
+        actionBtn.onclick = (e) => {
+            e.preventDefault();
+            nextSlide();
+        };
+
+        // Dots click to navigate
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                slides[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            });
+        });
+
+        // Initialize first view
+        updateUI(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול תשלומים - ועד 2025</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icon-192.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tiles Style -->
+    <link rel="stylesheet" href="css/tiles-style.css">
+</head>
+<body>
+    <!-- Loading State -->
+    <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p>טוען נתונים...</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="tiles-container" id="mainContent" style="display: none;">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <a href="dashboard-tiles.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                <span>חזרה לדשבורד</span>
+            </a>
+            
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>התנתק</span>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <div class="tiles-header">
+            <h1><i class="fas fa-credit-card"></i> ניהול תשלומים</h1>
+            <p class="subtitle">מעקב אחר תשלומי ועד וחשבוניות</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--success);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-value" id="totalPaid">₪0</div>
+                <div class="stat-label">שולם החודש</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--warning);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value" id="totalPending">₪0</div>
+                <div class="stat-label">ממתין לתשלום</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--danger);">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-value" id="totalOverdue">₪0</div>
+                <div class="stat-label">באיחור</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--info);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-value" id="totalPayments">0</div>
+                <div class="stat-label">סה"כ תשלומים</div>
+            </div>
+        </div>
+
+        <!-- Actions Bar -->
+        <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openAddPaymentModal()">
+                <i class="fas fa-plus"></i>
+                <span>רשום תשלום חדש</span>
+            </button>
+            
+            <button class="btn btn-success" onclick="generateInvoices()">
+                <i class="fas fa-file-invoice"></i>
+                <span>צור חשבוניות חודשיות</span>
+            </button>
+            
+            <button class="btn btn-outline" onclick="exportPayments()">
+                <i class="fas fa-download"></i>
+                <span>ייצא לאקסל</span>
+            </button>
+            
+            <button class="btn btn-secondary" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                <span>הדפס</span>
+            </button>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+            <button class="btn btn-sm" id="filterAll" onclick="filterPayments('all')" style="background: var(--primary); color: white;">
+                הכל
+            </button>
+            <button class="btn btn-sm btn-outline" id="filterPaid" onclick="filterPayments('paid')">
+                שולם
+            </button>
+            <button class="btn btn-sm btn-outline" id="filterPending" onclick="filterPayments('pending')">
+                ממתין
+            </button>
+            <button class="btn btn-sm btn-outline" id="filterOverdue" onclick="filterPayments('overdue')">
+                באיחור
+            </button>
+        </div>
+
+        <!-- Payments Grid -->
+        <div class="cards-grid" id="paymentsGrid">
+            <!-- Payments will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <h3 class="empty-title">אין תשלומים במערכת</h3>
+            <p class="empty-text">התחל בהוספת תשלום או צור חשבוניות חודשיות</p>
+            <button class="btn btn-primary btn-lg" onclick="openAddPaymentModal()">
+                <i class="fas fa-plus"></i>
+                <span>רשום תשלום חדש</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">רשום תשלום חדש</h2>
+                <button class="modal-close" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="paymentForm" onsubmit="savePayment(event)">
+                <input type="hidden" id="paymentId">
+                
+                <div class="form-group">
+                    <label class="form-label">דייר *</label>
+                    <select class="form-select" id="tenantId" required onchange="updatePaymentAmount()">
+                        <option value="">בחר דייר</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">סכום (₪) *</label>
+                    <input type="number" class="form-input" id="paymentAmount" required min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">תאריך תשלום *</label>
+                    <input type="date" class="form-input" id="paymentDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">חודש חיוב *</label>
+                    <input type="month" class="form-input" id="paymentMonth" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">סטטוס *</label>
+                    <select class="form-select" id="paymentStatus" required>
+                        <option value="paid">שולם</option>
+                        <option value="pending">ממתין לתשלום</option>
+                        <option value="overdue">באיחור</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">אמצעי תשלום</label>
+                    <select class="form-select" id="paymentMethod">
+                        <option value="cash">מזומן</option>
+                        <option value="check">צ'ק</option>
+                        <option value="transfer">העברה בנקאית</option>
+                        <option value="credit">אשראי</option>
+                        <option value="other">אחר</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">הערות</label>
+                    <textarea class="form-textarea" id="paymentNotes" placeholder="הערות נוספות..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closePaymentModal()">
+                        ביטול
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i>
+                        <span>שמור</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase & Auth -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tiles-app.js"></script>
+
+    <script>
+        // ===== Global State =====
+        let payments = [];
+        let tenants = [];
+        let currentFilter = 'all';
+        let editingPaymentId = null;
+
+        // ===== Initialize =====
+        window.addEventListener('DOMContentLoaded', async () => {
+            const initialized = await window.TilesApp.init();
+            if (!initialized) return;
+            
+            await loadTenants();
+            await loadPayments();
+            
+            // Set default date to today
+            document.getElementById('paymentDate').valueAsDate = new Date();
+            
+            // Set default month to current month
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('paymentMonth').value = monthStr;
+        });
+
+        // ===== Load Tenants =====
+        async function loadTenants() {
+            try {
+                const { data, error } = await window.TilesApp.supabase
+                    .from('tenants')
+                    .select('*')
+                    .order('apartment_number', { ascending: true });
+                
+                if (error) throw error;
+                
+                tenants = data || [];
+                console.log('✅ נטענו דיירים:', tenants.length);
+                
+                // Populate tenant select
+                const select = document.getElementById('tenantId');
+                select.innerHTML = '<option value="">בחר דייר</option>' + 
+                    tenants.map(t => `<option value="${t.id}" data-fee="${t.monthly_fee}">דירה ${t.apartment_number} - ${t.name}</option>`).join('');
+                
+            } catch (error) {
+                console.error('❌ שגיאה בטעינת דיירים:', error);
+                window.TilesApp.handleError(error, 'שגיאה בטעינת הדיירים');
+            }
+        }
+
+        // ===== Load Payments =====
+        async function loadPayments() {
+            try {
+                window.TilesApp.showLoading('טוען תשלומים...');
+                
+                const { data, error } = await window.TilesApp.supabase
+                    .from('payments')
+                    .select(`
+                        *,
+                        tenant:tenant_id (
+                            name,
+                            apartment_number
+                        )
+                    `)
+                    .order('payment_date', { ascending: false });
+                
+                if (error) throw error;
+                
+                payments = data || [];
+                console.log('✅ נטענו תשלומים:', payments.length);
+                
+                renderPayments();
+                updateStatistics();
+                
+                window.TilesApp.hideLoading();
+                
+            } catch (error) {
+                console.error('❌ שגיאה בטעינת תשלומים:', error);
+                window.TilesApp.handleError(error, 'שגיאה בטעינת התשלומים');
+                window.TilesApp.hideLoading();
+            }
+        }
+
+        // ===== Render Payments =====
+        function renderPayments() {
+            const grid = document.getElementById('paymentsGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            let filteredPayments = payments;
+            
+            if (currentFilter !== 'all') {
+                filteredPayments = payments.filter(p => p.status === currentFilter);
+            }
+            
+            if (filteredPayments.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = filteredPayments.map(payment => {
+                const tenant = payment.tenant || {};
+                const statusColors = {
+                    'paid': 'var(--success)',
+                    'pending': 'var(--warning)',
+                    'overdue': 'var(--danger)'
+                };
+                const statusIcons = {
+                    'paid': 'fa-check-circle',
+                    'pending': 'fa-clock',
+                    'overdue': 'fa-exclamation-circle'
+                };
+                const statusLabels = {
+                    'paid': 'שולם',
+                    'pending': 'ממתין',
+                    'overdue': 'באיחור'
+                };
+                
+                return `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${tenant.name || 'דייר לא ידוע'}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                <i class="fas fa-building"></i> דירה ${tenant.apartment_number || '-'}
+                            </div>
+                        </div>
+                        <div class="card-icon" style="background: ${statusColors[payment.status]};">
+                            <i class="fas ${statusIcons[payment.status]}"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-shekel-sign" style="width: 20px; color: var(--success);"></i>
+                                <span style="font-weight: 700; font-size: 1.2rem;">₪${payment.amount}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-calendar" style="width: 20px; color: var(--primary);"></i>
+                                <span>${window.formatDate(payment.payment_date)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-calendar-alt" style="width: 20px; color: var(--info);"></i>
+                                <span>חודש: ${formatMonth(payment.billing_month)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-wallet" style="width: 20px; color: var(--purple);"></i>
+                                <span>${getPaymentMethodLabel(payment.payment_method)}</span>
+                            </div>
+                            <div>
+                                ${window.TilesApp.getStatusBadge(payment.status)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <button class="btn btn-secondary btn-sm" onclick="editPayment('${payment.id}')">
+                            <i class="fas fa-edit"></i>
+                            <span>ערוך</span>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePayment('${payment.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ${payment.status === 'pending' ? `
+                        <button class="btn btn-success btn-sm" onclick="markAsPaid('${payment.id}')">
+                            <i class="fas fa-check"></i>
+                            <span>סמן כשולם</span>
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // ===== Update Statistics =====
+        function updateStatistics() {
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            
+            const paidThisMonth = payments
+                .filter(p => p.status === 'paid' && p.billing_month === currentMonth)
+                .reduce((sum, p) => sum + (p.amount || 0), 0);
+            
+            const pending = payments
+                .filter(p => p.status === 'pending')
+                .reduce((sum, p) => sum + (p.amount || 0), 0);
+            
+            const overdue = payments
+                .filter(p => p.status === 'overdue')
+                .reduce((sum, p) => sum + (p.amount || 0), 0);
+            
+            document.getElementById('totalPaid').textContent = window.formatCurrency(paidThisMonth);
+            document.getElementById('totalPending').textContent = window.formatCurrency(pending);
+            document.getElementById('totalOverdue').textContent = window.formatCurrency(overdue);
+            document.getElementById('totalPayments').textContent = payments.length;
+        }
+
+        // ===== Filter Payments =====
+        function filterPayments(status) {
+            currentFilter = status;
+            
+            // Update button styles
+            document.querySelectorAll('[id^="filter"]').forEach(btn => {
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--primary)';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline');
+            });
+            
+            const activeBtn = document.getElementById(`filter${status.charAt(0).toUpperCase() + status.slice(1)}`);
+            if (activeBtn) {
+                activeBtn.style.background = 'var(--primary)';
+                activeBtn.style.color = 'white';
+                activeBtn.classList.add('btn-primary');
+                activeBtn.classList.remove('btn-outline');
+            }
+            
+            renderPayments();
+        }
+
+        // ===== Open Add Payment Modal =====
+        function openAddPaymentModal() {
+            editingPaymentId = null;
+            document.getElementById('modalTitle').textContent = 'רשום תשלום חדש';
+            document.getElementById('paymentForm').reset();
+            
+            // Set defaults
+            document.getElementById('paymentDate').valueAsDate = new Date();
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('paymentMonth').value = monthStr;
+            document.getElementById('paymentStatus').value = 'paid';
+            
+            window.TilesApp.openModal('paymentModal');
+        }
+
+        // ===== Close Payment Modal =====
+        function closePaymentModal() {
+            window.TilesApp.closeModal('paymentModal');
+            document.getElementById('paymentForm').reset();
+            editingPaymentId = null;
+        }
+
+        // ===== Update Payment Amount =====
+        function updatePaymentAmount() {
+            const select = document.getElementById('tenantId');
+            const option = select.options[select.selectedIndex];
+            const fee = option.getAttribute('data-fee');
+            
+            if (fee) {
+                document.getElementById('paymentAmount').value = fee;
+            }
+        }
+
+        // ===== Save Payment =====
+        async function savePayment(event) {
+            event.preventDefault();
+            
+            try {
+                const paymentData = {
+                    tenant_id: document.getElementById('tenantId').value,
+                    amount: parseFloat(document.getElementById('paymentAmount').value),
+                    payment_date: document.getElementById('paymentDate').value,
+                    billing_month: document.getElementById('paymentMonth').value,
+                    status: document.getElementById('paymentStatus').value,
+                    payment_method: document.getElementById('paymentMethod').value,
+                    notes: document.getElementById('paymentNotes').value || null,
+                    user_id: window.TilesApp.user.id
+                };
+                
+                if (editingPaymentId) {
+                    // Update
+                    const { error } = await window.TilesApp.supabase
+                        .from('payments')
+                        .update(paymentData)
+                        .eq('id', editingPaymentId);
+                    
+                    if (error) throw error;
+                    
+                    window.showToast('התשלום עודכן בהצלחה', 'success');
+                } else {
+                    // Create
+                    const { error } = await window.TilesApp.supabase
+                        .from('payments')
+                        .insert([paymentData]);
+                    
+                    if (error) throw error;
+                    
+                    window.showToast('התשלום נרשם בהצלחה', 'success');
+                }
+                
+                closePaymentModal();
+                await loadPayments();
+                
+            } catch (error) {
+                console.error('❌ שגיאה בשמירת תשלום:', error);
+                window.TilesApp.handleError(error, 'שגיאה בשמירת התשלום');
+            }
+        }
+
+        // ===== Edit Payment =====
+        async function editPayment(paymentId) {
+            try {
+                const payment = payments.find(p => p.id === paymentId);
+                if (!payment) return;
+                
+                editingPaymentId = paymentId;
+                document.getElementById('modalTitle').textContent = 'ערוך תשלום';
+                document.getElementById('tenantId').value = payment.tenant_id;
+                document.getElementById('paymentAmount').value = payment.amount;
+                document.getElementById('paymentDate').value = payment.payment_date;
+                document.getElementById('paymentMonth').value = payment.billing_month;
+                document.getElementById('paymentStatus').value = payment.status;
+                document.getElementById('paymentMethod').value = payment.payment_method || 'cash';
+                document.getElementById('paymentNotes').value = payment.notes || '';
+                
+                window.TilesApp.openModal('paymentModal');
+                
+            } catch (error) {
+                console.error('❌ שגיאה בטעינת תשלום:', error);
+                window.TilesApp.handleError(error, 'שגיאה בטעינת התשלום');
+            }
+        }
+
+        // ===== Delete Payment =====
+        async function deletePayment(paymentId) {
+            const confirmed = await window.TilesApp.confirm('האם אתה בטוח שברצונך למחוק תשלום זה?');
+            if (!confirmed) return;
+            
+            try {
+                const { error } = await window.TilesApp.supabase
+                    .from('payments')
+                    .delete()
+                    .eq('id', paymentId);
+                
+                if (error) throw error;
+                
+                window.showToast('התשלום נמחק בהצלחה', 'success');
+                await loadPayments();
+                
+            } catch (error) {
+                console.error('❌ שגיאה במחיקת תשלום:', error);
+                window.TilesApp.handleError(error, 'שגיאה במחיקת התשלום');
+            }
+        }
+
+        // ===== Mark as Paid =====
+        async function markAsPaid(paymentId) {
+            try {
+                const { error } = await window.TilesApp.supabase
+                    .from('payments')
+                    .update({ 
+                        status: 'paid',
+                        payment_date: new Date().toISOString().split('T')[0]
+                    })
+                    .eq('id', paymentId);
+                
+                if (error) throw error;
+                
+                window.showToast('התשלום סומן כשולם', 'success');
+                await loadPayments();
+                
+            } catch (error) {
+                console.error('❌ שגיאה בעדכון תשלום:', error);
+                window.TilesApp.handleError(error, 'שגיאה בעדכון התשלום');
+            }
+        }
+
+        // ===== Generate Invoices =====
+        async function generateInvoices() {
+            if (tenants.length === 0) {
+                window.showToast('אין דיירים במערכת', 'warning');
+                return;
+            }
+            
+            const confirmed = await window.TilesApp.confirm(`האם ליצור חשבוניות עבור ${tenants.length} דיירים?`);
+            if (!confirmed) return;
+            
+            try {
+                const now = new Date();
+                const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                
+                const invoices = tenants.map(tenant => ({
+                    tenant_id: tenant.id,
+                    amount: tenant.monthly_fee,
+                    payment_date: null,
+                    billing_month: currentMonth,
+                    status: 'pending',
+                    payment_method: null,
+                    notes: 'חשבונית אוטומטית',
+                    user_id: window.TilesApp.user.id
+                }));
+                
+                const { error } = await window.TilesApp.supabase
+                    .from('payments')
+                    .insert(invoices);
+                
+                if (error) throw error;
+                
+                window.showToast(`נוצרו ${tenants.length} חשבוניות בהצלחה`, 'success');
+                await loadPayments();
+                
+            } catch (error) {
+                console.error('❌ שגיאה ביצירת חשבוניות:', error);
+                window.TilesApp.handleError(error, 'שגיאה ביצירת חשבוניות');
+            }
+        }
+
+        // ===== Export Payments =====
+        function exportPayments() {
+            if (payments.length === 0) {
+                window.showToast('אין תשלומים לייצא', 'warning');
+                return;
+            }
+            
+            const exportData = payments.map(p => ({
+                'דייר': p.tenant?.name || '-',
+                'דירה': p.tenant?.apartment_number || '-',
+                'סכום': p.amount,
+                'תאריך תשלום': window.formatDate(p.payment_date),
+                'חודש חיוב': formatMonth(p.billing_month),
+                'סטטוס': getStatusLabel(p.status),
+                'אמצעי תשלום': getPaymentMethodLabel(p.payment_method),
+                'הערות': p.notes || ''
+            }));
+            
+            window.TilesApp.exportToCSV(exportData, 'תשלומים');
+        }
+
+        // ===== Helper Functions =====
+        function formatMonth(monthStr) {
+            if (!monthStr) return '-';
+            const [year, month] = monthStr.split('-');
+            return `${month}/${year}`;
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'paid': 'שולם',
+                'pending': 'ממתין',
+                'overdue': 'באיחור'
+            };
+            return labels[status] || status;
+        }
+
+        function getPaymentMethodLabel(method) {
+            const labels = {
+                'cash': 'מזומן',
+                'check': 'צ\'ק',
+                'transfer': 'העברה בנקאית',
+                'credit': 'אשראי',
+                'other': 'אחר'
+            };
+            return labels[method] || 'לא צוין';
+        }
+    </script>
+</body>
+</html>

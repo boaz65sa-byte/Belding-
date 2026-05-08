@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<!--
+    מערכת ניהול דיירים מתקדמת
+    Tenant Management Pro v2.4.8
+    
+    מפתח ובעלים: בועז סעדה
+    Copyright © 2024 בועז סעדה
+    All Rights Reserved
+    
+    תאריך עדכון: 05/12/2024
+    גרסה זו כוללת: סנכרון מלא בין לשונית דיירים ותשלומים
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="author" content="בועז סעדה">
+    <meta name="copyright" content="© 2024 בועז סעדה">
+    <title>מערכת ניהול דיירים מתקדמת | Tenant Management Pro</title>
+    <meta name="description" content="מערכת מתקדמת לניהול דיירים, תשלומים, קבלות PDF, דוחות והוצאות.">
+    <meta name="keywords" content="ניהול דיירים, ועד בית, תשלומים, קבלות, דוחות, WhatsApp">
+    
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ניהול דיירים">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-180.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- JSZip for ZIP file creation -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    
+    <!-- html2canvas for Receipt Screenshots -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
+    <!-- jsPDF for PDF Generation -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile-native.css">
+    
+    <style>
+        /* SaaS Dashboard overrides - keep for app.js compatibility */
+        .menu-item.active { background-color: #2563eb; color: white; }
+        .menu-item.active:hover { background-color: #1d4ed8; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .tenant-tab.active { background: #2563eb !important; color: white !important; border: none; }
+        .tenant-tab:not(.active) { background: #f3f4f6; color: #374151; }
+        .modal-content { border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        /* Mobile touch targets - 44px minimum */
+        @media (max-width: 768px) {
+            .btn, button:not(.modal-close), .nav-item, .menu-item { min-height: 44px; }
+            .nav-item { min-height: 56px; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50 text-gray-900 min-h-screen" dir="rtl">
+    <!-- Mobile Actions Overlay -->
+    <div id="mobileActionsOverlay" onclick="closeTenantActions()"></div>
+    
+    <!-- Top Header - Mobile & Desktop -->
+    <header class="sticky top-0 z-50 bg-white shadow-md border-b border-gray-200 h-16 flex items-center">
+        <div class="flex items-center justify-between px-4 md:px-6 w-full">
+            <div class="flex items-center gap-3">
+                <button id="mobileMenuToggle" class="mobile-menu-toggle p-2 -m-2 rounded-lg hover:bg-gray-100 active:scale-95 transition min-w-[44px] min-h-[44px]" aria-label="תפריט">
+                    <i class="fas fa-bars text-xl text-gray-700"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg text-gray-900">ניהול דיירים</h1>
+                        <p class="text-xs text-gray-500 hidden sm:block">Tenant Management Pro</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="admin.html" id="adminPanelBtnTop" class="hidden items-center gap-2 px-4 py-3 min-h-[44px] bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition active:scale-95" title="פאנל אדמין">
+                    <i class="fas fa-crown"></i>
+                    <span class="hidden sm:inline">אדמין</span>
+                </a>
+                <a href="pricing.html" id="pricingBtnTop" class="inline-flex items-center gap-2 px-3 py-2.5 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition active:scale-95" title="מחירים ומנויים">
+                    <i class="fas fa-tags"></i>
+                    <span class="hidden sm:inline">מחירים</span>
+                </a>
+                <button id="themeToggle" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="החלף מצב">
+                    <i class="fas fa-moon text-gray-600"></i>
+                </button>
+                <button id="notificationsBtn" class="relative p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="התראות">
+                    <i class="fas fa-bell text-gray-600"></i>
+                    <span id="notificationBadge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold bg-orange-500 text-white rounded-full px-1">0</span>
+                </button>
+                <button id="backupBtn" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 hidden sm:flex min-w-[44px] min-h-[44px] items-center justify-center" title="גיבוי">
+                    <i class="fas fa-database text-gray-600"></i>
+                </button>
+                <a href="install.html" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 hidden sm:flex min-w-[44px] min-h-[44px] items-center justify-center" title="התקן אפליקציה">
+                    <i class="fas fa-mobile-alt text-gray-600"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar bg-white shadow-lg">
+        <div class="sidebar-menu p-4 flex flex-col gap-1">
+            <a href="#dashboard" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium active" data-section="dashboard">
+                <i class="fas fa-chart-line w-5"></i>
+                <span>לוח מחוונים</span>
+            </a>
+            <a href="#tenants" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium" data-section="tenants">
+                <i class="fas fa-users w-5"></i>
+                <span>דיירים</span>
+            </a>
+            <a href="#payments" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium" data-section="payments">
+                <i class="fas fa-money-bill-wave w-5"></i>
+                <span>תשלומים</span>
+            </a>
+            <a href="#expenses" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium" data-section="expenses">
+                <i class="fas fa-receipt w-5"></i>
+                <span>הוצאות</span>
+            </a>
+            <a href="#notices" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium" data-section="notices">
+                <i class="fas fa-bullhorn w-5"></i>
+                <span>הודעות לדיירים</span>
+            </a>
+            <a href="#reports" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium" data-section="reports">
+                <i class="fas fa-file-alt w-5"></i>
+                <span>דוחות</span>
+            </a>
+            <a href="#settings" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium" data-section="settings">
+                <i class="fas fa-cog w-5"></i>
+                <span>הגדרות</span>
+            </a>
+            <a href="#" onclick="logout(); return false;" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition font-medium mt-4">
+                <i class="fas fa-sign-out-alt w-5"></i>
+                <span>התנתק</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content-area md:mr-64 pt-4 pb-24 md:pb-8 px-4 md:px-6 max-w-7xl mx-auto">
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="content-section active">
+                <div class="mb-6">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-blue-600"></i>
+                        לוח מחוונים
+                    </h1>
+                    <p class="text-gray-500 mt-1">סקירה כללית של מצב הבניין</p>
+                </div>
+
+                <div id="quickAccessButtons" class="hidden"></div>
+
+                <!-- Subscription Banner -->
+                <div id="subscriptionBanner" class="subscription-banner hidden mb-6 p-5 rounded-xl shadow-md bg-gradient-to-br from-amber-500 to-amber-600">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <span class="text-4xl">🎁</span>
+                            <div>
+                                <h3 id="subscriptionTitle" class="text-white font-bold text-lg m-0">תקופת ניסיון</h3>
+                                <p id="subscriptionText" class="text-white/90 m-0 mt-1">נותרו לך 14 ימים חינם</p>
+                            </div>
+                        </div>
+                        <a href="pricing.html" class="inline-flex items-center gap-2 bg-white text-amber-600 px-5 py-3 rounded-lg font-bold shadow hover:scale-105 transition">
+                            <i class="fas fa-credit-card"></i>
+                            שדרג עכשיו
+                        </a>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900">מערכת ניהול דיירים מתקדמת</h3>
+                            <p class="text-sm text-gray-500">גרסה 2.4.8 | מפתח: בועז סעדה | © 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Cards Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white shadow-md">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📱</span>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-sm md:text-lg mb-1 truncate">התקן למסך הבית</h3>
+                                <a href="install.html" class="inline-flex items-center gap-1 bg-white text-emerald-600 px-3 py-1.5 rounded-lg font-semibold text-xs md:text-sm hover:scale-105 transition">
+                                    <i class="fas fa-mobile-alt text-xs"></i>
+                                    התקנה
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white shadow-md">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📦</span>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-sm md:text-lg mb-1 truncate">הורד המערכת</h3>
+                                <button id="downloadFullAppBtn" class="inline-flex items-center gap-1 bg-white text-blue-600 px-3 py-1.5 rounded-lg font-semibold text-xs md:text-sm hover:scale-105 transition cursor-pointer border-0">
+                                    <i class="fas fa-download text-xs"></i>
+                                    הורדה
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-blue-600">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h3 id="totalTenants" class="text-2xl font-bold text-gray-900">0</h3>
+                                <p class="text-sm text-gray-500">סך דיירים</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-emerald-500">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                                <h3 id="paidTenants" class="text-2xl font-bold text-gray-900">0</h3>
+                                <p class="text-sm text-gray-500">שילמו החודש</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-amber-500">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <h3 id="pendingTenants" class="text-2xl font-bold text-gray-900">0</h3>
+                                <p class="text-sm text-gray-500">ממתינים לתשלום</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-cyan-500">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600">
+                                <i class="fas fa-shekel-sign"></i>
+                            </div>
+                            <div>
+                                <h3 id="totalRevenue" class="text-2xl font-bold text-gray-900">₪0</h3>
+                                <p class="text-sm text-gray-500">הכנסות החודש</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-blue-600"></i>
+                            סטטוס תשלומים
+                        </h3>
+                        <div class="chart-container h-[300px]">
+                            <canvas id="paymentStatusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-bar text-blue-600"></i>
+                            הכנסות לפי חודשים
+                        </h3>
+                        <div class="chart-container h-[300px]">
+                            <canvas id="monthlyRevenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                    <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-history text-blue-600"></i>
+                        פעילות אחרונה
+                    </h3>
+                    <div id="recentActivity" class="activity-list space-y-2">
+                        <!-- Activity items will be added dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tenants Section -->
+            <section id="tenantsSection" class="content-section">
+                <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-users text-blue-600"></i> ניהול דיירים
+                        </h1>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="btn inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md transition" onclick="switchTab('payments')" title="עבור ללשונית תשלומים">
+                                <i class="fas fa-money-bill-wave"></i> <span class="hidden sm:inline">עבור לתשלומים</span>
+                            </button>
+                            <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition" id="addTenantBtn">
+                                <i class="fas fa-plus"></i> הוסף דייר
+                            </button>
+                            <button class="btn btn-secondary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg transition" id="importDataBtn">
+                                <i class="fas fa-file-import"></i> <span class="hidden sm:inline">ייבא נתונים</span>
+                            </button>
+                            <button class="btn btn-success inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md transition" id="quickBackupBtn" title="גיבוי מהיר - שמור את כל הנתונים">
+                                <i class="fas fa-download"></i> <span class="hidden sm:inline">גיבוי מהיר</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tenant Section Tabs -->
+                <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+                    <button class="tenant-tab active flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-lg font-semibold whitespace-nowrap" data-tab="tenantsList" onclick="switchTenantTab('tenantsList')">
+                        <i class="fas fa-users"></i> רשימת דיירים
+                    </button>
+                    <button class="tenant-tab flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-lg font-semibold whitespace-nowrap" data-tab="paymentsTable" onclick="switchTenantTab('paymentsTable')">
+                        <i class="fas fa-calendar-check"></i> טבלת תשלומים שנתית
+                    </button>
+                </div>
+
+                <!-- Tenants List Tab -->
+                <div id="tenantsListTab" class="tenant-tab-content active">
+
+                <!-- Search and Filter Bar -->
+                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="searchInput" class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="חפש לפי שם, דירה או טלפון...">
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="sortBy" class="px-4 py-3 border border-gray-200 rounded-lg bg-white font-medium min-h-[44px]">
+                                <option value="apartment">מיין לפי דירה</option>
+                                <option value="name">מיין לפי שם</option>
+                                <option value="amount">מיין לפי סכום</option>
+                            </select>
+                            <button class="btn-icon min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition" id="refreshBtn" title="רענן נתונים">
+                                <i class="fas fa-sync-alt text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tenants Table -->
+                <div class="table-container bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <table class="data-table" id="tenantsTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>דירה</th>
+                                <th>שם הדייר</th>
+                                <th>סכום חודשי</th>
+                                <th>תשלומים</th>
+                                <th>סטטוס</th>
+                                <th class="text-center">⋮</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tenantsTableBody">
+                            <!-- Table rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Mobile Tenant Cards (visible only on mobile) -->
+                <div class="tenants-cards-container" id="tenantsCardsContainer">
+                    <!-- Cards will be added dynamically -->
+                </div>
+
+                </div>
+                <!-- End Tenants List Tab -->
+
+                <!-- Payments Table Tab -->
+                <div id="paymentsTableTab" class="tenant-tab-content hidden">
+                    
+                    <!-- Date Range Selection -->
+                    <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-calendar-alt text-blue-600"></i> טבלת תשלומים שנתית
+                        </h2>
+                        <div class="flex flex-col sm:flex-row gap-3 flex-wrap">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-sm font-medium text-gray-700">מתאריך</label>
+                                <input type="date" id="paymentsTableStartDate" class="form-input px-4 py-3 border border-gray-200 rounded-lg min-h-[44px]">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-sm font-medium text-gray-700">עד תאריך</label>
+                                <input type="date" id="paymentsTableEndDate" class="form-input px-4 py-3 border border-gray-200 rounded-lg min-h-[44px]">
+                            </div>
+                            <div class="flex items-end">
+                                <button class="btn btn-primary px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg" onclick="renderPaymentsTable()">
+                                    <i class="fas fa-search"></i> הצג טבלה
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payments Table Container -->
+                    <div id="paymentsTableContainer" class="annual-payments-table-container bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden mb-6">
+                        <!-- Table will be generated here -->
+                    </div>
+
+                    <!-- Export Buttons -->
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg" onclick="printPaymentsTable()">
+                            <i class="fas fa-print"></i> הדפסה
+                        </button>
+                        <button class="btn btn-success inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg" onclick="exportPaymentsTableToExcel()">
+                            <i class="fas fa-file-excel"></i> ייצוא לExcel
+                        </button>
+                        <button class="btn btn-danger inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg" onclick="exportPaymentsTableToPDF()">
+                            <i class="fas fa-file-pdf"></i> ייצוא לPDF
+                        </button>
+                    </div>
+
+                </div>
+                <!-- End Payments Table Tab -->
+
+            </section>
+
+            <!-- Payments Section -->
+            <section id="paymentsSection" class="content-section">
+                <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-money-bill-wave text-blue-600"></i> ניהול תשלומים
+                        </h1>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="btn btn-secondary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg transition" onclick="switchTab('tenants')" title="חזור ללשונית דיירים">
+                                <i class="fas fa-users"></i> חזור לדיירים
+                            </button>
+                            <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition" id="recordPaymentBtn">
+                                <i class="fas fa-plus"></i> רשום תשלום
+                            </button>
+                            <button class="btn btn-success inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md transition" id="recordAnnualPaymentBtn">
+                                <i class="fas fa-calendar-check"></i> תשלום שנתי
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <p class="text-sm text-gray-500 mb-1">סה"כ צפוי</p>
+                        <p class="text-2xl font-bold text-gray-900" id="expectedTotal">₪0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-emerald-500">
+                        <p class="text-sm text-gray-500 mb-1">סה"כ התקבל</p>
+                        <p class="text-2xl font-bold text-emerald-600" id="receivedTotal">₪0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-red-500">
+                        <p class="text-sm text-gray-500 mb-1">סה"כ חובות</p>
+                        <p class="text-2xl font-bold text-red-600" id="debtTotal">₪0</p>
+                    </div>
+                </div>
+
+                <!-- Tenant Selection for Bulk Actions -->
+                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                        <label class="font-semibold text-gray-700">בחר דייר לפעולות:</label>
+                        <select id="paymentTenantFilter" class="px-4 py-3 border border-gray-200 rounded-lg bg-white min-w-[200px] min-h-[44px]">
+                            <option value="all">כל הדיירים</option>
+                            <!-- Tenant options will be added dynamically -->
+                        </select>
+                        <select id="paymentStatusFilter" class="px-4 py-3 border border-gray-200 rounded-lg bg-white min-h-[44px]">
+                            <option value="all">כל הסטטוסים</option>
+                            <option value="paid">שולם</option>
+                            <option value="pending">ממתין</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Payment History Table -->
+                <div class="table-container bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <table class="data-table" id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAllPayments"></th>
+                                <th>תאריך</th>
+                                <th>דירה</th>
+                                <th>שם הדייר</th>
+                                <th>סכום</th>
+                                <th>סטטוס</th>
+                                <th>אמצעי תשלום</th>
+                                <th>הערות</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                            <!-- Payment rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bulk Actions for Payments -->
+                <div class="bulk-actions hidden bg-white rounded-xl shadow-md p-4 border border-gray-100 flex flex-wrap gap-2 items-center" id="bulkActionsPayments">
+                    <span id="selectedPaymentsCount">0 נבחרו</span>
+                    <button class="btn btn-sm btn-success" id="bulkSendReceiptBtn">
+                        <i class="fas fa-file-invoice"></i> הפק קבלות
+                    </button>
+                    <button class="btn btn-sm btn-success" id="bulkSendWhatsappPaymentsBtn">
+                        <i class="fab fa-whatsapp"></i> שלח ב-WhatsApp
+                    </button>
+                    <button class="btn btn-sm" id="bulkMarkPaidPaymentsBtn">
+                        <i class="fas fa-check"></i> סמן כשולם
+                    </button>
+                    <button class="btn btn-sm btn-danger" id="bulkDeletePaymentsBtn">
+                        <i class="fas fa-trash"></i> מחק
+                    </button>
+                </div>
+            </section>
+
+            <!-- Expenses Section -->
+            <section id="expensesSection" class="content-section">
+                <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-receipt text-blue-600"></i> ניהול הוצאות
+                        </h1>
+                        <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition" id="addExpenseBtn">
+                            <i class="fas fa-plus"></i> הוסף הוצאה חדשה
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Expense Categories Summary -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('electricity')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center text-white"><i class="fas fa-bolt"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">חשמל <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-blue-600" id="electricityTotal">₪0</p>
+                        </div>
+                    </div>
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('elevator')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-violet-500 flex items-center justify-center text-white"><i class="fas fa-elevator"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">מעלית <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-violet-600" id="elevatorTotal">₪0</p>
+                        </div>
+                    </div>
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('cleaning')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-emerald-500 flex items-center justify-center text-white"><i class="fas fa-broom"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">ניקיון <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-emerald-600" id="cleaningTotal">₪0</p>
+                        </div>
+                    </div>
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('gardening')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center text-white"><i class="fas fa-leaf"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">גינון <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-green-600" id="gardeningTotal">₪0</p>
+                        </div>
+                    </div>
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('maintenance')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-amber-500 flex items-center justify-center text-white"><i class="fas fa-tools"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">תחזוקה <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-amber-600" id="maintenanceTotal">₪0</p>
+                        </div>
+                    </div>
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('antenna')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-red-500 flex items-center justify-center text-white"><i class="fas fa-satellite-dish"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">קולטים <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-red-600" id="antennaTotal">₪0</p>
+                        </div>
+                    </div>
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('water')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-cyan-500 flex items-center justify-center text-white"><i class="fas fa-water"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">מים <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-cyan-600" id="waterTotal">₪0</p>
+                        </div>
+                    </div>
+                    <div class="expense-category-card bg-white rounded-xl shadow-md p-4 border border-gray-100 cursor-pointer hover:shadow-lg transition flex items-center gap-3" onclick="editExpensesByCategory('other')" title="לחץ לעריכת כל ההוצאות בקטגוריה זו">
+                        <div class="category-icon w-12 h-12 rounded-lg bg-indigo-500 flex items-center justify-center text-white"><i class="fas fa-ellipsis-h"></i></div>
+                        <div class="category-info flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900">אחר <i class="fas fa-edit text-xs text-gray-500"></i></h4>
+                            <p class="category-amount text-lg font-bold text-indigo-600" id="otherTotal">₪0</p>
+                        </div>
+                    </div>
+                    <!-- Dynamic Custom Categories -->
+                    <div id="customCategoriesContainer" class="contents"></div>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="expenseSearchInput" class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[44px]" placeholder="חפש הוצאה...">
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="expenseCategoryFilter" class="px-4 py-3 border border-gray-200 rounded-lg bg-white min-h-[44px]">
+                                <option value="all">כל הקטגוריות</option>
+                                <option value="electricity">חשמל</option>
+                                <option value="elevator">מעלית</option>
+                                <option value="cleaning">ניקיון</option>
+                                <option value="gardening">גינון</option>
+                                <option value="maintenance">תחזוקה</option>
+                                <option value="antenna">קולטים</option>
+                                <option value="water">מים</option>
+                                <option value="other">אחר</option>
+                            </select>
+                            <button class="btn-icon min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50" id="refreshExpensesBtn" title="רענן נתונים">
+                                <i class="fas fa-sync-alt text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Table -->
+                <div class="table-container bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <table class="data-table" id="expensesTable">
+                        <thead>
+                            <tr>
+                                <th>תאריך</th>
+                                <th>קטגוריה</th>
+                                <th>תיאור</th>
+                                <th>סכום</th>
+                                <th>שולם ע"י</th>
+                                <th>קבלה</th>
+                                <th>הערות</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesTableBody">
+                            <!-- Expense rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Total Expenses -->
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600 font-medium">סה"כ הוצאות החודש</span>
+                        <strong class="text-xl font-bold text-gray-900" id="monthlyExpenseTotal">₪0</strong>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600 font-medium">סה"כ הוצאות שנתי</span>
+                        <strong class="text-xl font-bold text-gray-900" id="yearlyExpenseTotal">₪0</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notices Section (הודעות לדיירים) -->
+            <section id="noticesSection" class="content-section">
+                <div class="mb-6">
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-bullhorn text-blue-600"></i> הודעות לדיירים
+                    </h1>
+                    <p class="text-gray-500 mt-1">צור הודעות למען הדיירים להדפסה על לוח המודעות</p>
+                </div>
+
+                <!-- Create Notice Card -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
+                    <div class="card-header">
+                        <h3><i class="fas fa-plus-circle"></i> צור הודעה חדשה</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="noticeForm">
+                            <!-- Notice Type -->
+                            <div class="form-group">
+                                <label for="noticeType">סוג הודעה *</label>
+                                <select id="noticeType" class="form-select" required>
+                                    <option value="">-- בחר סוג הודעה --</option>
+                                    <option value="payment">הודעת תשלום</option>
+                                    <option value="general">הודעה כללית</option>
+                                    <option value="maintenance">הודעת תחזוקה</option>
+                                    <option value="meeting">הודעת אסיפה</option>
+                                    <option value="urgent">הודעה דחופה</option>
+                                </select>
+                            </div>
+
+                            <!-- Subject -->
+                            <div class="form-group">
+                                <label for="noticeSubject">נושא ההודעה *</label>
+                                <input type="text" id="noticeSubject" class="form-input" placeholder="לדוגמה: תשלום ועד בית לחודש ינואר" required>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="form-group">
+                                <label for="noticeContent">תוכן ההודעה *</label>
+                                <textarea id="noticeContent" class="form-textarea" rows="8" placeholder="כתוב את תוכן ההודעה כאן..." required></textarea>
+                            </div>
+
+                            <!-- Options -->
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="noticeIncludeSignature" checked>
+                                    <span>הוסף חתימה אוטומטית (מפרטי הועד)</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="noticeIncludeDate" checked>
+                                    <span>הוסף תאריך</span>
+                                </label>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" id="previewNoticeBtn">
+                                    <i class="fas fa-eye"></i> תצוגה מקדימה
+                                </button>
+                                <button type="button" class="btn btn-success" id="generateNoticePdfBtn">
+                                    <i class="fas fa-file-pdf"></i> הורד PDF
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="printNoticeBtn">
+                                    <i class="fas fa-print"></i> הדפס
+                                </button>
+                                <button type="reset" class="btn btn-cancel">
+                                    <i class="fas fa-times"></i> נקה טופס
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Notice Preview -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 hidden" id="noticePreviewCard">
+                    <div class="card-header">
+                        <h3><i class="fas fa-eye"></i> תצוגה מקדימה</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="noticePreview" class="notice-preview" style="background: white; padding: 3rem; border: 2px solid #e5e7eb; min-height: 400px; font-family: 'Arial', sans-serif;">
+                            <!-- Preview will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Notices History -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 mt-6">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> הודעות קודמות</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>תאריך</th>
+                                        <th>סוג</th>
+                                        <th>נושא</th>
+                                        <th>פעולות</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="noticesHistoryTableBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center py-8 text-gray-500">
+                                            אין הודעות קודמות
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reportsSection" class="content-section">
+                <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-file-alt text-blue-600"></i> דוחות וסטטיסטיקות
+                        </h1>
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg" id="exportPdfBtn">
+                                <i class="fas fa-file-pdf"></i> ייצא PDF
+                            </button>
+                            <button class="btn btn-secondary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg" id="exportExcelBtn">
+                                <i class="fas fa-file-excel"></i> ייצא Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Filters -->
+                <div class="report-filters bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100 flex flex-col sm:flex-row gap-3 flex-wrap">
+                    <div class="filter-item">
+                        <label>תאריך התחלה:</label>
+                        <input type="date" id="reportStartDate" class="form-input">
+                    </div>
+                    <div class="filter-item">
+                        <label>תאריך סיום:</label>
+                        <input type="date" id="reportEndDate" class="form-input">
+                    </div>
+                    <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg" id="generateReportBtn">
+                        <i class="fas fa-chart-bar"></i> צור דוח
+                    </button>
+                </div>
+
+                <!-- Report Display -->
+                <div id="reportDisplay" class="report-display bg-white rounded-xl shadow-md p-6 border border-gray-100 min-h-[200px]">
+                    <div class="empty-state">
+                        <i class="fas fa-chart-bar"></i>
+                        <p>בחר תאריכים וליחץ על "צור דוח" כדי לראות סטטיסטיקות</p>
+                    </div>
+                </div>
+
+                <!-- Debtor List -->
+                <div class="debtor-list-card bg-white rounded-xl shadow-md p-6 border border-gray-100 mt-6">
+                    <h3><i class="fas fa-exclamation-circle"></i> רשימת חייבים</h3>
+                    <div id="debtorList" class="debtor-list">
+                        <!-- Debtor items will be added dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="content-section">
+                <div class="mb-6">
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-cog text-blue-600"></i> הגדרות
+                    </h1>
+                </div>
+
+                <div class="settings-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- General Settings -->
+                    <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3><i class="fas fa-sliders-h"></i> הגדרות כלליות</h3>
+                        <div class="setting-item">
+                            <label>שם הבניין:</label>
+                            <input type="text" id="buildingName" class="form-input" placeholder="הכנס שם בניין">
+                        </div>
+                        <div class="setting-item">
+                            <label>סכום ברירת מחדל:</label>
+                            <input type="number" id="defaultAmount" class="form-input" placeholder="0">
+                        </div>
+                        <div class="setting-item">
+                            <label>יום תשלום:</label>
+                            <select id="paymentDay" class="form-select">
+                                <option value="1">1 לחודש</option>
+                                <option value="5">5 לחודש</option>
+                                <option value="10">10 לחודש</option>
+                                <option value="15">15 לחודש</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="saveGeneralSettings">
+                            <i class="fas fa-save"></i> שמור הגדרות
+                        </button>
+                    </div>
+
+                    <!-- Committee Details -->
+                    <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3><i class="fas fa-user-tie"></i> פרטי ועד הבית</h3>
+                        <div class="setting-item">
+                            <label>שם יו"ר הועד:</label>
+                            <input type="text" id="chairpersonName" class="form-input" placeholder="הכנס שם">
+                        </div>
+                        <div class="setting-item">
+                            <label>טלפון יו"ר הועד:</label>
+                            <input type="tel" id="chairpersonPhone" class="form-input" placeholder="05X-XXXXXXX">
+                        </div>
+                        <div class="setting-item">
+                            <label>שם הגזבר:</label>
+                            <input type="text" id="treasurerName" class="form-input" placeholder="הכנס שם">
+                        </div>
+                        <div class="setting-item">
+                            <label>טלפון הגזבר:</label>
+                            <input type="tel" id="treasurerPhone" class="form-input" placeholder="05X-XXXXXXX">
+                        </div>
+                        <div class="setting-item">
+                            <label>חתימה דיגיטלית:</label>
+                            <div class="signature-preview" id="signaturePreview">
+                                <p class="no-signature">אין חתימה</p>
+                            </div>
+                            <div class="signature-actions">
+                                <button class="btn btn-primary" id="openSignatureModalBtn">
+                                    <i class="fas fa-signature"></i> צור חתימה
+                                </button>
+                                <button class="btn btn-danger" id="clearSignatureBtn" style="display: none;">
+                                    <i class="fas fa-trash"></i> מחק חתימה
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="saveCommitteeSettings">
+                            <i class="fas fa-save"></i> שמור פרטים
+                        </button>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3><i class="fas fa-bell"></i> הגדרות התראות</h3>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="whatsappNotifications" checked>
+                                <span>שלח התראות ב-WhatsApp</span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="emailNotifications">
+                                <span>שלח התראות במייל</span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="smsNotifications">
+                                <span>שלח התראות ב-SMS</span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>ימים לפני תזכורת:</label>
+                            <input type="number" id="reminderDays" class="form-input" value="3">
+                        </div>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="autoMonthlyBilling" checked>
+                                <span>שלח הודעות חיוב אוטומטיות כל חודש</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" id="saveNotificationSettings">
+                            <i class="fas fa-save"></i> שמור הגדרות
+                        </button>
+                    </div>
+
+                    <!-- Backup & Restore -->
+                    <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3><i class="fas fa-database"></i> גיבוי ושחזור</h3>
+                        <div class="setting-item">
+                            <label>גיבוי אוטומטי:</label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="autoBackup" checked>
+                                <span>הפעל גיבוי אוטומטי</span>
+                            </label>
+                        </div>
+                        <div class="setting-actions">
+                            <button class="btn btn-primary" id="createBackupBtn">
+                                <i class="fas fa-download"></i> צור גיבוי
+                            </button>
+                            <button class="btn btn-secondary" id="restoreBackupBtn">
+                                <i class="fas fa-upload"></i> שחזר גיבוי
+                            </button>
+                        </div>
+                        <div class="setting-item">
+                            <small>גיבוי אחרון: <span id="lastBackupDate">אף פעם</span></small>
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3><i class="fas fa-trash-alt"></i> ניהול נתונים</h3>
+                        <p class="warning-text">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            פעולות אלו בלתי הפיכות!
+                        </p>
+                        <div class="setting-actions">
+                            <button class="btn btn-warning" id="clearPaymentsBtn">
+                                <i class="fas fa-eraser"></i> נקה היסטוריית תשלומים
+                            </button>
+                            <button class="btn btn-danger" id="clearAllDataBtn">
+                                <i class="fas fa-trash-alt"></i> מחק את כל הנתונים
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PWA Installation -->
+                    <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100 hidden" id="pwaInstallCard">
+                        <h3><i class="fas fa-mobile-alt"></i> התקן כאפליקציה</h3>
+                        <p>התקן את המערכת כאפליקציה במכשיר שלך לגישה מהירה!</p>
+                        <div class="pwa-benefits" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                            <div class="pwa-benefit" style="text-align: center;">
+                                <i class="fas fa-bolt" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;"></i>
+                                <div style="font-size: 0.85rem;">גישה מהירה</div>
+                            </div>
+                            <div class="pwa-benefit" style="text-align: center;">
+                                <i class="fas fa-wifi" style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;"></i>
+                                <div style="font-size: 0.85rem;">עובד ללא אינטרנט</div>
+                            </div>
+                            <div class="pwa-benefit" style="text-align: center;">
+                                <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--info-color); margin-bottom: 0.5rem;"></i>
+                                <div style="font-size: 0.85rem;">חוויית אפליקציה</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-success" id="installPwaBtn" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                            <i class="fas fa-download"></i> התקן עכשיו
+                        </button>
+                    </div>
+
+                    <!-- About System -->
+                    <div class="settings-card about-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3><i class="fas fa-info-circle"></i> אודות המערכת</h3>
+                        <div class="about-content">
+                            <div class="about-item">
+                                <strong>שם המערכת:</strong>
+                                <span>מערכת ניהול דיירים מתקדמת</span>
+                            </div>
+                            <div class="about-item">
+                                <strong>גרסה:</strong>
+                                <span>2.1.0 🔥 מעקב חודשי</span>
+                            </div>
+                            <div class="about-item">
+                                <strong>תאריך עדכון:</strong>
+                                <span>03/12/2024</span>
+                            </div>
+                            <div class="about-item">
+                                <strong>מפתח ובעלים:</strong>
+                                <span>בועז סעדה</span>
+                            </div>
+                            <div class="about-item">
+                                <strong>זכויות יוצרים:</strong>
+                                <span>© 2024 בועז סעדה</span>
+                            </div>
+                            <div class="about-item">
+                                <strong>רישיון:</strong>
+                                <span>All Rights Reserved</span>
+                            </div>
+                        </div>
+                        <div class="about-footer">
+                            <p><i class="fas fa-heart" style="color: #ef4444;"></i> נבנה באהבה בישראל</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <!-- /main-container -->
+
+    <!-- Modal: Add/Edit Tenant -->
+    <div class="modal" id="tenantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> <span id="modalTitle">הוסף דייר חדש</span></h2>
+                <button class="modal-close" id="closeTenantModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="tenantForm" class="modal-form">
+                <input type="hidden" id="tenantId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="apartment">מספר דירה *</label>
+                        <input type="text" id="apartment" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenantName">שם הדייר *</label>
+                        <input type="text" id="tenantName" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">טלפון *</label>
+                        <input type="tel" id="phone" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">אימייל</label>
+                        <input type="email" id="email" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="monthlyAmount">סכום חודשי *</label>
+                        <input type="number" id="monthlyAmount" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentStatus">סטטוס תשלום</label>
+                        <select id="paymentStatus" class="form-select">
+                            <option value="pending">ממתין לתשלום</option>
+                            <option value="paid">שולם</option>
+                            <option value="overdue">באיחור</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">הערות</label>
+                    <textarea id="notes" class="form-textarea" rows="3"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> שמור
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelTenantBtn">
+                        <i class="fas fa-times"></i> ביטול
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Record Payment -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-money-bill-wave"></i> רישום תשלום</h2>
+                <button class="modal-close" id="closePaymentModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="paymentForm" class="modal-form">
+                <div class="form-group">
+                    <label for="paymentTenant">בחר דייר *</label>
+                    <select id="paymentTenant" class="form-select" required>
+                        <option value="">-- בחר דייר --</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentAmount">סכום *</label>
+                        <input type="number" id="paymentAmount" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentDate">תאריך תשלום *</label>
+                        <input type="date" id="paymentDate" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentMethod">אמצעי תשלום</label>
+                    <select id="paymentMethod" class="form-select">
+                        <option value="cash">מזומן</option>
+                        <option value="check">צ'ק</option>
+                        <option value="transfer">העברה בנקאית</option>
+                        <option value="credit">כרטיס אשראי</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentNotes">הערות</label>
+                    <textarea id="paymentNotes" class="form-textarea" rows="2"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> שמור תשלום
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelPaymentBtn">
+                        <i class="fas fa-times"></i> ביטול
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Backup & Restore -->
+    <div class="modal" id="backupModal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2><i class="fas fa-database"></i> גיבוי ושחזור</h2>
+                <button class="modal-close" id="closeBackupModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="backup-options">
+                    <button class="btn btn-primary btn-block" id="downloadBackupBtn">
+                        <i class="fas fa-download"></i> הורד גיבוי
+                    </button>
+                    <button class="btn btn-secondary btn-block" id="uploadBackupBtn">
+                        <i class="fas fa-upload"></i> העלה גיבוי
+                    </button>
+                    <input type="file" id="backupFileInput" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Expense -->
+    <div class="modal" id="expenseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-receipt"></i> <span id="expenseModalTitle">הוסף הוצאה חדשה</span></h2>
+                <button class="modal-close" id="closeExpenseModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="expenseForm" class="modal-form">
+                <input type="hidden" id="expenseId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseDate">תאריך *</label>
+                        <input type="date" id="expenseDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseCategory">קטגוריה *</label>
+                        <select id="expenseCategory" class="form-select" required>
+                            <option value="">-- בחר קטגוריה --</option>
+                            <option value="electricity">חשמל</option>
+                            <option value="elevator">מעלית</option>
+                            <option value="cleaning">ניקיון</option>
+                            <option value="gardening">גינון</option>
+                            <option value="maintenance">תחזוקה</option>
+                            <option value="antenna">קולטים</option>
+                            <option value="water">מים</option>
+                            <option value="other">אחר</option>
+                            <option value="custom">➕ קטגוריה חדשה...</option>
+                        </select>
+                        
+                        <!-- Custom category input (hidden by default) -->
+                        <input 
+                            type="text" 
+                            id="customCategoryInput" 
+                            class="form-input" 
+                            placeholder="הכנס שם קטגוריה חדשה"
+                            style="display: none; margin-top: 0.5rem;"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="expenseDescription">תיאור *</label>
+                    <input type="text" id="expenseDescription" class="form-input" required placeholder="תיאור ההוצאה">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseAmount">סכום *</label>
+                        <input type="number" id="expenseAmount" class="form-input" required step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="expensePaidBy">שולם ע"י</label>
+                        <input type="text" id="expensePaidBy" class="form-input" placeholder="שם">
+                    </div>
+                </div>
+                
+                <!-- Recurring Expense Settings -->
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isRecurringExpense" style="margin-left: 8px;">
+                        הוצאה קבועה (חוזרת)
+                    </label>
+                </div>
+                
+                <div id="recurringExpenseSettings" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseFrequency">תדירות *</label>
+                            <select id="expenseFrequency" class="form-select">
+                                <option value="">-- בחר תדירות --</option>
+                                <option value="weekly">שבועי</option>
+                                <option value="biweekly">דו-שבועי</option>
+                                <option value="monthly">חודשי</option>
+                                <option value="quarterly">רבעוני (כל 3 חודשים)</option>
+                                <option value="semiannual">חצי שנתי (כל 6 חודשים)</option>
+                                <option value="annual">שנתי</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseStartDate">תאריך התחלה</label>
+                            <input type="date" id="expenseStartDate" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="expenseReminder" style="margin-left: 8px;" checked>
+                            תזכורת לפני המועד (3 ימים)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="expenseNotes">הערות</label>
+                    <textarea id="expenseNotes" class="form-textarea" rows="2"></textarea>
+                </div>
+
+                <!-- Receipt Upload Section -->
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-camera"></i> צרף קבלה/תמונה
+                    </label>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="file" id="expenseReceiptFile" accept="image/*,application/pdf" style="display: none;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('expenseReceiptFile').click()">
+                            <i class="fas fa-paperclip"></i> בחר קובץ
+                        </button>
+                        <button type="button" class="btn" style="background: #10b981; color: white;" onclick="captureReceiptPhoto()">
+                            <i class="fas fa-camera"></i> צלם קבלה
+                        </button>
+                        <span id="receiptFileName" style="font-size: 0.9rem; color: #6b7280;"></span>
+                    </div>
+                    <!-- Receipt Preview -->
+                    <div id="receiptPreview" style="margin-top: 10px; display: none;">
+                        <img id="receiptPreviewImg" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                        <button type="button" class="btn btn-secondary" onclick="removeReceipt()" style="margin-top: 10px;">
+                            <i class="fas fa-trash"></i> הסר קבלה
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> שמור
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelExpenseBtn">
+                        <i class="fas fa-times"></i> ביטול
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Receipt Generator -->
+    <div class="modal" id="receiptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice"></i> קבלה</h2>
+                <button class="modal-close" id="closeReceiptModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="receiptContent" class="receipt-content">
+                    <!-- Receipt will be generated here -->
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-success" id="sendReceiptWhatsappBtn">
+                        <i class="fab fa-whatsapp"></i> שלח ב-WhatsApp
+                    </button>
+                    <button class="btn btn-primary" id="downloadReceiptBtn">
+                        <i class="fas fa-download"></i> הורד PDF
+                    </button>
+                    <button class="btn btn-secondary" id="printReceiptBtn">
+                        <i class="fas fa-print"></i> הדפס
+                    </button>
+                    <button class="btn btn-cancel" onclick="hideModal('receiptModal')" style="margin-top: 1rem;">
+                        <i class="fas fa-arrow-right"></i> חזור
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Annual Payment -->
+    <div class="modal" id="annualPaymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-check"></i> תשלום שנתי מראש</h2>
+                <button class="modal-close" id="closeAnnualPaymentModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="annualPaymentForm" class="modal-form">
+                <div class="form-group">
+                    <label for="annualPaymentTenant">בחר דייר *</label>
+                    <select id="annualPaymentTenant" class="form-select" required>
+                        <option value="">-- בחר דייר --</option>
+                    </select>
+                </div>
+
+                <div class="annual-payment-info" id="annualPaymentInfo" style="display: none;">
+                    <div class="info-row">
+                        <span>סכום חודשי:</span>
+                        <strong id="annualMonthlyAmount">₪0</strong>
+                    </div>
+                    <div class="info-row">
+                        <span>סכום לשנה (12 חודשים):</span>
+                        <strong id="annualTotalAmount" class="highlight-amount">₪0</strong>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="annualPaymentDate">תאריך תשלום *</label>
+                        <input type="date" id="annualPaymentDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="annualPaymentMethod">אמצעי תשלום</label>
+                        <select id="annualPaymentMethod" class="form-select">
+                            <option value="cash">מזומן</option>
+                            <option value="check">צ'ק</option>
+                            <option value="transfer">העברה בנקאית</option>
+                            <option value="credit">כרטיס אשראי</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="annualPaymentNotes">הערות</label>
+                    <textarea id="annualPaymentNotes" class="form-textarea" rows="2"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> רשום תשלום שנתי
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelAnnualPaymentBtn">
+                        <i class="fas fa-times"></i> ביטול
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Monthly Tracking -->
+    <div class="modal modal-large" id="monthlyTrackingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-alt"></i> <span id="trackingModalTitle">מעקב חודשי</span></h2>
+                <button class="modal-close" id="closeMonthlyTrackingModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Tenant Info Card -->
+                <div class="tracking-info-card">
+                    <div class="tenant-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="tenant-details">
+                        <h3 id="trackingTenantName">שם הדייר</h3>
+                        <p><strong>דירה:</strong> <span id="trackingApartment">-</span></p>
+                        <p><strong>סכום חודשי:</strong> <span id="trackingMonthlyAmount">₪0</span></p>
+                    </div>
+                    <div class="tracking-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">שולם:</span>
+                            <span class="summary-value success" id="trackingPaidTotal">₪0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">חוב:</span>
+                            <span class="summary-value danger" id="trackingDebtTotal">₪0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">יתרה:</span>
+                            <span class="summary-value" id="trackingBalance">₪0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Year Selector -->
+                <div class="year-selector">
+                    <button class="btn-icon" id="prevYearBtn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <h3 id="currentTrackingYear">2024</h3>
+                    <button class="btn-icon" id="nextYearBtn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+
+                <!-- Monthly Grid -->
+                <div class="monthly-grid" id="monthlyGrid">
+                    <!-- Months will be generated dynamically -->
+                </div>
+
+                <!-- Payment History -->
+                <div class="tracking-history">
+                    <h3><i class="fas fa-history"></i> היסטוריית תשלומים</h3>
+                    <div class="history-list" id="trackingHistoryList">
+                        <!-- History items will be added dynamically -->
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-success" id="saveMonthlyChangesBtn">
+                        <i class="fas fa-save"></i> שמור שינויים
+                    </button>
+                    <button class="btn btn-primary" id="generateMonthlyReceiptBtn">
+                        <i class="fas fa-file-invoice"></i> הוצא קבלה
+                    </button>
+                    <button class="btn btn-secondary" id="closeTrackingBtn">
+                        <i class="fas fa-times"></i> סגור
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Digital Signature -->
+    <div class="modal" id="signatureModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-signature"></i> חתימה דיגיטלית</h2>
+                <button class="modal-close" id="closeSignatureModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary);">
+                    חתום במסך או באצבע (במובייל)
+                </p>
+                <div class="signature-pad-container">
+                    <canvas id="signaturePad" width="600" height="200"></canvas>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="saveSignatureBtn">
+                        <i class="fas fa-check"></i> שמור חתימה
+                    </button>
+                    <button class="btn btn-warning" id="clearSignaturePadBtn">
+                        <i class="fas fa-eraser"></i> נקה
+                    </button>
+                    <button class="btn btn-secondary" id="cancelSignatureBtn">
+                        <i class="fas fa-times"></i> ביטול
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: WhatsApp Message -->
+    <div class="modal" id="whatsappModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fab fa-whatsapp"></i> שלח הודעה ב-WhatsApp</h2>
+                <button class="modal-close" id="closeWhatsappModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>בחר תבנית הודעה:</label>
+                    <select id="whatsappTemplate" class="form-select">
+                        <option value="billing">הודעת חיוב</option>
+                        <option value="reminder">תזכורת תשלום</option>
+                        <option value="receipt">קבלה על תשלום</option>
+                        <option value="custom">הודעה מותאמת אישית</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>תוכן ההודעה:</label>
+                    <textarea id="whatsappMessage" class="form-textarea" rows="8" readonly></textarea>
+                </div>
+                
+                <div id="customMessageArea" class="form-group hidden">
+                    <label>הודעה מותאמת אישית:</label>
+                    <textarea id="customWhatsappMessage" class="form-textarea" rows="8"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-success btn-block" id="sendWhatsappBtn">
+                        <i class="fab fa-whatsapp"></i> פתח ב-WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Import Data -->
+    <div class="modal" id="importDataModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-import"></i> ייבוא נתונים</h2>
+                <button class="modal-close" id="closeImportDataModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="import-instructions">
+                    <h3><i class="fas fa-info-circle"></i> הוראות ייבוא</h3>
+                    <p>ניתן לייבא נתוני דיירים מהפורמטים הבאים:</p>
+                    <ul>
+                        <li>📊 <strong>Excel/CSV</strong> - קובץ עם העמודות: דירה, שם, טלפון, אימייל, סכום חודשי</li>
+                        <li>📄 <strong>JSON</strong> - קובץ גיבוי מהמערכת או פורמט JSON תואם</li>
+                    </ul>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>שים לב:</strong> הייבוא יוסיף דיירים חדשים. דיירים קיימים (לפי מספר דירה) לא יוחלפו.
+                    </div>
+                </div>
+
+                <!-- Import Method Selection -->
+                <div class="import-method-selection">
+                    <h3>בחר שיטת ייבוא:</h3>
+                    <div class="method-buttons">
+                        <button class="method-btn active" data-method="csv">
+                            <i class="fas fa-file-csv"></i>
+                            <span>Excel / CSV</span>
+                        </button>
+                        <button class="method-btn" data-method="json">
+                            <i class="fas fa-file-code"></i>
+                            <span>JSON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CSV Import Section -->
+                <div class="import-section" id="csvImportSection">
+                    <h3><i class="fas fa-table"></i> ייבוא מ-Excel/CSV</h3>
+                    
+                    <div class="form-group">
+                        <label>העלה קובץ Excel/CSV:</label>
+                        <div class="file-upload-area" id="csvFileUploadArea">
+                            <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                            <div class="file-upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>לחץ כאן או גרור קובץ</p>
+                                <span>קבצים נתמכים: CSV, XLSX, XLS</span>
+                            </div>
+                        </div>
+                        <div id="csvFileInfo" class="file-info" style="display: none;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-secondary" id="downloadTemplateBtn">
+                            <i class="fas fa-download"></i> הורד תבנית דוגמה
+                        </button>
+                    </div>
+
+                    <div id="csvPreview" class="import-preview" style="display: none;">
+                        <h4>תצוגה מקדימה:</h4>
+                        <div class="preview-stats">
+                            <span class="stat-badge">
+                                <i class="fas fa-users"></i>
+                                <strong id="csvTotalRows">0</strong> דיירים
+                            </span>
+                            <span class="stat-badge success">
+                                <i class="fas fa-check"></i>
+                                <strong id="csvValidRows">0</strong> תקינים
+                            </span>
+                            <span class="stat-badge error">
+                                <i class="fas fa-exclamation"></i>
+                                <strong id="csvErrorRows">0</strong> שגיאות
+                            </span>
+                        </div>
+                        <div class="preview-table-container">
+                            <table class="preview-table" id="csvPreviewTable"></table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON Import Section -->
+                <div class="import-section" id="jsonImportSection" style="display: none;">
+                    <h3><i class="fas fa-code"></i> ייבוא מ-JSON</h3>
+                    
+                    <div class="form-group">
+                        <label>העלה קובץ JSON:</label>
+                        <div class="file-upload-area" id="jsonFileUploadArea">
+                            <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+                            <div class="file-upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>לחץ כאן או גרור קובץ JSON</p>
+                                <span>קבצים נתמכים: JSON</span>
+                            </div>
+                        </div>
+                        <div id="jsonFileInfo" class="file-info" style="display: none;"></div>
+                    </div>
+
+                    <div id="jsonPreview" class="import-preview" style="display: none;">
+                        <h4>תצוגה מקדימה:</h4>
+                        <div class="preview-stats">
+                            <span class="stat-badge">
+                                <i class="fas fa-users"></i>
+                                <strong id="jsonTotalRows">0</strong> דיירים
+                            </span>
+                            <span class="stat-badge">
+                                <i class="fas fa-receipt"></i>
+                                <strong id="jsonPayments">0</strong> תשלומים
+                            </span>
+                            <span class="stat-badge">
+                                <i class="fas fa-money-bill"></i>
+                                <strong id="jsonExpenses">0</strong> הוצאות
+                            </span>
+                        </div>
+                        <div class="json-summary" id="jsonSummary"></div>
+                    </div>
+                </div>
+
+                <!-- Import Actions -->
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="executeImportBtn" disabled>
+                        <i class="fas fa-check"></i> בצע ייבוא
+                    </button>
+                    <button class="btn btn-secondary" id="cancelImportBtn">
+                        <i class="fas fa-times"></i> ביטול
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-icon" id="toastIcon"></div>
+        <div class="toast-message" id="toastMessage"></div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>טוען נתונים...</p>
+    </div>
+
+    <!-- Footer with Copyright -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <p>
+                <strong>מערכת ניהול דיירים מתקדמת</strong> | גרסה 2.4.8
+            </p>
+            <p>
+                © 2024 <strong>בועז סעדה</strong> | כל הזכויות שמורות
+            </p>
+            <p class="footer-subtitle">
+                נבנה עם ❤️ בישראל | Tenant Management Pro
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modal: Edit Expenses by Category -->
+    <div class="modal modal-large" id="categoryExpensesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> עריכת הוצאות: <span id="categoryExpensesTitle">קטגוריה</span></h2>
+                <button class="modal-close" id="closeCategoryExpensesModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>תאריך</th>
+                                <th>תיאור</th>
+                                <th>סכום</th>
+                                <th>שילם</th>
+                                <th>הערות</th>
+                                <th>קבלה</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoryExpensesTableBody">
+                            <!-- Expenses will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-actions" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <button class="btn btn-primary" onclick="addExpense()">
+                            <i class="fas fa-plus"></i> הוסף הוצאה חדשה בקטגוריה זו
+                        </button>
+                        <button class="btn btn-cancel" onclick="hideModal('categoryExpensesModal')">
+                            <i class="fas fa-arrow-right"></i> חזור
+                        </button>
+                    </div>
+                    <button class="btn btn-danger" id="deleteCategoryBtn" style="display: none;" title="מחק קטגוריה זו">
+                        <i class="fas fa-trash"></i> מחק קטגוריה
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation (visible only on mobile) -->
+    <nav class="mobile-bottom-nav">
+        <button class="nav-item" onclick="showTab('dashboard')" data-tab="dashboard">
+            <i class="fas fa-home"></i>
+            <span>ראשי</span>
+        </button>
+        <button class="nav-item" onclick="showTab('tenants')" data-tab="tenants">
+            <i class="fas fa-users"></i>
+            <span>דיירים</span>
+        </button>
+        <button class="nav-item" onclick="showTab('payments')" data-tab="payments">
+            <i class="fas fa-credit-card"></i>
+            <span>תשלומים</span>
+        </button>
+        <button class="nav-item" onclick="showTab('expenses')" data-tab="expenses">
+            <i class="fas fa-receipt"></i>
+            <span>הוצאות</span>
+        </button>
+        <button class="nav-item" onclick="openMoreMenu()" data-tab="more">
+            <i class="fas fa-ellipsis-h"></i>
+            <span>עוד</span>
+        </button>
+    </nav>
+
+    <!-- More Menu Modal -->
+    <div class="more-menu-overlay" id="moreMenuOverlay" onclick="closeMoreMenu()"></div>
+    <div class="more-menu" id="moreMenu">
+        <div class="more-menu-header">
+            <h3>תפריט נוסף</h3>
+            <button class="close-more-menu" onclick="closeMoreMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="more-menu-items">
+            <button class="more-menu-item" onclick="showTab('notices'); closeMoreMenu();">
+                <i class="fas fa-bullhorn"></i>
+                <span>הודעות</span>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="more-menu-item" onclick="showTab('reports'); closeMoreMenu();">
+                <i class="fas fa-chart-bar"></i>
+                <span>דוחות</span>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="more-menu-item" onclick="showTab('settings'); closeMoreMenu();">
+                <i class="fas fa-cog"></i>
+                <span>הגדרות</span>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <a href="pricing.html" class="more-menu-item" style="text-decoration:none;color:inherit;">
+                <i class="fas fa-tags" style="color:#10b981;"></i>
+                <span>מחירים ומנויים</span>
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Auth System -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <!-- Auth Check & Protection -->
+    <script>
+        // 🔒 בדיקת אימות לפני טעינת האפליקציה
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // המתן לאתחול Supabase
+                await initSupabase();
+                
+                // בדוק גישה
+                const accessCheck = await checkUserAccess();
+                console.log('🔐 תוצאת בדיקת גישה:', accessCheck);
+                
+                if (!accessCheck.hasAccess) {
+                    if (accessCheck.reason === 'not_logged_in') {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    if (accessCheck.reason === 'expired' ||
+                        accessCheck.reason === 'trial_expired' || 
+                        accessCheck.reason === 'subscription_expired') {
+                        window.location.href = 'pricing.html?expired=true';
+                        return;
+                    }
+                }
+                
+                // יש גישה - הצג מידע על המנוי
+                console.log('✅ גישה אושרה:', accessCheck.status);
+
+                // העלמת מסך הטעינה
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
+
+                // הצג התראה אם המנוי עומד לפוג
+                if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
+                    const message = accessCheck.status === 'trial' 
+                        ? `תקופת הניסיון שלך מסתיימת בעוד ${accessCheck.daysLeft} ימים`
+                        : `המנוי שלך מסתיים בעוד ${accessCheck.daysLeft} ימים`;
+                    
+                    if (typeof showToast !== 'undefined') {
+                        showToast(message, 'warning');
+                    }
+                }
+                
+                // שמור מידע על המשתמש ב-appState
+                if (typeof window.appState !== 'undefined' && accessCheck.profile) {
+                    window.appState.currentUser = accessCheck.profile;
+                }
+                
+                // הצג באנר מנוי
+                const banner = document.getElementById('subscriptionBanner');
+                const title = document.getElementById('subscriptionTitle');
+                const text = document.getElementById('subscriptionText');
+                
+                if (banner && accessCheck.profile) {
+                    const profile = accessCheck.profile;
+                    
+                    if (profile.status === 'trial') {
+                        banner.style.display = 'block';
+                        banner.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                        title.textContent = '🎁 תקופת ניסיון חינם';
+                        text.textContent = accessCheck.daysLeft 
+                            ? `נותרו לך ${accessCheck.daysLeft} ימים - שדרג עכשיו ותיהנה מכל התכונות!`
+                            : 'תקופת הניסיון שלך פעילה';
+                    } else if (profile.status === 'active' && !profile.has_lifetime_access) {
+                        if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
+                            banner.style.display = 'block';
+                            banner.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                            title.textContent = '⚠️ המנוי עומד לפוג';
+                            text.textContent = `נותרו ${accessCheck.daysLeft} ימים - חדש עכשיו!`;
+                        }
+                    } else if (profile.has_lifetime_access) {
+                        banner.style.display = 'block';
+                        banner.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                        title.textContent = '💎 מנוי לכל החיים';
+                        text.textContent = 'תודה שבחרת בנו! יש לך גישה מלאה לתמיד';
+                        const bannerLink = banner.querySelector('a');
+                        if (bannerLink) bannerLink.style.display = 'none';
+                    }
+                }
+                
+                // === הצג כפתורים בראש הדף ===
+                const userRole = accessCheck.profile?.role;
+                const userEmail = accessCheck.profile?.email;
+                
+                // כפתורים בראש הדף
+                const adminBtnTop = document.getElementById('adminPanelBtnTop');
+                const pricingBtnTop = document.getElementById('pricingBtnTop');
+                
+                console.log('👤 תפקיד:', userRole, '| אימייל:', userEmail);
+                
+                // בדיקה אם סופר אדמין
+                const isSuperAdmin = userRole === 'super_admin' || userEmail === 'boaz65sa@gmail.com';
+                console.log('🔑 סופר אדמין:', isSuperAdmin);
+                
+                // הצג כפתור פאנל אדמין לסופר אדמין
+                if (isSuperAdmin && adminBtnTop) {
+                    adminBtnTop.style.display = 'inline-flex';
+                    console.log('✅ כפתור פאנל אדמין מוצג');
+                }
+                
+                // הצג כפתור מחירים לכולם
+                if (pricingBtnTop) {
+                    pricingBtnTop.style.display = 'inline-flex';
+                    console.log('✅ כפתור מחירים מוצג');
+                }
+                
+            } catch (error) {
+                console.error('❌ שגיאה בבדיקת אימות:', error);
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+    
+    <!-- Main App -->
+    <script src="js/app.js"></script>
+    <script src="js/payments-table.js"></script>
+    <script src="js/mobile.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Backup data before PWA installation
+        function backupDataBeforeInstall() {
+            try {
+                const data = localStorage.getItem('tenantManagementData');
+                const settings = localStorage.getItem('tenantManagementSettings');
+                
+                if (data || settings) {
+                    // Create a backup with timestamp
+                    const backup = {
+                        data: data,
+                        settings: settings,
+                        timestamp: new Date().toISOString(),
+                        source: 'pre-install-backup'
+                    };
+                    
+                    // Save backup to multiple keys for safety
+                    localStorage.setItem('tenantManagement_BACKUP', JSON.stringify(backup));
+                    localStorage.setItem('tenantManagement_BACKUP_' + Date.now(), JSON.stringify(backup));
+                    
+                    console.log('✅ גיבוי נתונים בוצע לפני התקנה');
+                    return true;
+                }
+            } catch (error) {
+                console.error('❌ שגיאה בגיבוי נתונים:', error);
+            }
+            return false;
+        }
+        
+        // Restore data after PWA installation
+        function restoreDataAfterInstall() {
+            try {
+                const currentData = localStorage.getItem('tenantManagementData');
+                
+                // If no data exists, try to restore from backup
+                if (!currentData) {
+                    const backup = localStorage.getItem('tenantManagement_BACKUP');
+                    if (backup) {
+                        const parsed = JSON.parse(backup);
+                        if (parsed.data) {
+                            localStorage.setItem('tenantManagementData', parsed.data);
+                        }
+                        if (parsed.settings) {
+                            localStorage.setItem('tenantManagementSettings', parsed.settings);
+                        }
+                        console.log('✅ נתונים שוחזרו מגיבוי');
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ שגיאה בשחזור נתונים:', error);
+            }
+            return false;
+        }
+        
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('📱 PWA מוכן להתקנה');
+            backupDataBeforeInstall();
+        });
+        
+        // Listen for appinstalled event
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA הותקן בהצלחה');
+            setTimeout(() => {
+                restoreDataAfterInstall();
+            }, 1000);
+        });
+        
+        // Check on load if we need to restore
+        window.addEventListener('load', () => {
+            // If running as installed PWA
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                console.log('📱 רץ כ-PWA מותקן');
+                restoreDataAfterInstall();
+            }
+        });
+        
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker נרשם בהצלחה:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    console.log('🔄 גרסה חדשה זמינה! רענן את הדף.');
+                                    
+                                    // Backup data before update
+                                    backupDataBeforeInstall();
+                                    
+                                    // Optional: Show update notification
+                                    if (confirm('גרסה חדשה זמינה! האם לרענן את הדף?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ שגיאה ברישום Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Note: PWA installation code is in js/app.js
+    </script>
+
+    <!-- Global Floating Action Button (FAB) - Mobile Only -->
+    <div id="globalFab" class="fab-container md:hidden">
+        <button id="fabBtn" class="fab-button" aria-label="פעולה מהירה">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Bottom Navigation - Mobile Only -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden pb-[env(safe-area-inset-bottom)]" aria-label="ניווט תחתון">
+        <div class="flex justify-around items-center h-16">
+            <a href="#dashboard" class="menu-item flex flex-col items-center justify-center flex-1 py-2 text-gray-500 hover:text-blue-600 min-h-[56px] min-w-[44px] transition" data-section="dashboard">
+                <i class="fas fa-chart-line text-lg mb-0.5"></i>
+                <span class="text-xs">דשבורד</span>
+            </a>
+            <a href="#tenants" class="menu-item flex flex-col items-center justify-center flex-1 py-2 text-gray-500 hover:text-blue-600 min-h-[56px] min-w-[44px] transition" data-section="tenants">
+                <i class="fas fa-users text-lg mb-0.5"></i>
+                <span class="text-xs">דיירים</span>
+            </a>
+            <a href="#payments" class="menu-item flex flex-col items-center justify-center flex-1 py-2 text-gray-500 hover:text-blue-600 min-h-[56px] min-w-[44px] transition" data-section="payments">
+                <i class="fas fa-money-bill-wave text-lg mb-0.5"></i>
+                <span class="text-xs">תשלומים</span>
+            </a>
+            <a href="#expenses" class="menu-item flex flex-col items-center justify-center flex-1 py-2 text-gray-500 hover:text-blue-600 min-h-[56px] min-w-[44px] transition" data-section="expenses">
+                <i class="fas fa-receipt text-lg mb-0.5"></i>
+                <span class="text-xs">הוצאות</span>
+            </a>
+            <a href="#reports" class="menu-item flex flex-col items-center justify-center flex-1 py-2 text-gray-500 hover:text-blue-600 min-h-[56px] min-w-[44px] transition" data-section="reports">
+                <i class="fas fa-file-alt text-lg mb-0.5"></i>
+                <span class="text-xs">דוחות</span>
+            </a>
+            <a href="#settings" class="menu-item flex flex-col items-center justify-center flex-1 py-2 text-gray-500 hover:text-blue-600 min-h-[56px] min-w-[44px] transition" data-section="settings">
+                <i class="fas fa-cog text-lg mb-0.5"></i>
+                <span class="text-xs">הגדרות</span>
+            </a>
+        </div>
+    </nav>
+</body>
+</html>

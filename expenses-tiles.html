@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול הוצאות - ועד 2025</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icon-192.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tiles Style -->
+    <link rel="stylesheet" href="css/tiles-style.css">
+</head>
+<body>
+    <!-- Loading State -->
+    <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p>טוען נתונים...</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="tiles-container" id="mainContent" style="display: none;">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <a href="dashboard-tiles.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                <span>חזרה לדשבורד</span>
+            </a>
+            
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>התנתק</span>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <div class="tiles-header">
+            <h1><i class="fas fa-receipt"></i> ניהול הוצאות</h1>
+            <p class="subtitle">מעקב אחר כל הוצאות הועד</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--danger);">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-value" id="totalThisMonth">₪0</div>
+                <div class="stat-label">החודש</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--warning);">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-value" id="totalThisYear">₪0</div>
+                <div class="stat-label">השנה</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--info);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-value" id="totalExpenses">0</div>
+                <div class="stat-label">סה"כ הוצאות</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--purple);">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-value" id="totalCategories">0</div>
+                <div class="stat-label">קטגוריות</div>
+            </div>
+        </div>
+
+        <!-- Actions Bar - Mobile Optimized -->
+        <div class="actions-bar" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openAddExpenseModal()">
+                <i class="fas fa-plus"></i>
+                <span>הוסף הוצאה</span>
+            </button>
+            
+            <button class="btn btn-outline" onclick="exportExpenses()">
+                <i class="fas fa-download"></i>
+                <span>ייצוא</span>
+            </button>
+            
+            <button class="btn btn-secondary" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                <span>הדפס</span>
+            </button>
+        </div>
+
+        <!-- Search Box - Mobile Optimized -->
+        <div class="mobile-search" style="margin-bottom: 16px;">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchExpenses" placeholder="חיפוש לפי תיאור, ספק, קטגוריה..." oninput="searchExpenses()">
+        </div>
+
+        <!-- Filter by Category - Mobile Optimized -->
+        <div class="mobile-filter-container" style="margin-bottom: 20px;">
+            <select class="form-select" id="categoryFilter" onchange="filterByCategory()" style="width: 100%; padding: 14px; font-size: 16px; border-radius: 12px;">
+                <option value="all">🏷️ כל הקטגוריות</option>
+            </select>
+        </div>
+
+        <!-- Expenses Grid -->
+        <div class="cards-grid" id="expensesGrid">
+            <!-- Expenses will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <h3 class="empty-title">אין הוצאות במערכת</h3>
+            <p class="empty-text">התחל בהוספת ההוצאה הראשונה שלך</p>
+            <button class="btn btn-primary btn-lg" onclick="openAddExpenseModal()">
+                <i class="fas fa-plus"></i>
+                <span>הוסף הוצאה חדשה</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Expense Modal -->
+    <div class="modal" id="expenseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">הוסף הוצאה חדשה</h2>
+                <button class="modal-close" onclick="closeExpenseModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="expenseForm" onsubmit="saveExpense(event)">
+                <input type="hidden" id="expenseId">
+                
+                <div class="form-group">
+                    <label class="form-label">תיאור *</label>
+                    <input type="text" class="form-input" id="expenseDescription" required placeholder="לדוגמה: תיקון מעלית">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">סכום (₪) *</label>
+                    <input type="number" class="form-input" id="expenseAmount" required min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">תאריך *</label>
+                    <input type="date" class="form-input" id="expenseDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">קטגוריה *</label>
+                    <select class="form-select" id="expenseCategory" required>
+                        <option value="">בחר קטגוריה</option>
+                        <option value="maintenance">תחזוקה</option>
+                        <option value="cleaning">ניקיון</option>
+                        <option value="electricity">חשמל</option>
+                        <option value="water">מים</option>
+                        <option value="gardening">גינון</option>
+                        <option value="security">אבטחה</option>
+                        <option value="insurance">ביטוח</option>
+                        <option value="repairs">תיקונים</option>
+                        <option value="supplies">ציוד</option>
+                        <option value="other">אחר</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">שולם ל-</label>
+                    <input type="text" class="form-input" id="expenseVendor" placeholder="שם הספק/חברה">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">אישור/קבלה</label>
+                    <input type="text" class="form-input" id="expenseReceipt" placeholder="מספר קבלה או אסמכתא">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">הערות</label>
+                    <textarea class="form-textarea" id="expenseNotes" placeholder="הערות נוספות..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">
+                        ביטול
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i>
+                        <span>שמור</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase & Auth -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tiles-app.js"></script>
+
+    <script>
+        // ===== Global State =====
+        let expenses = [];
+        let currentCategoryFilter = 'all';
+        let editingExpenseId = null;
+
+        // ===== Initialize =====
+        window.addEventListener('DOMContentLoaded', async () => {
+            const initialized = await window.TilesApp.init();
+            if (!initialized) return;
+            
+            await loadExpenses();
+            
+            // Set default date to today
+            document.getElementById('expenseDate').valueAsDate = new Date();
+        });
+
+        // ===== Load Expenses =====
+        async function loadExpenses() {
+            try {
+                window.TilesApp.showLoading('טוען הוצאות...');
+                
+                const { data, error } = await window.TilesApp.supabase
+                    .from('expenses')
+                    .select('*')
+                    .order('expense_date', { ascending: false });
+                
+                if (error) throw error;
+                
+                expenses = data || [];
+                console.log('✅ נטענו הוצאות:', expenses.length);
+                
+                populateCategoryFilter();
+                renderExpenses();
+                updateStatistics();
+                
+                window.TilesApp.hideLoading();
+                
+            } catch (error) {
+                console.error('❌ שגיאה בטעינת הוצאות:', error);
+                window.TilesApp.handleError(error, 'שגיאה בטעינת ההוצאות');
+                window.TilesApp.hideLoading();
+            }
+        }
+
+        // ===== Populate Category Filter =====
+        function populateCategoryFilter() {
+            const categories = [...new Set(expenses.map(e => e.category))];
+            const select = document.getElementById('categoryFilter');
+            
+            select.innerHTML = '<option value="all">הכל</option>' +
+                categories.map(cat => `<option value="${cat}">${getCategoryLabel(cat)}</option>`).join('');
+        }
+
+        // ===== Search Expenses =====
+        let searchQuery = '';
+        
+        function searchExpenses() {
+            searchQuery = document.getElementById('searchExpenses').value.toLowerCase();
+            renderExpenses();
+        }
+
+        // ===== Render Expenses - Mobile Optimized =====
+        function renderExpenses() {
+            const grid = document.getElementById('expensesGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            let filteredExpenses = expenses;
+            
+            // Filter by category
+            if (currentCategoryFilter !== 'all') {
+                filteredExpenses = filteredExpenses.filter(e => e.category === currentCategoryFilter);
+            }
+            
+            // Filter by search query
+            if (searchQuery) {
+                filteredExpenses = filteredExpenses.filter(e => {
+                    const searchStr = `${e.description || ''} ${e.vendor || ''} ${getCategoryLabel(e.category)} ${e.amount || ''}`.toLowerCase();
+                    return searchStr.includes(searchQuery);
+                });
+            }
+            
+            if (filteredExpenses.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'block';
+            emptyState.style.display = 'none';
+            
+            const categoryColors = {
+                'maintenance': '#f59e0b',
+                'cleaning': '#06b6d4',
+                'electricity': '#f59e0b',
+                'water': '#06b6d4',
+                'gardening': '#10b981',
+                'security': '#ef4444',
+                'insurance': '#667eea',
+                'repairs': '#ef4444',
+                'supplies': '#8b5cf6',
+                'other': '#6b7280'
+            };
+            const categoryIcons = {
+                'maintenance': '🔧',
+                'cleaning': '🧹',
+                'electricity': '⚡',
+                'water': '💧',
+                'gardening': '🌿',
+                'security': '🛡️',
+                'insurance': '📋',
+                'repairs': '🔨',
+                'supplies': '📦',
+                'other': '📄'
+            };
+            
+            grid.innerHTML = filteredExpenses.map(expense => {
+                const color = categoryColors[expense.category] || '#6b7280';
+                const icon = categoryIcons[expense.category] || '📄';
+                
+                return `
+                <div class="mobile-card" style="border-right-color: ${color};">
+                    <div class="mobile-card-header">
+                        <div class="mobile-card-avatar" style="background: linear-gradient(135deg, ${color}, ${color}dd); font-size: 24px;">
+                            ${icon}
+                        </div>
+                        <div class="mobile-card-info">
+                            <div class="mobile-card-name">${expense.description}</div>
+                            <div class="mobile-card-subtitle">
+                                ${getCategoryLabel(expense.category)}
+                            </div>
+                        </div>
+                        <span class="mobile-card-badge" style="background: ${color}20; color: ${color}; font-size: 16px; font-weight: 700;">
+                            ₪${expense.amount}
+                        </span>
+                    </div>
+                    
+                    <div class="mobile-card-details">
+                        <div class="mobile-card-detail">
+                            <div class="mobile-card-detail-label">תאריך</div>
+                            <div class="mobile-card-detail-value">${window.formatDate(expense.expense_date)}</div>
+                        </div>
+                        <div class="mobile-card-detail">
+                            <div class="mobile-card-detail-label">קטגוריה</div>
+                            <div class="mobile-card-detail-value">${icon} ${getCategoryLabel(expense.category)}</div>
+                        </div>
+                        ${expense.vendor ? `
+                        <div class="mobile-card-detail">
+                            <div class="mobile-card-detail-label">ספק</div>
+                            <div class="mobile-card-detail-value">${expense.vendor}</div>
+                        </div>
+                        ` : ''}
+                        ${expense.receipt_number ? `
+                        <div class="mobile-card-detail">
+                            <div class="mobile-card-detail-label">מס' קבלה</div>
+                            <div class="mobile-card-detail-value">${expense.receipt_number}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${expense.notes ? `
+                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: #64748b;">
+                        <i class="fas fa-sticky-note" style="margin-left: 6px;"></i>
+                        ${expense.notes}
+                    </div>
+                    ` : ''}
+                    
+                    <div class="mobile-card-actions" style="grid-template-columns: repeat(2, 1fr);">
+                        <button class="btn btn-secondary btn-sm" onclick="editExpense('${expense.id}')">
+                            <i class="fas fa-edit"></i>
+                            ערוך
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteExpense('${expense.id}')">
+                            <i class="fas fa-trash"></i>
+                            מחק
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // ===== Update Statistics =====
+        function updateStatistics() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            const thisMonth = expenses
+                .filter(e => {
+                    const date = new Date(e.expense_date);
+                    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+                })
+                .reduce((sum, e) => sum + (e.amount || 0), 0);
+            
+            const thisYear = expenses
+                .filter(e => {
+                    const date = new Date(e.expense_date);
+                    return date.getFullYear() === currentYear;
+                })
+                .reduce((sum, e) => sum + (e.amount || 0), 0);
+            
+            const categories = new Set(expenses.map(e => e.category)).size;
+            
+            document.getElementById('totalThisMonth').textContent = window.formatCurrency(thisMonth);
+            document.getElementById('totalThisYear').textContent = window.formatCurrency(thisYear);
+            document.getElementById('totalExpenses').textContent = expenses.length;
+            document.getElementById('totalCategories').textContent = categories;
+        }
+
+        // ===== Filter by Category =====
+        function filterByCategory() {
+            const select = document.getElementById('categoryFilter');
+            currentCategoryFilter = select.value;
+            renderExpenses();
+        }
+
+        // ===== Open Add Expense Modal =====
+        function openAddExpenseModal() {
+            editingExpenseId = null;
+            document.getElementById('modalTitle').textContent = 'הוסף הוצאה חדשה';
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expenseDate').valueAsDate = new Date();
+            window.TilesApp.openModal('expenseModal');
+        }
+
+        // ===== Close Expense Modal =====
+        function closeExpenseModal() {
+            window.TilesApp.closeModal('expenseModal');
+            document.getElementById('expenseForm').reset();
+            editingExpenseId = null;
+        }
+
+        // ===== Save Expense =====
+        async function saveExpense(event) {
+            event.preventDefault();
+            
+            try {
+                const expenseData = {
+                    description: document.getElementById('expenseDescription').value,
+                    amount: parseFloat(document.getElementById('expenseAmount').value),
+                    expense_date: document.getElementById('expenseDate').value,
+                    category: document.getElementById('expenseCategory').value,
+                    vendor: document.getElementById('expenseVendor').value || null,
+                    receipt_number: document.getElementById('expenseReceipt').value || null,
+                    notes: document.getElementById('expenseNotes').value || null,
+                    user_id: window.TilesApp.user.id
+                };
+                
+                if (editingExpenseId) {
+                    // Update
+                    const { error } = await window.TilesApp.supabase
+                        .from('expenses')
+                        .update(expenseData)
+                        .eq('id', editingExpenseId);
+                    
+                    if (error) throw error;
+                    
+                    window.showToast('ההוצאה עודכנה בהצלחה', 'success');
+                } else {
+                    // Create
+                    const { error } = await window.TilesApp.supabase
+                        .from('expenses')
+                        .insert([expenseData]);
+                    
+                    if (error) throw error;
+                    
+                    window.showToast('ההוצאה נוספה בהצלחה', 'success');
+                }
+                
+                closeExpenseModal();
+                await loadExpenses();
+                
+            } catch (error) {
+                console.error('❌ שגיאה בשמירת הוצאה:', error);
+                window.TilesApp.handleError(error, 'שגיאה בשמירת ההוצאה');
+            }
+        }
+
+        // ===== Edit Expense =====
+        async function editExpense(expenseId) {
+            try {
+                const expense = expenses.find(e => e.id === expenseId);
+                if (!expense) return;
+                
+                editingExpenseId = expenseId;
+                document.getElementById('modalTitle').textContent = 'ערוך הוצאה';
+                document.getElementById('expenseDescription').value = expense.description;
+                document.getElementById('expenseAmount').value = expense.amount;
+                document.getElementById('expenseDate').value = expense.expense_date;
+                document.getElementById('expenseCategory').value = expense.category;
+                document.getElementById('expenseVendor').value = expense.vendor || '';
+                document.getElementById('expenseReceipt').value = expense.receipt_number || '';
+                document.getElementById('expenseNotes').value = expense.notes || '';
+                
+                window.TilesApp.openModal('expenseModal');
+                
+            } catch (error) {
+                console.error('❌ שגיאה בטעינת הוצאה:', error);
+                window.TilesApp.handleError(error, 'שגיאה בטעינת ההוצאה');
+            }
+        }
+
+        // ===== Delete Expense =====
+        async function deleteExpense(expenseId) {
+            const confirmed = await window.TilesApp.confirm('האם אתה בטוח שברצונך למחוק הוצאה זו?');
+            if (!confirmed) return;
+            
+            try {
+                const { error } = await window.TilesApp.supabase
+                    .from('expenses')
+                    .delete()
+                    .eq('id', expenseId);
+                
+                if (error) throw error;
+                
+                window.showToast('ההוצאה נמחקה בהצלחה', 'success');
+                await loadExpenses();
+                
+            } catch (error) {
+                console.error('❌ שגיאה במחיקת הוצאה:', error);
+                window.TilesApp.handleError(error, 'שגיאה במחיקת ההוצאה');
+            }
+        }
+
+        // ===== Export Expenses =====
+        function exportExpenses() {
+            if (expenses.length === 0) {
+                window.showToast('אין הוצאות לייצא', 'warning');
+                return;
+            }
+            
+            const exportData = expenses.map(e => ({
+                'תיאור': e.description,
+                'סכום': e.amount,
+                'תאריך': window.formatDate(e.expense_date),
+                'קטגוריה': getCategoryLabel(e.category),
+                'ספק': e.vendor || '',
+                'קבלה': e.receipt_number || '',
+                'הערות': e.notes || ''
+            }));
+            
+            window.TilesApp.exportToCSV(exportData, 'הוצאות');
+        }
+
+        // ===== Helper Functions =====
+        function getCategoryLabel(category) {
+            const labels = {
+                'maintenance': 'תחזוקה',
+                'cleaning': 'ניקיון',
+                'electricity': 'חשמל',
+                'water': 'מים',
+                'gardening': 'גינון',
+                'security': 'אבטחה',
+                'insurance': 'ביטוח',
+                'repairs': 'תיקונים',
+                'supplies': 'ציוד',
+                'other': 'אחר'
+            };
+            return labels[category] || category;
+        }
+    </script>
+</body>
+</html>

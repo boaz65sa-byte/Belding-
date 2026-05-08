@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>התקנת מערכת ניהול דיירים - למסך הבית</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-512.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header img {
+            width: 120px;
+            height: 120px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            animation: bounce 1s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .install-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .install-btn:active {
+            transform: translateY(0);
+        }
+        
+        .install-btn i {
+            font-size: 1.5rem;
+        }
+        
+        .manual-install {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .manual-install h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .device-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .device-tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .device-tab:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .device-tab.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        
+        .device-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .device-content.active {
+            display: block;
+        }
+        
+        .step {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-right: 4px solid #2563eb;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #2563eb;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+        
+        .step-text {
+            display: inline;
+            font-size: 1rem;
+            color: #374151;
+        }
+        
+        .benefits {
+            background: #ecfdf5;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .benefits h3 {
+            color: #065f46;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #064e3b;
+        }
+        
+        .benefit-item i {
+            color: #10b981;
+            font-size: 1.2rem;
+        }
+        
+        .open-app-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        
+        .open-app-btn:hover {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: slideUp 0.5s;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .success-message i {
+            font-size: 3rem;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+        
+        .success-message h2 {
+            color: #065f46;
+            margin-bottom: 10px;
+        }
+        
+        .success-message p {
+            color: #064e3b;
+        }
+        
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .device-tab {
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+        }
+        
+        .note {
+            background: #fef3c7;
+            border-right: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #92400e;
+        }
+        
+        .note strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #78350f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="icon-512.png" alt="אייקון מערכת ניהול דיירים">
+            <h1>🏢 מערכת ניהול דיירים Pro</h1>
+            <p>התקן את האפליקציה למסך הבית שלך</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i>
+                <h2>✅ נהדר! האפליקציה מותקנת</h2>
+                <p>עכשיו תוכל לגשת אליה ישירות ממסך הבית</p>
+            </div>
+            
+            <!-- Auto Install Button -->
+            <button class="install-btn" id="installBtn" style="display: none;">
+                <i class="fas fa-download"></i>
+                התקן עכשיו למסך הבית
+            </button>
+            
+            <!-- Open App Button -->
+            <button class="open-app-btn" id="openAppBtn">
+                <i class="fas fa-external-link-alt"></i>
+                פתח את המערכת
+            </button>
+            
+            <!-- Benefits Section -->
+            <div class="benefits">
+                <h3><i class="fas fa-star"></i> למה להתקין?</h3>
+                <div class="benefit-item">
+                    <i class="fas fa-rocket"></i>
+                    <span><strong>גישה מהירה</strong> - אייקון ישירות במסך הבית</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-bolt"></i>
+                    <span><strong>מהירות מקסימלית</strong> - טעינה מיידית מהמטמון</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-wifi"></i>
+                    <span><strong>עבודה ללא אינטרנט</strong> - גם כשאין רשת</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span><strong>חוויית אפליקציה</strong> - מסך מלא ללא סרגל דפדפן</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-sync-alt"></i>
+                    <span><strong>עדכונים אוטומטיים</strong> - תמיד הגרסה האחרונה</span>
+                </div>
+            </div>
+            
+            <!-- Manual Install Section -->
+            <div class="manual-install">
+                <h3><i class="fas fa-book"></i> הוראות התקנה ידנית</h3>
+                
+                <!-- Device Tabs -->
+                <div class="device-tabs">
+                    <div class="device-tab active" data-device="android">
+                        <i class="fab fa-android"></i> Android
+                    </div>
+                    <div class="device-tab" data-device="ios">
+                        <i class="fab fa-apple"></i> iPhone
+                    </div>
+                    <div class="device-tab" data-device="desktop">
+                        <i class="fas fa-desktop"></i> מחשב
+                    </div>
+                </div>
+                
+                <!-- Android Instructions -->
+                <div class="device-content active" id="android">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <span class="step-text">פתח את האתר ב-<strong>Chrome</strong> או <strong>Edge</strong></span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <span class="step-text">לחץ על תפריט <strong>⋮</strong> (שלוש נקודות) בפינה העליונה</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <span class="step-text">בחר <strong>"הוסף למסך הבית"</strong> או <strong>"Install app"</strong></span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <span class="step-text">לחץ <strong>"הוסף"</strong> או <strong>"Install"</strong></span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">5</span>
+                        <span class="step-text">✅ האייקון יופיע במסך הבית שלך!</span>
+                    </div>
+                </div>
+                
+                <!-- iOS Instructions -->
+                <div class="device-content" id="ios">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <span class="step-text">פתח את האתר ב-<strong>Safari</strong> (חייב להיות Safari!)</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <span class="step-text">לחץ על כפתור <strong>שיתוף</strong> <i class="fas fa-share"></i> בתחתית המסך</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <span class="step-text">גלול למטה ובחר <strong>"הוסף למסך הבית"</strong></span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <span class="step-text">לחץ <strong>"הוסף"</strong> בפינה הימנית העליונה</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">5</span>
+                        <span class="step-text">✅ האייקון יופיע במסך הבית שלך!</span>
+                    </div>
+                    
+                    <div class="note">
+                        <strong>💡 חשוב לדעת:</strong>
+                        ב-iPhone יש להשתמש ב-Safari בלבד. דפדפנים אחרים (Chrome, Firefox) לא תומכים בהתקנה.
+                    </div>
+                </div>
+                
+                <!-- Desktop Instructions -->
+                <div class="device-content" id="desktop">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <span class="step-text">פתח את האתר ב-<strong>Chrome</strong> או <strong>Edge</strong></span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <span class="step-text">חפש אייקון <strong>התקנה</strong> <i class="fas fa-plus-circle"></i> בשורת הכתובת</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <span class="step-text">לחץ על האייקון ובחר <strong>"התקן"</strong></span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <span class="step-text">✅ האפליקציה תיפתח בחלון נפרד!</span>
+                    </div>
+                    
+                    <div class="note">
+                        <strong>💡 טיפ:</strong>
+                        ניתן גם לפתוח תפריט (⋮) ולבחר "התקן מערכת ניהול דיירים Pro..."
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // PWA Install functionality
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        const successMessage = document.getElementById('successMessage');
+        const openAppBtn = document.getElementById('openAppBtn');
+        
+        // Device tabs functionality
+        const deviceTabs = document.querySelectorAll('.device-tab');
+        const deviceContents = document.querySelectorAll('.device-content');
+        
+        deviceTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const device = tab.getAttribute('data-device');
+                
+                // Remove active class from all tabs
+                deviceTabs.forEach(t => t.classList.remove('active'));
+                deviceContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                document.getElementById(device).classList.add('active');
+            });
+        });
+        
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'flex';
+        });
+        
+        // Handle install button click
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                alert('ההתקנה האוטומטית לא זמינה. אנא עקוב אחר ההוראות הידניות למטה.');
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+                successMessage.classList.add('show');
+                installBtn.style.display = 'none';
+            }
+            
+            deferredPrompt = null;
+        });
+        
+        // Track successful installation
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            successMessage.classList.add('show');
+            installBtn.style.display = 'none';
+        });
+        
+        // Open main app
+        openAppBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+        
+        // Auto-detect device and show relevant instructions
+        window.addEventListener('load', () => {
+            const ua = navigator.userAgent.toLowerCase();
+            
+            if (/iphone|ipad|ipod/.test(ua)) {
+                // iOS device
+                deviceTabs[1].click(); // Show iOS instructions
+            } else if (/android/.test(ua)) {
+                // Android device
+                deviceTabs[0].click(); // Show Android instructions
+            } else {
+                // Desktop
+                deviceTabs[2].click(); // Show Desktop instructions
+            }
+        });
+        
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.log('Service Worker registration failed', err));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחירים - ועד 2025</title>
+    
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .pricing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .alert {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .pricing-card.featured {
+            border: 3px solid #10b981;
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.08) translateY(-10px);
+        }
+
+        .badge {
+            position: absolute;
+            top: -15px;
+            right: 50%;
+            transform: translateX(50%);
+            background: #10b981;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .plan-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .plan-name {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .price-amount {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .price-period {
+            font-size: 18px;
+            color: #718096;
+            margin-right: 5px;
+        }
+
+        .savings {
+            text-align: center;
+            color: #10b981;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .features {
+            margin: 30px 0;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .feature i {
+            color: #10b981;
+            font-size: 18px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .comparison {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+
+        .comparison h2 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .comparison-table th {
+            background: #f7fafc;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .comparison-table td.check {
+            color: #10b981;
+            font-size: 20px;
+        }
+
+        .comparison-table td.cross {
+            color: #ef4444;
+            font-size: 20px;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-link a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content i {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .comparison {
+                padding: 20px;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pricing-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💎 בחר את התוכנית המתאימה לך</h1>
+            <p>כל התוכניות כוללות גישה מלאה לכל התכונות</p>
+        </div>
+
+        <!-- Expired Alert -->
+        <div class="alert" id="expiredAlert" style="display: none;">
+            ⚠️ תקופת הניסיון שלך הסתיימה. בחר תוכנית כדי להמשיך להשתמש במערכת.
+        </div>
+
+        <!-- Pricing Cards -->
+        <div class="pricing-grid">
+            <!-- Monthly -->
+            <div class="pricing-card">
+                <div class="plan-icon">📅</div>
+                <h3 class="plan-name">מנוי חודשי</h3>
+                <div class="price">
+                    <span class="price-amount">₪49</span>
+                    <span class="price-period">/חודש</span>
+                </div>
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>גישה מלאה לכל התכונות</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>ניהול דיירים ותשלומים</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>דוחות ויצוא נתונים</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>גיבויים אוטומטיים</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>תמיכה טכנית</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="purchasePlan('monthly')">
+                    <i class="fas fa-shopping-cart"></i> רכוש עכשיו
+                </button>
+            </div>
+
+            <!-- Yearly (Featured) -->
+            <div class="pricing-card featured">
+                <div class="badge">🔥 הכי משתלם!</div>
+                <div class="plan-icon">🎯</div>
+                <h3 class="plan-name">מנוי שנתי</h3>
+                <div class="price">
+                    <span class="price-amount">₪490</span>
+                    <span class="price-period">/שנה</span>
+                </div>
+                <div class="savings">💰 חסוך ₪98 (חודש חינם!)</div>
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span><strong>כל התכונות של החודשי</strong></span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>חיסכון של 17%</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>תמיכה VIP</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>גיבוי יומי</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>נעילת מחיר לשנה</span>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="purchasePlan('yearly')">
+                    <i class="fas fa-crown"></i> רכוש עכשיו
+                </button>
+            </div>
+
+            <!-- Lifetime -->
+            <div class="pricing-card">
+                <div class="plan-icon">💎</div>
+                <h3 class="plan-name">לכל החיים</h3>
+                <div class="price">
+                    <span class="price-amount">₪499</span>
+                    <span class="price-period">חד פעמי</span>
+                </div>
+                <div class="savings">🎁 תשלום אחד, גישה לתמיד!</div>
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span><strong>כל התכונות לצמיתות</strong></span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>ללא חידושים</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>עדכונים לכל החיים</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>תמיכה VIP לצמיתות</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>ההשקעה הטובה ביותר</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="purchasePlan('lifetime')">
+                    <i class="fas fa-infinity"></i> רכוש עכשיו
+                </button>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison">
+            <h2>📊 השוואת תוכניות</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>תכונה</th>
+                        <th>חודשי</th>
+                        <th>שנתי</th>
+                        <th>לכל החיים</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ניהול דיירים</td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>ניהול תשלומים</td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>דוחות ויצוא</td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>גיבויים אוטומטיים</td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>תמיכה VIP</td>
+                        <td class="cross"><i class="fas fa-times"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>גיבוי יומי</td>
+                        <td class="cross"><i class="fas fa-times"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>עדכונים לצמיתות</td>
+                        <td class="cross"><i class="fas fa-times"></i></td>
+                        <td class="cross"><i class="fas fa-times"></i></td>
+                        <td class="check"><i class="fas fa-check"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Back Link -->
+        <div class="back-link">
+            <a href="index.html">
+                <i class="fas fa-arrow-right"></i>
+                חזרה לדף הראשי
+            </a>
+        </div>
+    </div>
+
+    <!-- Processing Modal -->
+    <div class="modal" id="processingModal">
+        <div class="modal-content">
+            <i class="fas fa-credit-card" style="color: #667eea;"></i>
+            <h3>מעבד תשלום...</h3>
+            <div class="spinner"></div>
+            <p>אנא המתן, אל תסגור את החלון</p>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <i class="fas fa-check-circle" style="color: #10b981;"></i>
+            <h3>התשלום בוצע בהצלחה!</h3>
+            <p>המנוי שלך עודכן. מעביר לדף הראשי...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/payment.js"></script>
+    
+    <script>
+        // בדיקה אם הגיע מ-expired
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('expired') === 'true') {
+                document.getElementById('expiredAlert').style.display = 'block';
+            }
+        });
+
+        // רכישת תוכנית
+        async function purchasePlan(planType) {
+            try {
+                // הצג מודל עיבוד
+                document.getElementById('processingModal').classList.add('active');
+
+                // סימולציית עיכוב (כמו תשלום אמיתי)
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // בצע תשלום
+                const result = await processPayment(planType, 'simulation');
+
+                // סגור מודל עיבוד
+                document.getElementById('processingModal').classList.remove('active');
+
+                if (result.success) {
+                    // הצג הצלחה
+                    document.getElementById('successModal').classList.add('active');
+
+                    // המתן 2 שניות והעבר לדף הראשי
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    alert('שגיאה בתשלום: ' + result.error);
+                }
+
+            } catch (error) {
+                document.getElementById('processingModal').classList.remove('active');
+                alert('שגיאה: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

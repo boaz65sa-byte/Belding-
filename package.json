@@ -1,0 +1,20 @@
+{
+  "name": "vaad-2025",
+  "version": "2.5.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build required'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@supabase/supabase-js": "^2.39.0",
+    "stripe": "^14.10.0"
+  },
+  "devDependencies": {
+    "vercel": "^50.28.0"
+  }
+}
