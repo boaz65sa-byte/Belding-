@@ -1837,6 +1837,10 @@
             try {
                 // המתן לאתחול Supabase
                 await initSupabase();
+                // ריענון סשן מה-URL (התחברות Google / לינק אימות אחרי redirect)
+                if (window.supabaseClient) {
+                    await window.supabaseClient.auth.getSession();
+                }
                 
                 // בדוק גישה
                 const accessCheck = await checkUserAccess();

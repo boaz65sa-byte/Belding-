@@ -7,13 +7,35 @@
 // משתנה גלובלי ללקוח Supabase
 let supabaseInstance = null;
 
+/**
+ * כתובת מלאה לדף באותו תיק כמו המסך הנוכחי (חובה ל-OAuth ואיפוס סיסמה כשהאתר לא ב-root)
+ */
+function authResolveRedirectUrl(fileName) {
+    try {
+        return new URL(fileName, window.location.href).href;
+    } catch (e) {
+        const base = window.location.origin || '';
+        const path = String(fileName || '').replace(/^\//, '');
+        return base ? `${base}/${path}` : path;
+    }
+}
+
 // פונקציית אתחול - נקראת מהדף הראשי
 async function initSupabase() {
     if (supabaseInstance) return supabaseInstance;
 
     // מנסה לקחת מ-config.js
     if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_KEY !== 'undefined') {
-        supabaseInstance = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const create = typeof window !== 'undefined' && window.supabase && window.supabase.createClient
+            ? window.supabase.createClient.bind(window.supabase)
+            : (typeof supabase !== 'undefined' && supabase.createClient ? supabase.createClient.bind(supabase) : null);
+        if (!create) {
+            console.error('❌ Supabase SDK לא זמין');
+            return null;
+        }
+        supabaseInstance = create(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
+        });
         window.supabaseClient = supabaseInstance;
         return supabaseInstance;
     } 
@@ -262,7 +284,7 @@ async function resetPassword(email) {
     if (!supabase) return { success: false, error: 'Connection Error' };
     try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/update-password.html'
+            redirectTo: authResolveRedirectUrl('reset-password.html')
         });
         if (error) throw error;
         return { success: true };
@@ -280,15 +302,20 @@ async function signInWithGoogle() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin + '/index.html',
+                redirectTo: authResolveRedirectUrl('index.html'),
                 queryParams: {
                     access_type: 'offline',
                     prompt: 'consent'
-                }
+                },
+                skipBrowserRedirect: true
             }
         });
         
         if (error) throw error;
+        if (!data || !data.url) {
+            return { success: false, error: 'לא התקבל קישור התחברות. ודא ש-Google מופעל ב-Supabase ושכתובת ההפניה מורשית.' };
+        }
+        window.location.assign(data.url);
         return { success: true, data };
     } catch (error) {
         console.error('Google sign-in error:', error);
@@ -395,3 +422,4 @@ window.getCurrentUser = getCurrentUser;
 window.getUserProfile = getUserProfile;
 window.signOut = signOut;
 window.signupWithBuilding = signupWithBuilding;
+window.authResolveRedirectUrl = authResolveRedirectUrl;

@@ -15,8 +15,15 @@ const SUPABASE_CONFIG = {
 if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
     console.error('CRITICAL ERROR: Supabase library not loaded! Check HTML script tags.');
 } else {
-    // יצירת החיבור והפיכתו לזמין בכל האתר
-    window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    // יצירת החיבור והפיכתו לזמין בכל האתר (PKCE + זיהוי סשן מה-URL — נדרש ל-Google OAuth ואיפוס סיסמה)
+    window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            flowType: 'pkce'
+        }
+    });
     console.log('✅ Supabase Connected Successfully (Project: Vaad 2025)');
 }
 

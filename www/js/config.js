@@ -11,22 +11,24 @@ const SUPABASE_CONFIG = {
 };
 
 // ✅ תיקון 2: הוספת לוגיקת החיבור (קריטי!)
-if (typeof supabase === 'undefined') {
+// בדיקה אם ספריית Supabase נטענה מה-CDN (window.supabase)
+if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
     console.error('CRITICAL ERROR: Supabase library not loaded! Check HTML script tags.');
-    // אופציונלי: הצגת התראה למשתמש
-    if (typeof window !== 'undefined') {
-        window.addEventListener('DOMContentLoaded', () => {
-            alert('שגיאה טכנית: הספרייה לא נטענה. אנא רענן את הדף.');
-        });
-    }
 } else {
-    // יצירת החיבור והפיכתו לזמין בכל האתר
-    window.supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    // יצירת החיבור והפיכתו לזמין בכל האתר (PKCE + זיהוי סשן מה-URL — נדרש ל-Google OAuth ואיפוס סיסמה)
+    window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            flowType: 'pkce'
+        }
+    });
     console.log('✅ Supabase Connected Successfully (Project: Vaad 2025)');
 }
 
 /**
- * 💰 הגדרות מחירים (השארתי את הקוד המצוין שלך כמו שהוא)
+ * 💰 הגדרות מחירים - מעודכן
  */
 const PRICING_CONFIG = {
     trial: {
@@ -37,23 +39,23 @@ const PRICING_CONFIG = {
     },
     monthly: {
         name: 'מנוי חודשי',
-        price: 49,
+        price: 29.90,
         currency: 'ILS',
         symbol: '₪',
         features: ['כל התכונות של הניסיון', 'גיבויים אוטומטיים', 'תמיכה מועדפת', 'עדכונים שוטפים', 'ללא הגבלת דיירים']
     },
     yearly: {
         name: 'מנוי שנתי',
-        price: 490,
+        price: 300,
         currency: 'ILS',
         symbol: '₪',
-        savings: 98,
-        savingsPercent: 17,
-        features: ['כל התכונות של החודשי', 'חודש חינם! (חיסכון של ₪98)', 'תמיכה VIP', 'גיבוי יומי', 'נעילת מחיר לתמיד']
+        savings: 58.80,
+        savingsPercent: 16,
+        features: ['כל התכונות של החודשי', 'חיסכון של ₪58.80 בשנה!', 'תמיכה VIP', 'גיבוי יומי', 'נעילת מחיר לתמיד']
     },
     lifetime: {
         name: 'חד פעמי - לתמיד',
-        price: 499,
+        price: 500,
         currency: 'ILS',
         symbol: '₪',
         features: ['כל התכונות לתמיד!', 'תשלום חד פעמי', 'ללא חידושים', 'עדכונים לכל החיים', 'תמיכה VIP לצמיתות'],
@@ -72,7 +74,11 @@ const NOTIFICATION_CONFIG = {
 /**
  * 👑 הגדרות תפקידים
  */
-const ROLES = { ADMIN: 'admin', USER: 'user' };
+const ROLES = { 
+    SUPER_ADMIN: 'super_admin',  // בועז - מנהל כללי של כל המערכת
+    ADMIN: 'admin',              // מנהל בניין ספציפי
+    USER: 'user'                 // משתמש רגיל
+};
 
 /**
  * 🔒 הגדרות סטטוס משתמש

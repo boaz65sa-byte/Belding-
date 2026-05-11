@@ -1829,6 +1829,9 @@
             try {
                 // המתן לאתחול Supabase
                 await initSupabase();
+                if (window.supabaseClient) {
+                    await window.supabaseClient.auth.getSession();
+                }
                 
                 // בדוק גישה
                 const accessCheck = await checkUserAccess();
