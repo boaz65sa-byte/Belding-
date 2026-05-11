@@ -398,7 +398,7 @@
                                 <label>עד תאריך:</label>
                                 <input type="date" id="paymentsTableEndDate" class="form-input">
                             </div>
-                            <button class="btn btn-primary" onclick="renderPaymentsTable()">
+                            <button class="btn btn-primary" onclick="renderAnnualPaymentsMatrix()">
                                 <i class="fas fa-search"></i> הצג טבלה
                             </button>
                         </div>
@@ -1854,6 +1854,8 @@
                         window.location.href = 'pricing.html?expired=true';
                         return;
                     }
+                    window.location.href = 'login.html';
+                    return;
                 }
                 
                 // יש גישה - הצג מידע על המנוי

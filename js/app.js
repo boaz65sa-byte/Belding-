@@ -4398,9 +4398,10 @@ function bulkSendReceipts() {
     let count = 0;
     appState.selectedPayments.forEach(paymentId => {
         const payment = appState.payments.find(p => p.id === paymentId);
-        if (payment) {
+        const tenant = payment ? appState.tenants.find(t => t.id === payment.tenantId) : null;
+        if (payment && tenant) {
             setTimeout(() => {
-                generateReceipt(payment);
+                generateReceipt(tenant, payment);
             }, count * 500);
             count++;
         }
@@ -5546,7 +5547,21 @@ function generateMonthlyReceipt() {
         </div>
     `;
     
-    appState.currentPaymentForReceipt = { tenant, payment: { amount: totalAmount } };
+    const sortedByMonth = [...paidMonths].sort((a, b) => b.month - a.month);
+    const lastPaid = sortedByMonth[0];
+    const paymentDate = (lastPaid && lastPaid.date) ? lastPaid.date : `${currentTrackingYear}-${String(lastPaid ? lastPaid.month : 12).padStart(2, '0')}-01`;
+    const syntheticPayment = {
+        amount: totalAmount,
+        date: paymentDate,
+        method: 'מעקב חודשי',
+        notes: `קבלה מצטברת (${paidMonths.length} חודשים): ${monthsList}`
+    };
+    appState.currentPaymentForReceipt = { tenant, payment: syntheticPayment };
+    try {
+        sessionStorage.setItem('currentPaymentForReceipt', JSON.stringify({ tenant, payment: syntheticPayment }));
+    } catch (e) {
+        console.warn('sessionStorage קבלה חודשית:', e);
+    }
     hideModal('monthlyTrackingModal');
     showModal('receiptModal');
 }

@@ -408,7 +408,7 @@
                                 <input type="date" id="paymentsTableEndDate" class="form-input px-4 py-3 border border-gray-200 rounded-lg min-h-[44px]">
                             </div>
                             <div class="flex items-end">
-                                <button class="btn btn-primary px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg" onclick="renderPaymentsTable()">
+                                <button class="btn btn-primary px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg" onclick="renderAnnualPaymentsMatrix()">
                                     <i class="fas fa-search"></i> הצג טבלה
                                 </button>
                             </div>
@@ -1851,13 +1851,18 @@
                         window.location.href = 'login.html';
                         return;
                     }
-                    
+                    if (accessCheck.reason === 'blocked') {
+                        window.location.href = 'blocked.html';
+                        return;
+                    }
                     if (accessCheck.reason === 'expired' ||
-                        accessCheck.reason === 'trial_expired' || 
+                        accessCheck.reason === 'trial_expired' ||
                         accessCheck.reason === 'subscription_expired') {
                         window.location.href = 'pricing.html?expired=true';
                         return;
                     }
+                    window.location.href = 'login.html';
+                    return;
                 }
                 
                 // יש גישה - הצג מידע על המנוי

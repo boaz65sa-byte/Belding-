@@ -46,8 +46,8 @@ function initializePaymentsTableDates() {
     document.getElementById('paymentsTableEndDate').value = endDate;
 }
 
-// Render payments table
-function renderPaymentsTable() {
+// טבלת תשלומים שנתית (מטריצת דיירים × חודשים) — שם נפרד מ-renderPaymentsTable ב-app.js
+function renderAnnualPaymentsMatrix() {
     const container = document.getElementById('paymentsTableContainer');
     if (!container) return;
     
