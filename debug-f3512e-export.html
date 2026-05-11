@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ייצוא דיבוג f3512e</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+        code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+        button { margin: 0.5rem 0; padding: 0.75rem 1.25rem; font-size: 1rem; cursor: pointer; }
+        pre { background: #111; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>ייצוא לוג דיבוג (סשן f3512e)</h1>
+    <p>1. שחזר את הבעיה ב־<code>index.html</code> <strong>באותו אתר</strong> (אותו host כמו הדף הזה).</p>
+    <p>2. לחץ על הכפתור — יורד קובץ <code>debug-f3512e.log</code>. שמור אותו ב־<code>Belding--main</code> (ליד <code>index.html</code>).</p>
+    <p>3. בצ'אט: Proceed אחרי שהקובץ נשמר.</p>
+    <button type="button" id="btn">הורד debug-f3512e.log</button>
+    <h2>תצוגה מקדימה</h2>
+    <pre id="out">(ריק — אין עדיין רשומות ב-sessionStorage מפתח __DBG_F3512E)</pre>
+    <script>
+        (function () {
+            var raw = sessionStorage.getItem('__DBG_F3512E') || '[]';
+            var arr;
+            try { arr = JSON.parse(raw); } catch (e) { arr = []; }
+            var lines = Array.isArray(arr) ? arr.map(function (x) { return JSON.stringify(x); }).join('\n') : '';
+            document.getElementById('out').textContent = lines || '(אין נתונים — חזור ל-index.html, רענן, ואז חזור לכאן)';
+            document.getElementById('btn').onclick = function () {
+                var r = sessionStorage.getItem('__DBG_F3512E') || '[]';
+                var a;
+                try { a = JSON.parse(r); } catch (e2) { a = []; }
+                var L = Array.isArray(a) ? a.map(function (x) { return JSON.stringify(x); }).join('\n') : '';
+                if (!L) { alert('אין לוגים ב-sessionStorage. טען קודם את index.html מאותו אתר.'); return; }
+                var blob = new Blob([L + '\n'], { type: 'application/x-ndjson' });
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'debug-f3512e.log';
+                link.click();
+                setTimeout(function () { URL.revokeObjectURL(link.href); }, 2000);
+            };
+        })();
+    </script>
+</body>
+</html>
