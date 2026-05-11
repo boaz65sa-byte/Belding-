@@ -342,23 +342,47 @@
                 <!-- Tenants List Tab -->
                 <div id="tenantsListTab" class="tenant-tab-content active">
 
-                <!-- Search and Filter Bar -->
-                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <div class="flex-1 relative">
+                <!-- Summary (same layout as payments section) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <p class="text-sm text-gray-500 mb-1">סה"כ דיירים</p>
+                        <p class="text-2xl font-bold text-gray-900" id="tenantsSummaryTotal">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-emerald-500">
+                        <p class="text-sm text-gray-500 mb-1">סטטוס שולם</p>
+                        <p class="text-2xl font-bold text-emerald-600" id="tenantsSummaryPaid">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-amber-500">
+                        <p class="text-sm text-gray-500 mb-1">ממתין / באיחור</p>
+                        <p class="text-2xl font-bold text-amber-600" id="tenantsSummaryPending">0</p>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Bar (aligned with payments filters) -->
+                <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
+                    <div class="flex flex-col sm:flex-row gap-3 flex-wrap items-start sm:items-center">
+                        <div class="flex-1 relative min-w-[200px]">
                             <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="searchInput" class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="חפש לפי שם, דירה או טלפון...">
+                            <input type="text" id="searchInput" class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px]" placeholder="חפש לפי שם, דירה או טלפון...">
                         </div>
-                        <div class="flex gap-2">
-                            <select id="sortBy" class="px-4 py-3 border border-gray-200 rounded-lg bg-white font-medium min-h-[44px]">
-                                <option value="apartment">מיין לפי דירה</option>
-                                <option value="name">מיין לפי שם</option>
-                                <option value="amount">מיין לפי סכום</option>
-                            </select>
-                            <button class="btn-icon min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition" id="refreshBtn" title="רענן נתונים">
-                                <i class="fas fa-sync-alt text-gray-600"></i>
-                            </button>
-                        </div>
+                        <label class="sr-only" for="statusFilter">סינון סטטוס</label>
+                        <select id="statusFilter" class="px-4 py-3 border border-gray-200 rounded-lg bg-white min-h-[44px] min-w-[160px]" title="סינון לפי סטטוס">
+                            <option value="all">כל הסטטוסים</option>
+                            <option value="paid">שולם</option>
+                            <option value="pending">ממתין</option>
+                            <option value="overdue">באיחור</option>
+                            <option value="debt">חוב</option>
+                            <option value="active">פעיל</option>
+                        </select>
+                        <select id="sortBy" class="px-4 py-3 border border-gray-200 rounded-lg bg-white font-medium min-h-[44px] min-w-[180px]">
+                            <option value="apartment">מיין לפי דירה</option>
+                            <option value="name">מיין לפי שם</option>
+                            <option value="amount">מיין לפי סכום</option>
+                            <option value="status">מיין לפי סטטוס</option>
+                        </select>
+                        <button type="button" class="btn-icon min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition" id="refreshBtn" title="רענן נתונים">
+                            <i class="fas fa-sync-alt text-gray-600"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -385,6 +409,19 @@
                 <!-- Mobile Tenant Cards (visible only on mobile) -->
                 <div class="tenants-cards-container" id="tenantsCardsContainer">
                     <!-- Cards will be added dynamically -->
+                </div>
+
+                <div class="bulk-actions hidden bg-white rounded-xl shadow-md p-4 border border-gray-100 flex flex-wrap gap-2 items-center" id="bulkActions" style="display: none;">
+                    <span id="selectedCount">0 נבחרו</span>
+                    <button type="button" class="btn btn-sm btn-success" id="bulkMarkPaidTenantsBtn">
+                        <i class="fas fa-check"></i> סמן כשולם
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" id="bulkReminderTenantsBtn">
+                        <i class="fas fa-bell"></i> תזכורת (סימולציה)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" id="bulkDeleteTenantsBtn">
+                        <i class="fas fa-trash"></i> מחק
+                    </button>
                 </div>
 
                 </div>

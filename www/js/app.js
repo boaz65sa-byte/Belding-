@@ -274,16 +274,21 @@ function setupNavigation() {
             e.preventDefault();
             const targetSection = item.dataset.section;
             
+            // Skip if no target section defined
+            if (!targetSection) return;
+            
             // Update active menu item
             menuItems.forEach(mi => mi.classList.remove('active'));
             item.classList.add('active');
             
-            // Show target section
+            // Show target section (with null check)
             sections.forEach(section => section.classList.remove('active'));
-            document.getElementById(`${targetSection}Section`).classList.add('active');
-            
-            // Render section-specific content
-            renderSectionContent(targetSection);
+            const targetElement = document.getElementById(`${targetSection}Section`);
+            if (targetElement) {
+                targetElement.classList.add('active');
+                // Render section-specific content
+                renderSectionContent(targetSection);
+            }
         });
     });
     
@@ -352,6 +357,7 @@ function updateAllStatistics() {
     updateStatistics();
     updatePaymentSummary();
     updateTenantsStatusFromMonthlyPayments();
+    updateTenantsListSummary();
 }
 
 function updateTenantsStatusFromMonthlyPayments() {
@@ -570,8 +576,8 @@ function renderTenantsTable() {
                 </td>
             </tr>
         `;
-        // Also update cards
         renderTenantCards(filteredTenants);
+        updateTenantsListSummary();
         return;
     }
     
@@ -581,18 +587,18 @@ function renderTenantsTable() {
             p.year === new Date().getFullYear()
         ).length;
         const totalMonths = 12;
-        const statusIcon = tenant.status === 'active' ? '💚' : 
-                          tenant.status === 'debt' ? '⚠️' : '✅';
+        const badgeClass = getTenantStatusBadgeClass(tenant.status);
+        const statusLabel = getStatusText(tenant.status);
         
         return `
         <tr>
-            <td><input type="checkbox" class="tenant-checkbox" data-id="${tenant.id}" ${appState.selectedTenants.has(tenant.id) ? 'checked' : ''}></td>
-            <td>${tenant.apartment}</td>
-            <td><strong>${tenant.name}</strong></td>
-            <td>₪${tenant.monthlyAmount}</td>
-            <td>${paidMonths}/${totalMonths}</td>
-            <td style="text-align: center; font-size: 1.5rem;">${statusIcon}</td>
-            <td style="text-align: center;">
+            <td class="col-checkbox"><input type="checkbox" class="tenant-checkbox" data-id="${tenant.id}" ${appState.selectedTenants.has(tenant.id) ? 'checked' : ''}></td>
+            <td data-label="דירה">${tenant.apartment}</td>
+            <td data-label="שם הדייר"><strong>${tenant.name}</strong></td>
+            <td data-label="סכום חודשי"><strong>₪${Number(tenant.monthlyAmount).toLocaleString()}</strong></td>
+            <td data-label="תשלומים">${paidMonths}/${totalMonths}</td>
+            <td data-label="סטטוס"><span class="status-badge status-${badgeClass}">${statusLabel}</span></td>
+            <td data-label="פעולות" style="text-align: center;">
                 <div class="tenant-actions-wrapper" style="position: relative; display: inline-block;">
                     <button class="tenant-actions-btn" onclick="toggleTenantActions('${tenant.id}', event)" title="פעולות">
                         <i class="fas fa-ellipsis-v"></i>
@@ -633,11 +639,9 @@ function renderTenantsTable() {
         `;
     }).join('');
     
-    // Update checkbox listeners
     updateCheckboxListeners();
-    
-    // Also render mobile cards
     renderTenantCards(filteredTenants);
+    updateTenantsListSummary();
 }
 
 // Render tenant cards for mobile
@@ -661,8 +665,8 @@ function renderTenantCards(tenants) {
             p.year === new Date().getFullYear()
         ).length;
         const totalMonths = 12;
-        const statusIcon = tenant.status === 'active' ? '💚' : 
-                          tenant.status === 'debt' ? '⚠️' : '✅';
+        const badgeClass = getTenantStatusBadgeClass(tenant.status);
+        const statusLabel = getStatusText(tenant.status);
         
         // Calculate debt/balance
         const totalExpected = tenant.monthlyAmount * totalMonths;
@@ -679,7 +683,7 @@ function renderTenantCards(tenants) {
                         <div class="tenant-card-name">${tenant.name}</div>
                         <div class="tenant-card-apartment">דירה ${tenant.apartment}</div>
                     </div>
-                    <div class="tenant-card-status">${statusIcon}</div>
+                    <div class="tenant-card-status"><span class="status-badge status-${badgeClass}">${statusLabel}</span></div>
                 </div>
                 
                 <div class="tenant-card-details">
@@ -919,15 +923,15 @@ function renderPaymentsTable(tenantId = null) {
         const paymentStatus = getPaymentStatus(payment);
         return `
             <tr>
-                <td><input type="checkbox" class="payment-checkbox" data-id="${payment.id}" ${appState.selectedPayments.has(payment.id) ? 'checked' : ''}></td>
-                <td>${formatDate(payment.date)}</td>
-                <td>${tenant ? tenant.apartment : '-'}</td>
-                <td>${tenant ? tenant.name : 'דייר לא נמצא'}</td>
-                <td><strong>₪${payment.amount}</strong></td>
-                <td>${getPaymentMethodText(payment.method)}</td>
-                <td><span class="status-badge status-${paymentStatus}">${getStatusText(paymentStatus)}</span></td>
-                <td>${payment.notes || '-'}</td>
-                <td>
+                <td class="col-checkbox"><input type="checkbox" class="payment-checkbox" data-id="${payment.id}" ${appState.selectedPayments.has(payment.id) ? 'checked' : ''}></td>
+                <td data-label="תאריך">${formatDate(payment.date)}</td>
+                <td data-label="דירה">${tenant ? tenant.apartment : '-'}</td>
+                <td data-label="שם הדייר">${tenant ? tenant.name : 'דייר לא נמצא'}</td>
+                <td data-label="סכום"><strong>₪${payment.amount}</strong></td>
+                <td data-label="אמצעי תשלום">${getPaymentMethodText(payment.method)}</td>
+                <td data-label="סטטוס"><span class="status-badge status-${paymentStatus}">${getStatusText(paymentStatus)}</span></td>
+                <td data-label="הערות">${payment.notes || '-'}</td>
+                <td data-label="פעולות">
                     <button class="action-btn delete" onclick="deletePayment('${payment.id}')" title="מחק">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -1235,76 +1239,137 @@ function generateReport() {
     addActivity(`נוצר דוח לתקופה ${formatDate(startDate)} - ${formatDate(endDate)}`, 'report');
 }
 
-function exportToPDF() {
+async function exportToPDF() {
     try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
+        showLoading();
         
-        // Add Hebrew font support
-        doc.setFont('Helvetica');
-        doc.setFontSize(16);
-        doc.text('דוח דיירים', 105, 20, { align: 'center' });
+        // יצירת אלמנט HTML זמני עם הדוח
+        const reportContainer = document.createElement('div');
+        reportContainer.style.cssText = `
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 800px;
+            padding: 40px;
+            background: white;
+            font-family: 'Heebo', Arial, sans-serif;
+            direction: rtl;
+        `;
         
-        // Add date
-        doc.setFontSize(10);
-        doc.text(`תאריך: ${new Date().toLocaleDateString('he-IL')}`, 105, 30, { align: 'center' });
+        const buildingName = appState.settings.buildingName || 'בניין';
+        const currentDate = new Date().toLocaleDateString('he-IL');
         
-        // Prepare table data
-        const headers = [['דירה', 'שם', 'טלפון', 'סכום חודשי', 'סטטוס']];
-        const data = appState.tenants.map(t => [
-            t.apartment,
-            t.name,
-            t.phone,
-            `₪${t.monthlyAmount}`,
-            getStatusText(t.status)
-        ]);
+        // חישוב סטטיסטיקות
+        const totalTenants = appState.tenants.length;
+        const totalExpected = appState.tenants.reduce((sum, t) => sum + t.monthlyAmount, 0);
+        const paidTenants = appState.tenants.filter(t => t.status === 'paid').length;
+        const debtTenants = appState.tenants.filter(t => t.status === 'overdue' || t.status === 'debt').length;
         
-        // Add table (simple version without autoTable)
-        let y = 45;
-        doc.setFontSize(9);
+        reportContainer.innerHTML = `
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
+                <h1 style="color: #667eea; margin: 0 0 10px 0; font-size: 28px;">📊 דוח דיירים</h1>
+                <h2 style="color: #333; margin: 0 0 10px 0; font-size: 20px;">${buildingName}</h2>
+                <p style="color: #666; margin: 0; font-size: 14px;">תאריך הפקה: ${currentDate}</p>
+            </div>
+            
+            <div style="display: flex; justify-content: space-around; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">${totalTenants}</div>
+                    <div style="font-size: 14px;">סה"כ דיירים</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">${paidTenants}</div>
+                    <div style="font-size: 14px;">שילמו</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">${debtTenants}</div>
+                    <div style="font-size: 14px;">בחוב</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 20px 30px; border-radius: 12px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 32px; font-weight: bold;">₪${totalExpected.toLocaleString()}</div>
+                    <div style="font-size: 14px;">צפי חודשי</div>
+                </div>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #1e293b, #334155); color: white;">
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">דירה</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">שם</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">טלפון</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">סכום חודשי</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">סטטוס</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${appState.tenants.map((t, i) => `
+                        <tr style="background: ${i % 2 === 0 ? '#f8fafc' : 'white'};">
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${t.apartment}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${t.name}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; direction: ltr; text-align: right;">${t.phone}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">₪${t.monthlyAmount}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                                <span style="background: ${t.status === 'paid' ? '#d1fae5' : t.status === 'pending' ? '#fef3c7' : '#fee2e2'}; 
+                                             color: ${t.status === 'paid' ? '#065f46' : t.status === 'pending' ? '#92400e' : '#991b1b'}; 
+                                             padding: 4px 12px; border-radius: 20px; font-size: 12px;">
+                                    ${getStatusText(t.status)}
+                                </span>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <div style="text-align: center; color: #666; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <p>מערכת ניהול דיירים | בועז סעדה © ${new Date().getFullYear()}</p>
+            </div>
+        `;
         
-        // Headers
-        doc.setFont('Helvetica', 'bold');
-        const colWidths = [20, 50, 40, 30, 30];
-        let x = 20;
-        headers[0].forEach((header, i) => {
-            doc.text(header, x, y, { align: 'right' });
-            x += colWidths[i];
+        document.body.appendChild(reportContainer);
+        
+        // המרה לתמונה באמצעות html2canvas
+        const canvas = await html2canvas(reportContainer, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
         });
         
-        // Data rows
-        doc.setFont('Helvetica', 'normal');
-        y += 7;
-        data.forEach((row, rowIndex) => {
-            if (y > 270) {
-                doc.addPage();
-                y = 20;
-            }
-            x = 20;
-            row.forEach((cell, i) => {
-                doc.text(String(cell), x, y, { align: 'right' });
-                x += colWidths[i];
-            });
-            y += 7;
-        });
+        document.body.removeChild(reportContainer);
         
-        // Add footer
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.text(`עמוד ${i} מתוך ${pageCount}`, 105, 285, { align: 'center' });
-            doc.text('מערכת ניהול דיירים - בועז סעדה', 105, 290, { align: 'center' });
+        // יצירת PDF
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+        
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // אם הדוח ארוך מדי, חלק לעמודים
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 297;
+        
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= 297;
         }
         
-        // Save PDF
-        doc.save(`דוח_דיירים_${new Date().toISOString().split('T')[0]}.pdf`);
+        // שמירה
+        const fileName = `דוח_דיירים_${buildingName}_${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(fileName);
+        
+        hideLoading();
         showToast('PDF יוצא בהצלחה!', 'success');
         addActivity('יוצא קובץ PDF', 'export');
         
     } catch (error) {
+        hideLoading();
         console.error('שגיאה ביצירת PDF:', error);
-        showToast('שגיאה ביצירת PDF - וודא שהדפדפן תומך', 'error');
+        showToast('שגיאה ביצירת PDF - נסה שוב', 'error');
     }
 }
 
@@ -1742,9 +1807,33 @@ function loadSettings() {
 }
 
 function saveGeneralSettings() {
+    const oldAmount = appState.settings.defaultAmount;
+    const newAmount = parseFloat(document.getElementById('defaultAmount').value);
+    
     appState.settings.buildingName = document.getElementById('buildingName').value;
-    appState.settings.defaultAmount = parseFloat(document.getElementById('defaultAmount').value);
+    appState.settings.defaultAmount = newAmount;
     appState.settings.paymentDay = parseInt(document.getElementById('paymentDay').value);
+    
+    // אם העלות החודשית השתנתה, שאל אם לעדכן את כל הדיירים
+    if (oldAmount !== newAmount && appState.tenants.length > 0) {
+        const updateAll = confirm(`העלות החודשית השתנתה מ-₪${oldAmount} ל-₪${newAmount}.\n\nהאם לעדכן את העלות החודשית לכל הדיירים הקיימים?`);
+        
+        if (updateAll) {
+            let updatedCount = 0;
+            appState.tenants.forEach(tenant => {
+                // עדכן רק דיירים שהיה להם הסכום הישן
+                if (tenant.monthlyAmount === oldAmount) {
+                    tenant.monthlyAmount = newAmount;
+                    updatedCount++;
+                }
+            });
+            
+            if (updatedCount > 0) {
+                showToast(`עודכנו ${updatedCount} דיירים לסכום החדש ₪${newAmount}`, 'success');
+                renderTenantsTable();
+            }
+        }
+    }
     
     saveDataToStorage();
     showToast('ההגדרות נשמרו בהצלחה!', 'success');
@@ -2256,12 +2345,15 @@ function updateCheckboxListeners() {
 function updateBulkActionsUI() {
     const bulkActions = document.getElementById('bulkActions');
     const selectedCount = document.getElementById('selectedCount');
+    if (!bulkActions || !selectedCount) return;
     
     if (appState.selectedTenants.size > 0) {
+        bulkActions.classList.remove('hidden');
         bulkActions.style.display = 'flex';
         selectedCount.textContent = `${appState.selectedTenants.size} נבחרו`;
     } else {
         bulkActions.style.display = 'none';
+        bulkActions.classList.add('hidden');
     }
 }
 
@@ -2412,6 +2504,10 @@ function setupEventListeners() {
     // Search and Filter (Tenants)
     document.getElementById('searchInput')?.addEventListener('input', renderTenantsTable);
     document.getElementById('sortBy')?.addEventListener('change', renderTenantsTable);
+    document.getElementById('statusFilter')?.addEventListener('change', renderTenantsTable);
+    document.getElementById('bulkMarkPaidTenantsBtn')?.addEventListener('click', bulkMarkPaid);
+    document.getElementById('bulkReminderTenantsBtn')?.addEventListener('click', bulkSendReminder);
+    document.getElementById('bulkDeleteTenantsBtn')?.addEventListener('click', bulkDelete);
     document.getElementById('refreshBtn')?.addEventListener('click', () => {
         renderTenantsTable();
         showToast('הנתונים רוענו', 'success');
@@ -2712,9 +2808,32 @@ function getStatusText(status) {
     const statusMap = {
         paid: 'שולם',
         pending: 'ממתין',
-        overdue: 'באיחור'
+        overdue: 'באיחור',
+        debt: 'חוב',
+        active: 'פעיל'
     };
     return statusMap[status] || status;
+}
+
+/** מחלקת CSS ל־status-badge עבור סטטוס דייר */
+function getTenantStatusBadgeClass(status) {
+    if (status === 'paid' || status === 'active') return 'paid';
+    if (status === 'pending') return 'pending';
+    if (status === 'debt' || status === 'overdue') return 'overdue';
+    return 'pending';
+}
+
+function updateTenantsListSummary() {
+    const totalEl = document.getElementById('tenantsSummaryTotal');
+    if (!totalEl) return;
+    const list = appState.tenants || [];
+    const paid = list.filter(t => t.status === 'paid' || t.status === 'active').length;
+    const pending = list.filter(t => t.status === 'pending' || t.status === 'overdue' || t.status === 'debt').length;
+    totalEl.textContent = String(list.length);
+    const paidEl = document.getElementById('tenantsSummaryPaid');
+    const pendEl = document.getElementById('tenantsSummaryPending');
+    if (paidEl) paidEl.textContent = String(paid);
+    if (pendEl) pendEl.textContent = String(pending);
 }
 
 function getPaymentMethodText(method) {
@@ -2928,23 +3047,23 @@ function renderExpensesTable() {
     
     tbody.innerHTML = filteredExpenses.map(expense => `
         <tr>
-            <td>${formatDate(expense.date)}</td>
-            <td>${getCategoryNameHe(expense.category)}</td>
-            <td>
+            <td data-label="תאריך">${formatDate(expense.date)}</td>
+            <td data-label="קטגוריה">${getCategoryNameHe(expense.category)}</td>
+            <td data-label="תיאור">
                 ${expense.description}
                 ${expense.isRecurring ? `<span style="color: #3b82f6; margin-right: 8px;" title="הוצאה קבועה - ${getFrequencyLabel(expense.frequency)}">🔄</span>` : ''}
             </td>
-            <td><strong>₪${expense.amount}</strong></td>
-            <td>${expense.paidBy || '-'}</td>
-            <td>
+            <td data-label="סכום"><strong>₪${expense.amount}</strong></td>
+            <td data-label="שולם ע״י">${expense.paidBy || '-'}</td>
+            <td data-label="קבלה">
                 ${expense.receiptImage ? `
                     <button class="action-btn" style="background: #10b981; color: white;" onclick="viewExpenseReceipt('${expense.id}')" title="צפה בקבלה">
                         <i class="fas fa-image"></i>
                     </button>
                 ` : '<span style="color: #9ca3af;">-</span>'}
             </td>
-            <td>${expense.notes || '-'}</td>
-            <td>
+            <td data-label="הערות">${expense.notes || '-'}</td>
+            <td data-label="פעולות">
                 <div class="table-actions">
                     <button class="action-btn edit" onclick="editExpense('${expense.id}')" title="ערוך">
                         <i class="fas fa-edit"></i>
@@ -4027,48 +4146,73 @@ let currentOpenActionsMenu = null;
 
 function toggleTenantActions(tenantId, event) {
     event.stopPropagation();
-    
+
     const menu = document.getElementById(`tenantActions-${tenantId}`);
+    const overlay = document.getElementById('mobileActionsOverlay');
     if (!menu) return;
-    
+
     // Close any other open menus
     if (currentOpenActionsMenu && currentOpenActionsMenu !== menu) {
         currentOpenActionsMenu.style.display = 'none';
         currentOpenActionsMenu.classList.remove('open-upward');
     }
-    
+
     // Toggle current menu
     if (menu.style.display === 'none' || menu.style.display === '') {
         menu.style.display = 'block';
         currentOpenActionsMenu = menu;
         
-        // Calculate if menu should open upward or downward
+        // Show overlay
+        if (overlay) {
+            overlay.classList.add('active');
+        }
+        
+        // Position the menu using fixed positioning
         const button = event.currentTarget;
         const buttonRect = button.getBoundingClientRect();
-        const menuHeight = 400; // approximate height of menu
+        const menuHeight = menu.offsetHeight || 350;
+        const menuWidth = menu.offsetWidth || 200;
         const windowHeight = window.innerHeight;
+        const windowWidth = window.innerWidth;
         const spaceBelow = windowHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
         
-        // If not enough space below and more space above, open upward
-        if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
-            menu.classList.add('open-upward');
-        } else {
+        // Calculate horizontal position (align to right of button, but don't go off screen)
+        let leftPos = buttonRect.right - menuWidth;
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + menuWidth > windowWidth - 10) leftPos = windowWidth - menuWidth - 10;
+        
+        menu.style.left = leftPos + 'px';
+        menu.style.right = 'auto';
+        
+        // Calculate vertical position
+        if (spaceBelow >= menuHeight || spaceBelow > spaceAbove) {
+            // Open downward
+            menu.style.top = (buttonRect.bottom + 8) + 'px';
+            menu.style.bottom = 'auto';
             menu.classList.remove('open-upward');
+        } else {
+            // Open upward
+            menu.style.top = 'auto';
+            menu.style.bottom = (windowHeight - buttonRect.top + 8) + 'px';
+            menu.classList.add('open-upward');
         }
     } else {
         menu.style.display = 'none';
         menu.classList.remove('open-upward');
+        if (overlay) overlay.classList.remove('active');
         currentOpenActionsMenu = null;
     }
 }
 
 function closeTenantActions() {
+    const overlay = document.getElementById('mobileActionsOverlay');
     if (currentOpenActionsMenu) {
         currentOpenActionsMenu.style.display = 'none';
         currentOpenActionsMenu.classList.remove('open-upward');
         currentOpenActionsMenu = null;
     }
+    if (overlay) overlay.classList.remove('active');
 }
 
 // Close menu when clicking outside

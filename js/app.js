@@ -357,6 +357,7 @@ function updateAllStatistics() {
     updateStatistics();
     updatePaymentSummary();
     updateTenantsStatusFromMonthlyPayments();
+    updateTenantsListSummary();
 }
 
 function updateTenantsStatusFromMonthlyPayments() {
@@ -575,8 +576,8 @@ function renderTenantsTable() {
                 </td>
             </tr>
         `;
-        // Also update cards
         renderTenantCards(filteredTenants);
+        updateTenantsListSummary();
         return;
     }
     
@@ -586,18 +587,18 @@ function renderTenantsTable() {
             p.year === new Date().getFullYear()
         ).length;
         const totalMonths = 12;
-        const statusIcon = tenant.status === 'active' ? '💚' : 
-                          tenant.status === 'debt' ? '⚠️' : '✅';
+        const badgeClass = getTenantStatusBadgeClass(tenant.status);
+        const statusLabel = getStatusText(tenant.status);
         
         return `
         <tr>
-            <td><input type="checkbox" class="tenant-checkbox" data-id="${tenant.id}" ${appState.selectedTenants.has(tenant.id) ? 'checked' : ''}></td>
-            <td>${tenant.apartment}</td>
-            <td><strong>${tenant.name}</strong></td>
-            <td>₪${tenant.monthlyAmount}</td>
-            <td>${paidMonths}/${totalMonths}</td>
-            <td style="text-align: center; font-size: 1.5rem;">${statusIcon}</td>
-            <td style="text-align: center;">
+            <td class="col-checkbox"><input type="checkbox" class="tenant-checkbox" data-id="${tenant.id}" ${appState.selectedTenants.has(tenant.id) ? 'checked' : ''}></td>
+            <td data-label="דירה">${tenant.apartment}</td>
+            <td data-label="שם הדייר"><strong>${tenant.name}</strong></td>
+            <td data-label="סכום חודשי"><strong>₪${Number(tenant.monthlyAmount).toLocaleString()}</strong></td>
+            <td data-label="תשלומים">${paidMonths}/${totalMonths}</td>
+            <td data-label="סטטוס"><span class="status-badge status-${badgeClass}">${statusLabel}</span></td>
+            <td data-label="פעולות" style="text-align: center;">
                 <div class="tenant-actions-wrapper" style="position: relative; display: inline-block;">
                     <button class="tenant-actions-btn" onclick="toggleTenantActions('${tenant.id}', event)" title="פעולות">
                         <i class="fas fa-ellipsis-v"></i>
@@ -638,11 +639,9 @@ function renderTenantsTable() {
         `;
     }).join('');
     
-    // Update checkbox listeners
     updateCheckboxListeners();
-    
-    // Also render mobile cards
     renderTenantCards(filteredTenants);
+    updateTenantsListSummary();
 }
 
 // Render tenant cards for mobile
@@ -666,8 +665,8 @@ function renderTenantCards(tenants) {
             p.year === new Date().getFullYear()
         ).length;
         const totalMonths = 12;
-        const statusIcon = tenant.status === 'active' ? '💚' : 
-                          tenant.status === 'debt' ? '⚠️' : '✅';
+        const badgeClass = getTenantStatusBadgeClass(tenant.status);
+        const statusLabel = getStatusText(tenant.status);
         
         // Calculate debt/balance
         const totalExpected = tenant.monthlyAmount * totalMonths;
@@ -684,7 +683,7 @@ function renderTenantCards(tenants) {
                         <div class="tenant-card-name">${tenant.name}</div>
                         <div class="tenant-card-apartment">דירה ${tenant.apartment}</div>
                     </div>
-                    <div class="tenant-card-status">${statusIcon}</div>
+                    <div class="tenant-card-status"><span class="status-badge status-${badgeClass}">${statusLabel}</span></div>
                 </div>
                 
                 <div class="tenant-card-details">
@@ -2346,12 +2345,15 @@ function updateCheckboxListeners() {
 function updateBulkActionsUI() {
     const bulkActions = document.getElementById('bulkActions');
     const selectedCount = document.getElementById('selectedCount');
+    if (!bulkActions || !selectedCount) return;
     
     if (appState.selectedTenants.size > 0) {
+        bulkActions.classList.remove('hidden');
         bulkActions.style.display = 'flex';
         selectedCount.textContent = `${appState.selectedTenants.size} נבחרו`;
     } else {
         bulkActions.style.display = 'none';
+        bulkActions.classList.add('hidden');
     }
 }
 
@@ -2502,6 +2504,10 @@ function setupEventListeners() {
     // Search and Filter (Tenants)
     document.getElementById('searchInput')?.addEventListener('input', renderTenantsTable);
     document.getElementById('sortBy')?.addEventListener('change', renderTenantsTable);
+    document.getElementById('statusFilter')?.addEventListener('change', renderTenantsTable);
+    document.getElementById('bulkMarkPaidTenantsBtn')?.addEventListener('click', bulkMarkPaid);
+    document.getElementById('bulkReminderTenantsBtn')?.addEventListener('click', bulkSendReminder);
+    document.getElementById('bulkDeleteTenantsBtn')?.addEventListener('click', bulkDelete);
     document.getElementById('refreshBtn')?.addEventListener('click', () => {
         renderTenantsTable();
         showToast('הנתונים רוענו', 'success');
@@ -2802,9 +2808,32 @@ function getStatusText(status) {
     const statusMap = {
         paid: 'שולם',
         pending: 'ממתין',
-        overdue: 'באיחור'
+        overdue: 'באיחור',
+        debt: 'חוב',
+        active: 'פעיל'
     };
     return statusMap[status] || status;
+}
+
+/** מחלקת CSS ל־status-badge עבור סטטוס דייר */
+function getTenantStatusBadgeClass(status) {
+    if (status === 'paid' || status === 'active') return 'paid';
+    if (status === 'pending') return 'pending';
+    if (status === 'debt' || status === 'overdue') return 'overdue';
+    return 'pending';
+}
+
+function updateTenantsListSummary() {
+    const totalEl = document.getElementById('tenantsSummaryTotal');
+    if (!totalEl) return;
+    const list = appState.tenants || [];
+    const paid = list.filter(t => t.status === 'paid' || t.status === 'active').length;
+    const pending = list.filter(t => t.status === 'pending' || t.status === 'overdue' || t.status === 'debt').length;
+    totalEl.textContent = String(list.length);
+    const paidEl = document.getElementById('tenantsSummaryPaid');
+    const pendEl = document.getElementById('tenantsSummaryPending');
+    if (paidEl) paidEl.textContent = String(paid);
+    if (pendEl) pendEl.textContent = String(pending);
 }
 
 function getPaymentMethodText(method) {

@@ -2970,7 +2970,14 @@ body.dark-mode .tenant-actions-menu button:active {
 }
 
 .tenant-card-status {
-    font-size: 24px;
+    font-size: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.tenant-card-status .status-badge {
+    font-size: 0.8rem;
 }
 
 .tenant-card-details {
