@@ -7,31 +7,64 @@
     <style>
         body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
         code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+        .warn { background: #fef3c7; border: 1px solid #f59e0b; padding: 12px; border-radius: 8px; margin: 1rem 0; }
         button { margin: 0.5rem 0; padding: 0.75rem 1.25rem; font-size: 1rem; cursor: pointer; }
-        pre { background: #111; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+        pre { background: #111; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow: auto; font-size: 11px; white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
 <body>
     <h1>ייצוא לוג דיבוג (סשן f3512e)</h1>
-    <p>1. שחזר את הבעיה ב־<code>index.html</code> <strong>באותו אתר</strong> (אותו host כמו הדף הזה).</p>
-    <p>2. לחץ על הכפתור — יורד קובץ <code>debug-f3512e.log</code>. שמור אותו ב־<code>Belding--main</code> (ליד <code>index.html</code>).</p>
-    <p>3. בצ'אט: Proceed אחרי שהקובץ נשמר.</p>
+    <div class="warn" id="protoWarn" style="display:none;">
+        זוהה <code>file://</code> — דפדפנים לרוב <strong>לא משתפים</strong> sessionStorage בין קבצים. השתמש ב־URL של Vercel או הרץ <code>npx serve .</code> ופתח <code>http://localhost:3000/index.html</code>.
+    </div>
+    <p>1. שחזר את הבעיה ב־<code>index.html</code> <strong>באותו אתר</strong> (אותו host, לא file://).</p>
+    <p>2. לחץ "הורד debug-f3512e.log" ושמור את הקובץ בתיקיית <code>Belding--main</code>.</p>
+    <p>3. בצ'אט: Proceed.</p>
+    <p><strong>מקור:</strong> <span id="srcLabel"></span></p>
     <button type="button" id="btn">הורד debug-f3512e.log</button>
-    <h2>תצוגה מקדימה</h2>
-    <pre id="out">(ריק — אין עדיין רשומות ב-sessionStorage מפתח __DBG_F3512E)</pre>
+    <h2>מפתחות sessionStorage (אבחון)</h2>
+    <pre id="keys"></pre>
+    <h2>תצוגה מקדימה (ממוזג)</h2>
+    <pre id="out">(טוען…)</pre>
     <script>
         (function () {
-            var raw = sessionStorage.getItem('__DBG_F3512E') || '[]';
-            var arr;
-            try { arr = JSON.parse(raw); } catch (e) { arr = []; }
-            var lines = Array.isArray(arr) ? arr.map(function (x) { return JSON.stringify(x); }).join('\n') : '';
-            document.getElementById('out').textContent = lines || '(אין נתונים — חזור ל-index.html, רענן, ואז חזור לכאן)';
+            if (location.protocol === 'file:') {
+                var w = document.getElementById('protoWarn');
+                if (w) w.style.display = 'block';
+            }
+            function parseArr(s) {
+                try {
+                    var a = JSON.parse(s || '[]');
+                    return Array.isArray(a) ? a : [];
+                } catch (e) { return []; }
+            }
+            function mergeLogs() {
+                var ss = parseArr(sessionStorage.getItem('__DBG_F3512E'));
+                var ls = parseArr(localStorage.getItem('__DBG_F3512E'));
+                var map = {};
+                ss.concat(ls).forEach(function (item) {
+                    var k = (item && item.timestamp) + '|' + (item && item.message) + '|' + (item && item.hypothesisId);
+                    map[k] = item;
+                });
+                return Object.keys(map).sort().map(function (k) { return map[k]; });
+            }
+            var merged = mergeLogs();
+            var lines = merged.map(function (x) { return JSON.stringify(x); }).join('\n');
+            var keys = [];
+            for (var i = 0; i < sessionStorage.length; i++) {
+                keys.push(sessionStorage.key(i));
+            }
+            document.getElementById('keys').textContent = keys.length ? keys.join('\n') : '(אין מפתחות ב-sessionStorage)';
+            document.getElementById('out').textContent = lines || '(אין נתונים — ודא שטענת את index.html מאותו host אחרי דיפלוי ad0b3d6+)';
+            var src = 'session=' + parseArr(sessionStorage.getItem('__DBG_F3512E')).length + ', local=' + parseArr(localStorage.getItem('__DBG_F3512E')).length + ', merged=' + merged.length;
+            document.getElementById('srcLabel').textContent = src;
             document.getElementById('btn').onclick = function () {
-                var r = sessionStorage.getItem('__DBG_F3512E') || '[]';
-                var a;
-                try { a = JSON.parse(r); } catch (e2) { a = []; }
-                var L = Array.isArray(a) ? a.map(function (x) { return JSON.stringify(x); }).join('\n') : '';
-                if (!L) { alert('אין לוגים ב-sessionStorage. טען קודם את index.html מאותו אתר.'); return; }
+                var m = mergeLogs();
+                var L = m.map(function (x) { return JSON.stringify(x); }).join('\n');
+                if (!L) {
+                    alert('אין לוגים. פתח את index.html באותו host (HTTPS), רענן, שחזר בעיה, ואז חזור לדף זה.');
+                    return;
+                }
                 var blob = new Blob([L + '\n'], { type: 'application/x-ndjson' });
                 var link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);

@@ -1840,11 +1840,16 @@
                 try { console.log('[f3512e]', JSON.stringify(payload)); } catch (e2) {}
                 try {
                     var _k = '__DBG_F3512E';
-                    var _prev = sessionStorage.getItem(_k);
-                    var _arr = _prev ? JSON.parse(_prev) : [];
-                    _arr.push(payload);
-                    if (_arr.length > 40) { _arr = _arr.slice(-40); }
-                    sessionStorage.setItem(_k, JSON.stringify(_arr));
+                    function _pushStore(store) {
+                        var _prev = store.getItem(_k);
+                        var _arr = _prev ? JSON.parse(_prev) : [];
+                        if (!Array.isArray(_arr)) { _arr = []; }
+                        _arr.push(payload);
+                        if (_arr.length > 40) { _arr = _arr.slice(-40); }
+                        store.setItem(_k, JSON.stringify(_arr));
+                    }
+                    _pushStore(sessionStorage);
+                    _pushStore(localStorage);
                 } catch (e3) {}
                 // #region agent log
                 fetch('http://127.0.0.1:7898/ingest/9131c919-dd65-4211-891e-dd19c03c447f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f3512e'},body:JSON.stringify(payload)}).catch(function(){});
