@@ -142,12 +142,21 @@ body {
     transform: translateY(-2px);
 }
 
-/* ===== Cards Grid ===== */
+/* ===== Cards Grid — גובה אחיד בשורה (כמו תשלומים) ===== */
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
     gap: var(--spacing-lg);
+    align-items: stretch;
     animation: fadeInUp 0.6s ease;
+}
+
+.cards-grid > .card,
+.cards-grid > .mobile-card {
+    height: 100%;
+    min-height: 17.5rem;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ===== Card ===== */
@@ -187,6 +196,7 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--spacing-md);
+    flex-shrink: 0;
 }
 
 .card-title {
@@ -209,11 +219,15 @@ body {
 
 .card-body {
     margin-bottom: var(--spacing-md);
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .card-footer {
     display: flex;
     gap: var(--spacing-sm);
+    margin-top: auto;
+    flex-wrap: wrap;
 }
 
 /* ===== Buttons ===== */
@@ -227,8 +241,10 @@ body {
     transition: all var(--transition-base);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--spacing-xs);
     text-decoration: none;
+    min-height: 44px;
 }
 
 .btn-primary {
@@ -395,9 +411,10 @@ body {
 /* ===== Stats Cards ===== */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
+    align-items: stretch;
 }
 
 .stat-card {
@@ -406,6 +423,10 @@ body {
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-md);
     transition: all var(--transition-base);
+    min-height: 9.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .stat-card:hover {
@@ -739,6 +760,203 @@ body {
         right: var(--spacing-md);
         left: var(--spacing-md);
     }
+    
+    /* Mobile Actions Bar */
+    .actions-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .actions-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Mobile Filter */
+    .mobile-filter-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .mobile-filter-container .form-select,
+    .mobile-filter-container .form-input {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+    
+    /* Mobile Search */
+    .mobile-search {
+        position: relative;
+        width: 100%;
+    }
+    
+    .mobile-search input {
+        width: 100%;
+        padding: 14px 45px 14px 14px;
+        font-size: 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: white;
+        transition: all 0.3s;
+    }
+    
+    .mobile-search input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+    
+    .mobile-search i {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-size: 18px;
+    }
+}
+
+/* ===== Mobile Cards - Enhanced ===== */
+.mobile-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-right: 5px solid var(--primary);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mobile-card:active {
+    transform: scale(0.98);
+}
+
+.mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+}
+
+.mobile-card-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.mobile-card-info {
+    flex: 1;
+    margin-right: 12px;
+}
+
+.mobile-card-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.mobile-card-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.mobile-card-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mobile-card-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: start;
+}
+
+.mobile-card-detail {
+    font-size: 13px;
+}
+
+.mobile-card-detail-label {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.mobile-card-detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mobile-card-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: auto;
+}
+
+.mobile-card-actions .btn {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 10px;
+    justify-content: center;
+}
+
+/* Status Colors for Mobile Cards */
+.mobile-card.status-paid {
+    border-right-color: var(--success);
+}
+
+.mobile-card.status-pending {
+    border-right-color: var(--warning);
+}
+
+.mobile-card.status-overdue {
+    border-right-color: var(--danger);
+}
+
+/* Filter Tabs Mobile */
+@media (max-width: 768px) {
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .filter-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .filter-tabs .btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 10px 16px;
+        border-radius: 20px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -758,6 +976,54 @@ body {
     .mobile-card-actions {
         grid-template-columns: 1fr 1fr;
     }
+}
+
+/* ===== נגישות: מיקוד ברור ===== */
+.back-btn:focus-visible,
+.logout-btn:focus-visible,
+.bottom-nav-link:focus-visible,
+.modal-close:focus-visible,
+.btn:focus-visible,
+.form-input:focus-visible,
+.form-select:focus-visible,
+.form-textarea:focus-visible {
+    outline: 3px solid #1d4ed8;
+    outline-offset: 2px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===== גרפים בדפי Tiles — גובה אחיד ===== */
+.chart-container {
+    min-height: 22rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-wrapper {
+    flex: 1 1 auto;
+    min-height: 240px;
+    position: relative;
 }
 
 /* ===== Print Styles ===== */
