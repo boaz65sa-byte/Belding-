@@ -2,119 +2,457 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d0e15">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>הרשמה - ועד 2025</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .signup-container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 500px; width: 100%; padding: 40px; animation: slideUp 0.5s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo i { font-size: 60px; color: #667eea; margin-bottom: 15px; }
-        .logo h1 { font-size: 28px; color: #2d3748; margin-bottom: 10px; }
-        .logo p { color: #718096; font-size: 14px; }
-        .trial-badge { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; font-weight: 600; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-        .trial-badge i { margin-left: 8px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; color: #2d3748; font-weight: 500; font-size: 14px; }
-        .form-group label .required { color: #ef4444; margin-right: 3px; }
-        .input-wrapper { position: relative; }
-        .input-wrapper i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #a0aec0; }
-        .form-input { width: 100%; padding: 12px 45px 12px 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; transition: all 0.3s; font-family: inherit; }
-        .form-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
-        .form-input.error { border-color: #ef4444; }
-        .error-message { color: #ef4444; font-size: 13px; margin-top: 5px; display: none; }
-        .error-message.show { display: block; }
-        .password-toggle { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #a0aec0; cursor: pointer; padding: 5px; }
-        .password-toggle:hover { color: #667eea; }
-        .password-strength { margin-top: 8px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
-        .password-strength-bar { height: 100%; width: 0; transition: all 0.3s; border-radius: 2px; }
-        .password-strength-bar.weak { width: 33%; background: #ef4444; }
+        :root {
+            --primary: #6366f1; /* Indigo */
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --secondary: #ec4899; /* Pink */
+            --accent: #10b981; 
+            --danger: #ef4444;
+            --dark-bg: #0d0e15;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.6);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            padding: 32px 24px;
+        }
+
+        /* Ambient Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 40%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 40px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            margin: auto;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Header */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 56px; height: 56px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 10px 20px var(--primary-glow);
+            margin-bottom: 16px;
+        }
+
+        .auth-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Trial Badge */
+        .trial-badge {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-label .required { color: var(--secondary); margin-left: 4px; }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            color: var(--text-muted);
+            font-size: 16px;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 44px 14px 20px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .form-input:focus + .input-icon {
+            color: var(--primary);
+        }
+
+        .form-input::placeholder {
+            color: #475569;
+        }
+
+        .password-toggle {
+            position: absolute;
+            left: 14px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 6px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%; width: 0;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .password-strength-bar.weak { width: 33%; background: var(--danger); }
         .password-strength-bar.medium { width: 66%; background: #f59e0b; }
-        .password-strength-bar.strong { width: 100%; background: #10b981; }
-        .password-hint { font-size: 12px; color: #718096; margin-top: 5px; }
-        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 25px; }
-        .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; margin-top: 2px; }
-        .checkbox-group label { font-size: 14px; color: #4a5568; line-height: 1.5; }
-        .checkbox-group a { color: #667eea; text-decoration: none; font-weight: 600; }
-        .checkbox-group a:hover { text-decoration: underline; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: inherit; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 15px; }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-        .divider { text-align: center; margin: 25px 0; position: relative; }
-        .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e2e8f0; }
-        .divider span { background: white; padding: 0 15px; color: #718096; font-size: 14px; position: relative; z-index: 1; }
-        .login-link { text-align: center; color: #718096; font-size: 14px; }
-        .login-link a { color: #667eea; text-decoration: none; font-weight: 600; }
-        .login-link a:hover { text-decoration: underline; }
-        .alert { padding: 12px 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; display: none; animation: slideDown 0.3s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .alert-error { background: #fed7d7; color: #c53030; border: 1px solid #fc8181; }
-        .alert-success { background: #c6f6d5; color: #2f855a; border: 1px solid #68d391; }
-        .loading { display: none; justify-content: center; align-items: center; gap: 10px; }
-        .loading.active { display: flex; }
-        .spinner { width: 20px; height: 20px; border: 3px solid #e2e8f0; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .password-strength-bar.strong { width: 100%; background: var(--accent); }
+
+        .password-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-group input {
+            appearance: none;
+            width: 20px; height: 20px;
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            background: var(--input-bg);
+            cursor: pointer;
+            display: grid;
+            place-content: center;
+            transition: 0.2s;
+            margin-top: 2px;
+        }
+
+        .checkbox-group input::before {
+            content: "";
+            width: 10px; height: 10px;
+            transform: scale(0);
+            box-shadow: inset 1em 1em var(--primary);
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+            transition: 120ms transform ease-in-out;
+        }
+
+        .checkbox-group input:checked {
+            background: var(--input-bg);
+            border-color: var(--primary);
+        }
+
+        .checkbox-group input:checked::before {
+            transform: scale(1);
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .checkbox-group a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            box-shadow: 0 10px 20px var(--primary-glow);
+        }
+
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary:disabled { opacity: 0.7; pointer-events: none; }
+
+        .btn-google {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-google.oauth-social-margin {
+            margin-bottom: 12px;
+        }
+
+        .btn-facebook {
+            background: var(--glass-bg);
+            border: 1px solid rgba(24, 119, 242, 0.35);
+            color: var(--text-main);
+            backdrop-filter: blur(10px);
+            margin-bottom: 16px;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center;
+            margin: 20px 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: var(--glass-border);
+            margin: 0 16px;
+        }
+
+        /* Login Link */
+        .login-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        .spinner {
+            width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .features-list { background: #f7fafc; padding: 20px; border-radius: 12px; margin: 25px 0; }
-        .features-list h3 { color: #2d3748; font-size: 16px; margin-bottom: 15px; }
-        .feature-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; color: #4a5568; }
-        .feature-item i { color: #10b981; font-size: 16px; }
-        @media (max-width: 768px) { .signup-container { padding: 30px 25px; } .logo h1 { font-size: 24px; } }
+        .loading { display: none; align-items: center; gap: 8px; }
+        .loading.active { display: flex; }
     </style>
 </head>
 <body>
-    <div class="signup-container">
-        <div class="logo">
-            <i class="fas fa-building"></i>
-            <h1>ועד 2025</h1>
-            <p>הצטרף למערכת ניהול הדיירים המתקדמת</p>
+
+    <div class="auth-container">
+        
+        <div class="auth-header">
+            <div class="logo-icon">
+                <i class="fas fa-building"></i>
+            </div>
+            <h1>יצירת חשבון</h1>
+            <p>הצטרף למערכת ניהול הדיירים החכמה</p>
         </div>
 
         <div class="trial-badge">
             <i class="fas fa-gift"></i>
-            14 ימי ניסיון חינם - ללא צורך בכרטיס אשראי!
+            14 ימי ניסיון בחינם (ללא אשראי)
         </div>
 
-        <div class="alert alert-error" id="errorAlert"></div>
-        <div class="alert alert-success" id="successAlert"></div>
+        <button type="button" class="btn btn-google oauth-social-margin" id="googleSignupBtn" onclick="handleGoogleSignup()">
+            <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            הירשם עם Google
+        </button>
+
+        <button type="button" class="btn btn-facebook" id="facebookSignupBtn" onclick="handleFacebookSignup()">
+            <i class="fab fa-facebook" style="font-size:20px;color:#1877f2"></i>
+            הירשם עם Facebook
+        </button>
+
+        <div class="divider">או הירשם עם אימייל</div>
+
+        <div class="alert alert-error" id="errorAlert">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+        <div class="alert alert-success" id="successAlert">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText"></span>
+        </div>
 
         <form id="signupForm">
             <div class="form-group">
-                <label for="fullName"><span class="required">*</span> שם מלא</label>
+                <label class="form-label" for="fullName">שם מלא<span class="required">*</span></label>
                 <div class="input-wrapper">
-                    <i class="fas fa-user"></i>
                     <input type="text" id="fullName" class="form-input" placeholder="שם פרטי ומשפחה" required autocomplete="name">
-                </div>
-                <div class="error-message" id="fullNameError">נא להזין שם מלא</div>
-            </div>
-
-            <div class="form-group">
-                <label for="email"><span class="required">*</span> אימייל</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" class="form-input" placeholder="your@email.com" required autocomplete="email">
-                </div>
-                <div class="error-message" id="emailError">נא להזין אימייל תקין</div>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">טלפון (אופציונלי)</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-phone"></i>
-                    <input type="tel" id="phone" class="form-input" placeholder="05X-XXXXXXX" autocomplete="tel">
+                    <i class="fas fa-user input-icon"></i>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="password"><span class="required">*</span> סיסמה</label>
+                <label class="form-label" for="email">אימייל<span class="required">*</span></label>
                 <div class="input-wrapper">
-                    <i class="fas fa-lock"></i>
+                    <input type="email" id="email" class="form-input" placeholder="name@example.com" required autocomplete="email" inputmode="email">
+                    <i class="fas fa-envelope input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="phone">טלפון (אופציונלי)</label>
+                <div class="input-wrapper">
+                    <input type="tel" id="phone" class="form-input" placeholder="05X-XXXXXXX" autocomplete="tel" inputmode="tel">
+                    <i class="fas fa-phone input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="buildingAddress">כתובת הועד<span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <input type="text" id="buildingAddress" class="form-input" placeholder="עיר, רחוב ומספר" required>
+                    <i class="fas fa-building input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">סיסמה<span class="required">*</span></label>
+                <div class="input-wrapper">
                     <input type="password" id="password" class="form-input" placeholder="לפחות 6 תווים" required autocomplete="new-password">
+                    <i class="fas fa-lock input-icon"></i>
                     <button type="button" class="password-toggle" onclick="togglePassword('password', 'toggleIcon1')">
                         <i class="fas fa-eye" id="toggleIcon1"></i>
                     </button>
@@ -123,164 +461,187 @@
                     <div class="password-strength-bar" id="strengthBar"></div>
                 </div>
                 <div class="password-hint" id="strengthText">הזן סיסמה חזקה</div>
-                <div class="error-message" id="passwordError">סיסמה חייבת להכיל לפחות 6 תווים</div>
             </div>
 
             <div class="form-group">
-                <label for="confirmPassword"><span class="required">*</span> אימות סיסמה</label>
+                <label class="form-label" for="confirmPassword">אימות סיסמה<span class="required">*</span></label>
                 <div class="input-wrapper">
-                    <i class="fas fa-lock"></i>
                     <input type="password" id="confirmPassword" class="form-input" placeholder="הזן שוב את הסיסמה" required autocomplete="new-password">
+                    <i class="fas fa-lock input-icon"></i>
                     <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
                         <i class="fas fa-eye" id="toggleIcon2"></i>
                     </button>
                 </div>
-                <div class="error-message" id="confirmPasswordError">הסיסמאות אינן תואמות</div>
             </div>
 
             <div class="checkbox-group">
                 <input type="checkbox" id="agreeTerms" required>
                 <label for="agreeTerms">
-                    אני מסכים ל<a href="#" target="_blank">תנאי השימוש</a> ו<a href="#" target="_blank">מדיניות הפרטיות</a>
+                    אני מסכים ל<a href="#">תנאי השימוש</a> ול<a href="#">מדיניות הפרטיות</a> החלים על הועד
                 </label>
             </div>
 
             <button type="submit" class="btn btn-primary" id="signupBtn">
-                <span id="signupBtnText"><i class="fas fa-user-plus"></i> הירשם עכשיו</span>
+                <span id="signupBtnText"><i class="fas fa-user-plus"></i> פתח חשבון חינם</span>
                 <div class="loading" id="signupLoading">
                     <div class="spinner"></div>
-                    <span>רושם...</span>
                 </div>
             </button>
         </form>
 
-        <div class="features-list">
-            <h3>מה מקבלים בתקופת הניסיון:</h3>
-            <div class="feature-item"><i class="fas fa-check-circle"></i> <span>גישה מלאה לכל התכונות</span></div>
-            <div class="feature-item"><i class="fas fa-check-circle"></i> <span>ניהול דיירים ותשלומים</span></div>
-            <div class="feature-item"><i class="fas fa-check-circle"></i> <span>דוחות ויצוא נתונים</span></div>
-            <div class="feature-item"><i class="fas fa-check-circle"></i> <span>תמיכה טכנית מלאה</span></div>
+        <div class="login-link">
+            כבר יש לך חשבון? <a href="login.html">התחבר כאן</a>
         </div>
-
-        <div class="divider"><span>או</span></div>
-        <div class="login-link">כבר יש לך חשבון? <a href="login.html">התחבר כאן</a></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Scripts -->
     <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/auth.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-
-            // Check session
-            if (typeof window.getCurrentSession === 'function') {
-                window.getCurrentSession().then(session => {
-                    if (session) window.location.href = 'index.html';
-                });
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
+        }
 
-            // Helpers
-            window.togglePassword = function(inputId, iconId) {
-                const passwordInput = document.getElementById(inputId);
-                const toggleIcon = document.getElementById(iconId);
-                
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    toggleIcon.classList.remove('fa-eye');
-                    toggleIcon.classList.add('fa-eye-slash');
-                } else {
-                    passwordInput.type = 'password';
-                    toggleIcon.classList.remove('fa-eye-slash');
-                    toggleIcon.classList.add('fa-eye');
+        function showAlert(message, type = 'error') {
+            const alertEl = document.getElementById(type === 'error' ? 'errorAlert' : 'successAlert');
+            const textEl = document.getElementById(type === 'error' ? 'errorText' : 'successText');
+            const otherAlert = document.getElementById(type === 'error' ? 'successAlert' : 'errorAlert');
+            
+            otherAlert.style.display = 'none';
+            textEl.textContent = message;
+            alertEl.style.display = 'flex';
+            
+            setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
+        }
+
+        function restoreGoogleSignupButton() {
+            var btn = document.getElementById('googleSignupBtn');
+            if (!btn) return;
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> הירשם עם Google';
+        }
+
+        function restoreFacebookSignupButton() {
+            var btn = document.getElementById('facebookSignupBtn');
+            if (!btn) return;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fab fa-facebook" style="font-size:20px;color:#1877f2"></i> הירשם עם Facebook';
+        }
+
+        async function handleGoogleSignup() {
+            await initSupabase();
+            const btn = document.getElementById('googleSignupBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="border-top-color: var(--primary);"></div>';
+            
+            try {
+                const result = await signInWithGoogle();
+                if (!result.success) {
+                    showAlert(result.error || 'שגיאה בהרשמה עם Google');
+                    restoreGoogleSignupButton();
                 }
-            };
-
-            function showAlert(message, type = 'error') {
-                const alertElement = document.getElementById(type === 'error' ? 'errorAlert' : 'successAlert');
-                alertElement.textContent = message;
-                alertElement.style.display = 'block';
-                setTimeout(() => { alertElement.style.display = 'none'; }, 5000);
+            } catch (error) {
+                showAlert('שגיאה בהרשמה עם Google');
+                restoreGoogleSignupButton();
             }
+        }
 
-            // Password Strength
-            const passInput = document.getElementById('password');
-            if(passInput) {
-                passInput.addEventListener('input', (e) => {
-                    const password = e.target.value;
-                    const strengthBar = document.getElementById('strengthBar');
-                    const strengthText = document.getElementById('strengthText');
-                    
-                    let strength = 0;
-                    if (password.length >= 6) strength++;
-                    if (password.length >= 10) strength++;
-                    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-                    if (/\d/.test(password)) strength++;
-                    if (/[^a-zA-Z\d]/.test(password)) strength++;
-                    
-                    strengthBar.className = 'password-strength-bar';
-                    if (strength <= 2) {
-                        strengthBar.classList.add('weak');
-                        strengthText.textContent = 'סיסמה חלשה';
-                        strengthText.style.color = '#ef4444';
-                    } else if (strength <= 4) {
-                        strengthBar.classList.add('medium');
-                        strengthText.textContent = 'סיסמה בינונית';
-                        strengthText.style.color = '#f59e0b';
+        async function handleFacebookSignup() {
+            await initSupabase();
+            const btn = document.getElementById('facebookSignupBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="border-top-color: #1877f2;"></div>';
+            try {
+                const result = await signInWithFacebook();
+                if (!result.success) {
+                    showAlert(result.error || 'שגיאה בהרשמה עם Facebook');
+                    restoreFacebookSignupButton();
+                }
+            } catch (error) {
+                showAlert('שגיאה בהרשמה עם Facebook');
+                restoreFacebookSignupButton();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initSupabase();
+            const session = await getCurrentSession();
+            if (session) window.location.href = 'index.html';
+
+            document.getElementById('password').addEventListener('input', (e) => {
+                const pass = e.target.value;
+                const bar = document.getElementById('strengthBar');
+                const text = document.getElementById('strengthText');
+                
+                let str = 0;
+                if (pass.length >= 6) str++;
+                if (pass.length >= 10) str++;
+                if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) str++;
+                if (/\d/.test(pass)) str++;
+                if (/[^a-zA-Z\d]/.test(pass)) str++;
+                
+                bar.className = 'password-strength-bar';
+                if (str <= 2) {
+                    bar.classList.add('weak');
+                    text.textContent = 'חלש'; text.style.color = '#ef4444';
+                } else if (str <= 4) {
+                    bar.classList.add('medium');
+                    text.textContent = 'טוב'; text.style.color = '#f59e0b';
+                } else {
+                    bar.classList.add('strong');
+                    text.textContent = 'מצוין!'; text.style.color = '#10b981';
+                }
+            });
+
+            document.getElementById('signupForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const fullName = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim() || null;
+                const buildingAddress = document.getElementById('buildingAddress').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPass = document.getElementById('confirmPassword').value;
+                const terms = document.getElementById('agreeTerms').checked;
+
+                if (fullName.length < 2) return showAlert('נא להזין שם מלא');
+                if (!buildingAddress) return showAlert('נא להזין כתובת בניין');
+                if (password.length < 6) return showAlert('סיסמה קצרה מדי');
+                if (password !== confirmPass) return showAlert('הסיסמאות אינן תואמות');
+                if (!terms) return showAlert('חובה לאשר תנאי שימוש');
+
+                document.getElementById('signupBtnText').style.display = 'none';
+                document.getElementById('signupLoading').classList.add('active');
+                document.getElementById('signupBtn').disabled = true;
+
+                try {
+                    const result = await signupWithBuilding(email, password, fullName, phone, buildingAddress);
+
+                    if (result.success) {
+                        showAlert('נרשמת בהצלחה! מעביר...', 'success');
+                        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
                     } else {
-                        strengthBar.classList.add('strong');
-                        strengthText.textContent = 'סיסמה חזקה!';
-                        strengthText.style.color = '#10b981';
+                        showAlert(result.error || 'שגיאה ברישום');
                     }
-                });
-            }
-
-            // Submit Handler
-            const form = document.getElementById('signupForm');
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    const fullName = document.getElementById('fullName').value.trim();
-                    const email = document.getElementById('email').value.trim();
-                    const phone = document.getElementById('phone').value.trim() || null;
-                    const password = document.getElementById('password').value;
-                    const confirmPass = document.getElementById('confirmPassword').value;
-                    const terms = document.getElementById('agreeTerms').checked;
-
-                    if (fullName.length < 2) return showAlert('נא להזין שם מלא');
-                    if (password.length < 6) return showAlert('סיסמה קצרה מדי');
-                    if (password !== confirmPass) return showAlert('הסיסמאות אינן תואמות');
-                    if (!terms) return showAlert('חובה לאשר תנאי שימוש');
-
-                    document.getElementById('signupBtnText').style.display = 'none';
-                    document.getElementById('signupLoading').classList.add('active');
-                    document.getElementById('signupBtn').disabled = true;
-
-                    try {
-                        if (typeof window.signup !== 'function') {
-                            throw new Error('פונקציית ההרשמה לא נטענה');
-                        }
-
-                        const result = await window.signup(email, password, fullName, phone);
-
-                        if (result.success) {
-                            showAlert('נרשמת בהצלחה! מעביר...', 'success');
-                            setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-                        } else {
-                            showAlert(result.error || 'שגיאה ברישום');
-                        }
-                    } catch (error) {
-                        console.error('Signup Error:', error);
-                        showAlert('שגיאה: ' + error.message);
-                    } finally {
-                        document.getElementById('signupBtnText').style.display = 'inline';
-                        document.getElementById('signupLoading').classList.remove('active');
-                        document.getElementById('signupBtn').disabled = false;
-                    }
-                });
-            }
+                } catch (error) {
+                    showAlert('שגיאה: ' + error.message);
+                } finally {
+                    document.getElementById('signupBtnText').style.display = 'inline';
+                    document.getElementById('signupLoading').classList.remove('active');
+                    document.getElementById('signupBtn').disabled = false;
+                }
+            });
         });
     </script>
 </body>
-</html> 
+</html>

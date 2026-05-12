@@ -1829,6 +1829,9 @@
             try {
                 // המתן לאתחול Supabase
                 await initSupabase();
+                if (typeof finalizeAuthFromRedirectUrl === 'function' && window.supabaseClient) {
+                    await finalizeAuthFromRedirectUrl(window.supabaseClient);
+                }
                 if (window.supabaseClient) {
                     await window.supabaseClient.auth.getSession();
                 }

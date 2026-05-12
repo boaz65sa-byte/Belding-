@@ -20,41 +20,46 @@ function authResolveRedirectUrl(fileName) {
     }
 }
 
-// פונקציית אתחול - נקראת מהדף הראשי
-async function initSupabase() {
-    if (supabaseInstance) return supabaseInstance;
+const AUTH_CLIENT_OPTIONS = {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
+};
 
-    // מנסה לקחת מ-config.js
-    if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_KEY !== 'undefined') {
-        const create = typeof window !== 'undefined' && window.supabase && window.supabase.createClient
-            ? window.supabase.createClient.bind(window.supabase)
-            : (typeof supabase !== 'undefined' && supabase.createClient ? supabase.createClient.bind(supabase) : null);
-        if (!create) {
-            console.error('❌ Supabase SDK לא זמין');
-            return null;
-        }
-        supabaseInstance = create(SUPABASE_URL, SUPABASE_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
-        });
-        window.supabaseClient = supabaseInstance;
-        return supabaseInstance;
-    } 
-    
-    // בדיקה אם כבר הוגדר חיצונית
+/** יצירה סינכרונית של לקוח Supabase — תואם ל-config.js (SUPABASE_CONFIG) */
+function ensureSupabaseClientSync() {
+    if (supabaseInstance) return supabaseInstance;
     if (window.supabaseClient) {
         supabaseInstance = window.supabaseClient;
         return supabaseInstance;
     }
-
-    console.error('❌ שגיאה: לא נמצאו הגדרות התחברות ל-Supabase');
+    const create = typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function'
+        ? window.supabase.createClient.bind(window.supabase)
+        : null;
+    if (!create) {
+        console.error('❌ Supabase SDK לא נטען מה-CDN');
+        return null;
+    }
+    if (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+        supabaseInstance = create(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, AUTH_CLIENT_OPTIONS);
+        window.supabaseClient = supabaseInstance;
+        return supabaseInstance;
+    }
+    if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_KEY !== 'undefined') {
+        supabaseInstance = create(SUPABASE_URL, SUPABASE_KEY, AUTH_CLIENT_OPTIONS);
+        window.supabaseClient = supabaseInstance;
+        return supabaseInstance;
+    }
+    console.error('❌ חסר SUPABASE_CONFIG או מפתחות ב-config.js');
     return null;
 }
 
-// פונקציית עזר פנימית לקבלת הלקוח
+// פונקציית אתחול - נקראת מהדף הראשי
+async function initSupabase() {
+    return ensureSupabaseClientSync();
+}
+
+// פונקציית עזר פנימית לקבלת הלקוח (תמיד סינכרונית — לא Promise)
 function getSupabase() {
-    if (supabaseInstance) return supabaseInstance;
-    if (window.supabaseClient) return window.supabaseClient;
-    return initSupabase(); // נסה לאתחל אם לא קיים
+    return ensureSupabaseClientSync();
 }
 
 /**
@@ -62,7 +67,7 @@ function getSupabase() {
  * בודקת אם למשתמש יש גישה ומחזירה פרטי פרופיל מלאים
  */
 async function checkUserAccess() {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (!supabase) return { hasAccess: false, reason: 'error' };
 
     try {
@@ -190,7 +195,7 @@ async function checkUserAccess() {
 
 // 1. הרשמה
 async function signup(email, password, fullName, phone) {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (!supabase) return { success: false, error: 'Connection Error' };
 
     try {
@@ -207,7 +212,7 @@ async function signup(email, password, fullName, phone) {
 
 // 1.1 הרשמה עם בניין
 async function signupWithBuilding(email, password, fullName, phone, buildingAddress) {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (!supabase) return { success: false, error: 'Connection Error' };
 
     try {
@@ -251,81 +256,162 @@ async function signupWithBuilding(email, password, fullName, phone, buildingAddr
 
 // 2. התחברות
 async function login(email, password) {
-    const supabase = await getSupabase();
-    if (!supabase) return { success: false, error: 'Connection Error' };
+    const supabase = getSupabase();
+    if (!supabase) return { success: false, error: 'שגיאת חיבור לשרת. רענן את הדף או בדוק חסימת תוכן/פרסומות.' };
 
     try {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         return { success: true, user: data.user };
     } catch (error) {
-        return { success: false, error: 'פרטים שגויים או משתמש לא קיים' };
+        const msg = (error && error.message) ? String(error.message) : '';
+        if (/Invalid login credentials|invalid login/i.test(msg)) {
+            return { success: false, error: 'פרטים שגויים או משתמש לא קיים' };
+        }
+        if (/Email not confirmed|email not confirmed|not confirmed/i.test(msg)) {
+            return { success: false, error: 'יש לאשר את הקישור שנשלח לאימייל לפני ההתחברות.' };
+        }
+        if (/network|fetch|failed/i.test(msg)) {
+            return { success: false, error: 'בעיית רשת. נסה שוב או בדוק חיבור.' };
+        }
+        return { success: false, error: msg || 'שגיאה בהתחברות' };
     }
 }
 
 // 3. יציאה
 async function logout() {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (supabase) await supabase.auth.signOut();
     window.location.href = 'login.html';
 }
 
 // 4. בדיקת סשן (פשוטה)
 async function getCurrentSession() {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (!supabase) return null;
     const { data: { session } } = await supabase.auth.getSession();
     return session;
 }
 
-// 5. איפוס סיסמה
+// 5. איפוס סיסמה (שליחת מייל)
 async function resetPassword(email) {
-    const supabase = await getSupabase();
-    if (!supabase) return { success: false, error: 'Connection Error' };
+    const supabase = getSupabase();
+    if (!supabase) return { success: false, error: 'שגיאת חיבור לשרת. רענן את הדף.' };
+    const trimmed = String(email || '').trim();
+    if (!trimmed) return { success: false, error: 'הזן כתובת אימייל.' };
     try {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
             redirectTo: authResolveRedirectUrl('reset-password.html')
         });
         if (error) throw error;
         return { success: true };
     } catch (error) {
-        return { success: false, error: error.message };
+        const msg = (error && error.message) ? String(error.message) : '';
+        if (/fetch|network|Failed to fetch/i.test(msg)) {
+            return { success: false, error: 'בעיית רשת. נסה שוב או בדוק חיבור.' };
+        }
+        if (/rate|too many|429/i.test(msg)) {
+            return { success: false, error: 'יותר מדי בקשות. המתן דקה ונסה שוב.' };
+        }
+        return { success: false, error: msg || 'שגיאה בשליחת מייל האיפוס.' };
     }
 }
 
-// 6. התחברות עם Google
-async function signInWithGoogle() {
-    const supabase = await getSupabase();
-    if (!supabase) return { success: false, error: 'Connection Error' };
-    
+/**
+ * אחרי לחיצה על קישור מייל (איפוס / OAuth): חילוף code (PKCE), verifyOtp (token_hash), והמתנה קצרה לסשן.
+ * אם ביקשת איפוס במחשב ופתחת את המייל בטלפון — PKCE עלול להיכשל (אין code verifier); הודעה מתאימה ב-return.
+ */
+async function finalizeAuthFromRedirectUrl(supabase, options) {
+    const maxMs = (options && options.maxMs) != null ? options.maxMs : 6000;
+    const intervalMs = (options && options.intervalMs) != null ? options.intervalMs : 120;
+    if (!supabase) return null;
+
     try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: authResolveRedirectUrl('index.html'),
-                queryParams: {
-                    access_type: 'offline',
-                    prompt: 'consent'
-                },
-                skipBrowserRedirect: true
+        const url = new URL(window.location.href);
+        const token_hash = url.searchParams.get('token_hash');
+        const otpType = url.searchParams.get('type');
+        if (token_hash && otpType) {
+            const { error } = await supabase.auth.verifyOtp({
+                type: otpType,
+                token_hash: token_hash
+            });
+            if (!error) {
+                url.searchParams.delete('token_hash');
+                url.searchParams.delete('type');
+                window.history.replaceState({}, '', url.pathname + (url.search || '') + (url.hash || ''));
             }
-        });
-        
-        if (error) throw error;
-        if (!data || !data.url) {
-            return { success: false, error: 'לא התקבל קישור התחברות. ודא ש-Google מופעל ב-Supabase ושכתובת ההפניה מורשית.' };
         }
-        window.location.assign(data.url);
+
+        const code = url.searchParams.get('code');
+        if (code) {
+            const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
+            if (!exErr) {
+                url.searchParams.delete('code');
+                window.history.replaceState({}, '', url.pathname + (url.search || '') + (url.hash || ''));
+            }
+        }
+    } catch (e) {
+        console.warn('finalizeAuthFromRedirectUrl:', e);
+    }
+
+    const deadline = Date.now() + maxMs;
+    while (Date.now() < deadline) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) return session;
+        await new Promise(function (r) { setTimeout(r, intervalMs); });
+    }
+    return null;
+}
+
+/** התחברות OAuth (Google / Facebook) — אותה זרימת redirect ל-index.html */
+async function signInWithOAuthProvider(provider) {
+    const labels = { google: 'Google', facebook: 'Facebook' };
+    const label = labels[provider] || provider;
+    const supabase = getSupabase();
+    if (!supabase) return { success: false, error: 'שגיאת חיבור לשרת. רענן את הדף.' };
+
+    try {
+        const options = {
+            redirectTo: authResolveRedirectUrl('index.html')
+        };
+        if (provider === 'google') {
+            options.queryParams = {
+                access_type: 'offline',
+                prompt: 'consent'
+            };
+        }
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options
+        });
+
+        if (error) throw error;
+        if (data && data.url) {
+            window.location.assign(data.url);
+        }
         return { success: true, data };
     } catch (error) {
-        console.error('Google sign-in error:', error);
-        return { success: false, error: error.message };
+        console.error(label + ' sign-in error:', error);
+        const msg = (error && error.message) ? String(error.message) : 'שגיאה לא ידועה';
+        return {
+            success: false,
+            error: msg + ' — בדוק ב-Supabase: Authentication → Providers → ' + label + ', ו-Redirect URLs כוללים את כתובת האתר המדויקת.'
+        };
     }
+}
+
+async function signInWithGoogle() {
+    return signInWithOAuthProvider('google');
+}
+
+async function signInWithFacebook() {
+    return signInWithOAuthProvider('facebook');
 }
 
 // 7. קבלת משתמש נוכחי
 async function getCurrentUser() {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (!supabase) return null;
     
     try {
@@ -340,7 +426,7 @@ async function getCurrentUser() {
 
 // 8. קבלת פרופיל משתמש מהטבלה (יוצר אוטומטית אם לא קיים)
 async function getUserProfile(userId) {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (!supabase) return null;
     
     try {
@@ -395,7 +481,7 @@ async function getUserProfile(userId) {
 
 // 9. התנתקות
 async function signOut() {
-    const supabase = await getSupabase();
+    const supabase = getSupabase();
     if (!supabase) return false;
     
     try {
@@ -417,7 +503,9 @@ window.login = login;
 window.logout = logout;
 window.getCurrentSession = getCurrentSession;
 window.resetPassword = resetPassword;
+window.finalizeAuthFromRedirectUrl = finalizeAuthFromRedirectUrl;
 window.signInWithGoogle = signInWithGoogle;
+window.signInWithFacebook = signInWithFacebook;
 window.getCurrentUser = getCurrentUser;
 window.getUserProfile = getUserProfile;
 window.signOut = signOut;

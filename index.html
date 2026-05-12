@@ -1896,7 +1896,11 @@
                 // המתן לאתחול Supabase
                 await initSupabase();
                 __agentDbgF3512e({sessionId:'f3512e',location:'index.html:auth',message:'after initSupabase',data:{hasSupabaseClient:!!window.supabaseClient,hasInitFn:typeof initSupabase==='function'},timestamp:Date.now(),hypothesisId:'H1',runId:'pre'});
-                // ריענון סשן מה-URL (התחברות Google / לינק אימות אחרי redirect)
+                // חילוף קוד PKCE / אימות מה-URL לפני בדיקת סשן (Google, Facebook, וכו')
+                if (typeof finalizeAuthFromRedirectUrl === 'function' && window.supabaseClient) {
+                    await finalizeAuthFromRedirectUrl(window.supabaseClient);
+                }
+                // ריענון סשן מה-URL (התחברות OAuth / לינק אימות אחרי redirect)
                 var __dbgHasSession = false;
                 if (window.supabaseClient) {
                     var __gs = await window.supabaseClient.auth.getSession();
