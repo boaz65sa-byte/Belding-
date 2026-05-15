@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "hebrew-tailwind-preset": {
+      "source": "skills-il/localization",
+      "sourceType": "github",
+      "computedHash": "82b5a2cbfd18e65b9a8468c8c814b06a73a304b0230dafc1ac39430ade7e01e6"
+    },
+    "israeli-ui-design-system": {
+      "source": "skills-il/localization",
+      "sourceType": "github",
+      "computedHash": "791d9e8d2e0a2f4265b254bd846df5617e54429be410f6c1d7f700a7a23f8b12"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Heebo:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/belding-theme.css">
     
     <style>
         :root {
@@ -132,7 +135,7 @@
 
         .input-icon {
             position: absolute;
-            right: 16px;
+            inset-inline-start: 16px; /* right side in RTL */
             color: var(--text-muted);
             font-size: 18px;
             pointer-events: none;
@@ -142,14 +145,18 @@
         .form-input {
             width: 100%;
             background: var(--input-bg);
-            border: 1px solid var(--glass-border);
+            border: 1.5px solid var(--glass-border);
             border-radius: 16px;
-            padding: 16px 44px 16px 20px;
+            padding: 16px 48px 16px 20px; /* inline padding handled below */
+            padding-inline-start: 48px;   /* space for icon in RTL */
+            padding-inline-end: 20px;
             color: var(--text-main);
-            font-family: inherit;
-            font-size: 16px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 16px; /* Prevent iOS zoom */
+            line-height: 1.7;
             outline: none;
-            transition: all 0.3s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            min-height: 56px;
         }
 
         .form-input:focus {
@@ -168,13 +175,16 @@
 
         .password-toggle {
             position: absolute;
-            left: 16px;
+            inset-inline-end: 16px; /* left side in RTL */
             background: none;
             border: none;
             color: var(--text-muted);
             font-size: 18px;
             cursor: pointer;
             padding: 4px;
+            min-height: 44px; /* touch target */
+            display: flex;
+            align-items: center;
         }
 
         .password-toggle:hover {
@@ -365,7 +375,27 @@
         .loading { display: none; align-items: center; gap: 8px; }
         .loading.active { display: flex; }
     </style>
-</head>
+    <!-- Tailwind CSS (Play CDN) + Hebrew RTL Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            hebrew: ['Heebo', 'Assistant', 'Noto Sans Hebrew', 'sans-serif'],
+          },
+          lineHeight: {
+            hebrew: '1.7',
+            'hebrew-tight': '1.4',
+          },
+          colors: {
+            primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',600:'#2563eb',700:'#1e40af',800:'#1d4ed8' }
+          }
+        }
+      }
+    }
+    </script></head>
 <body>
 
     <div class="auth-container">

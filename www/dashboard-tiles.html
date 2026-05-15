@@ -1,15 +1,21 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>דשבורד - ועד 2025</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Heebo (Hebrew) + Inter (numbers/Latin) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/belding-theme.css">
     
     <style>
         * {
@@ -19,11 +25,18 @@
         }
         
         body {
-            font-family: 'Heebo', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Heebo', 'Assistant', sans-serif;
+            background:
+                radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.12), transparent 40%),
+                radial-gradient(circle at 20% 100%, rgba(16, 163, 74, 0.06), transparent 35%),
+                linear-gradient(180deg, #f9fafb 0%, #eff6ff 100%);
             min-height: 100vh;
+            min-height: 100dvh;
             padding: 20px;
-            color: #1f2937;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            color: #111827;
+            line-height: 1.7;
+            word-spacing: 0.04em;
         }
         
         /* Header */
@@ -34,15 +47,14 @@
         }
         
         .header h1 {
-            color: white;
+            color: #111827;
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
         .header .welcome {
-            color: rgba(255,255,255,0.9);
+            color: #6b7280;
             font-size: 1.1rem;
             font-weight: 400;
         }
@@ -54,10 +66,11 @@
             gap: 15px;
             margin-top: 15px;
             padding: 15px;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
-            color: white;
+            border: 1px solid #e5e7eb;
+            color: #1f2937;
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
@@ -67,12 +80,12 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: white;
+            background: #2563eb;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            color: #667eea;
+            color: white;
             font-weight: 600;
         }
         
@@ -91,15 +104,16 @@
         
         /* Tile Card */
         .tile {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
             padding: 25px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(15,23,42,0.08);
             text-decoration: none;
             color: inherit;
             display: flex;
@@ -116,14 +130,15 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: var(--tile-color, #667eea);
+            background: var(--tile-color, #2563eb);
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
         
         .tile:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            transform: translateY(-6px);
+            border-color: rgba(37, 99, 235, 0.28);
+            box-shadow: 0 18px 36px -24px rgba(15,23,42,0.45);
         }
         
         .tile:hover::before {
@@ -144,13 +159,13 @@
             justify-content: center;
             font-size: 2rem;
             color: white;
-            background: var(--tile-color, #667eea);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: var(--tile-color, #2563eb);
+            box-shadow: 0 8px 18px -12px rgba(15,23,42,0.5);
             transition: all 0.3s ease;
         }
         
         .tile:hover .tile-icon {
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.06);
         }
         
         .tile-title {
@@ -167,41 +182,44 @@
         
         .tile-badge {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            background: #ef4444;
+            inset-block-start: 12px;
+            inset-inline-start: 12px; /* right side in RTL */
+            background: #dc2626;
             color: white;
+            font-family: 'Inter', sans-serif;
             font-size: 0.75rem;
             font-weight: 600;
-            padding: 4px 10px;
+            padding: 3px 9px;
             border-radius: 20px;
-            animation: pulse 2s infinite;
+            animation: pulse 2.5s infinite;
         }
         
         /* Color Variants */
-        .tile-dashboard { --tile-color: #667eea; }
-        .tile-tenants { --tile-color: #10b981; }
-        .tile-payments { --tile-color: #f59e0b; }
-        .tile-expenses { --tile-color: #ef4444; }
-        .tile-messages { --tile-color: #8b5cf6; }
-        .tile-reports { --tile-color: #06b6d4; }
+        .tile-dashboard { --tile-color: #2563eb; }
+        .tile-tenants { --tile-color: #059669; }
+        .tile-payments { --tile-color: #d97706; }
+        .tile-expenses { --tile-color: #dc2626; }
+        .tile-messages { --tile-color: #7c3aed; }
+        .tile-reports { --tile-color: #0284c7; }
         .tile-settings { --tile-color: #6b7280; }
-        .tile-profile { --tile-color: #ec4899; }
+        .tile-profile { --tile-color: #2563eb; }
         
         /* Logout Button */
         .logout-btn {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 10px 20px;
+            inset-block-start: 20px;
+            inset-inline-end: 20px; /* left side in RTL */
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            padding: 10px 18px;
             border-radius: 50px;
             font-weight: 600;
+            font-size: 0.875rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -209,8 +227,16 @@
         }
         
         .logout-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
             transform: translateY(-2px);
+        }
+
+        .tile:focus-visible,
+        .logout-btn:focus-visible {
+            outline: 3px solid #1d4ed8;
+            outline-offset: 3px;
         }
         
         /* Animations */
@@ -303,13 +329,13 @@
         /* Loading State */
         .loading {
             text-align: center;
-            color: white;
+            color: #1f2937;
             padding: 50px;
         }
         
         .spinner {
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid white;
+            border: 4px solid #dbeafe;
+            border-top: 4px solid #2563eb;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -322,7 +348,27 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-</head>
+    <!-- Tailwind CSS (Play CDN) + Hebrew RTL Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            hebrew: ['Heebo', 'Assistant', 'Noto Sans Hebrew', 'sans-serif'],
+          },
+          lineHeight: {
+            hebrew: '1.7',
+            'hebrew-tight': '1.4',
+          },
+          colors: {
+            primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',600:'#2563eb',700:'#1e40af',800:'#1d4ed8' }
+          }
+        }
+      }
+    }
+    </script></head>
 <body>
     <!-- Logout Button -->
     <button class="logout-btn" id="logoutBtn">

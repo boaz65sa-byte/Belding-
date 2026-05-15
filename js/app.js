@@ -73,6 +73,7 @@ function initializeApp() {
     loadDataFromStorage();
     setupEventListeners();
     setupNavigation();
+    applyTabFromUrl();
     renderDashboard();
     renderTenantsTable();
     populatePaymentTenantFilter();
@@ -266,41 +267,46 @@ function loadDemoData() {
 // ===================================
 
 function setupNavigation() {
-    const menuItems = document.querySelectorAll('.menu-item');
-    const sections = document.querySelectorAll('.content-section');
-    
+    const menuItems = document.querySelectorAll('.menu-item[data-section]');
+
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const targetSection = item.dataset.section;
-            
-            // Skip if no target section defined
             if (!targetSection) return;
-            
-            // Update active menu item
-            menuItems.forEach(mi => mi.classList.remove('active'));
-            item.classList.add('active');
-            
-            // Show target section (with null check)
-            sections.forEach(section => section.classList.remove('active'));
-            const targetElement = document.getElementById(`${targetSection}Section`);
-            if (targetElement) {
-                targetElement.classList.add('active');
-                // Render section-specific content
-                renderSectionContent(targetSection);
-            }
+            switchTab(targetSection);
         });
     });
-    
+
     // Mobile menu toggle
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const sidebar = document.getElementById('sidebar');
-    
+
     if (mobileMenuToggle) {
         mobileMenuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
         });
     }
+}
+
+/** טעינה מ־?tab= או # (לינקים חיצוניים / קוביות) */
+function applyTabFromUrl() {
+    const allowed = ['dashboard', 'tenants', 'payments', 'expenses', 'notices', 'reports', 'settings'];
+    let tab = null;
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const q = params.get('tab');
+        if (q && allowed.indexOf(q) !== -1) tab = q;
+    } catch (e) { /* ignore */ }
+    if (!tab && window.location.hash) {
+        var h = String(window.location.hash).replace(/^#/, '');
+        if (allowed.indexOf(h) !== -1) tab = h;
+        else if (h.indexOf('Section') !== -1) {
+            var stripped = h.replace(/Section$/, '');
+            if (allowed.indexOf(stripped) !== -1) tab = stripped;
+        }
+    }
+    if (tab) switchTab(tab);
 }
 
 function renderSectionContent(section) {
@@ -990,34 +996,31 @@ function filterPaymentsByStatus() {
 // ===================================
 
 function switchTab(tabName) {
-    // Find the menu item for this tab
-    const menuItem = document.querySelector(`.menu-item[data-section="${tabName}"]`);
-    
-    if (menuItem) {
-        // Update active menu items (sidebar)
-        document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active'));
-        menuItem.classList.add('active');
-        
-        // Update active nav items (bottom mobile nav)
-        document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(ni => ni.classList.remove('active'));
-        const bottomNavItem = document.querySelector(`.mobile-bottom-nav .nav-item[data-tab="${tabName}"]`);
-        if (bottomNavItem) {
-            bottomNavItem.classList.add('active');
-        }
-        
-        // Show target section
-        document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-        const targetSection = document.getElementById(`${tabName}Section`);
-        if (targetSection) {
-            targetSection.classList.add('active');
-        }
-        
-        // Render section content
+    const allowed = ['dashboard', 'tenants', 'payments', 'expenses', 'notices', 'reports', 'settings'];
+    if (!tabName || allowed.indexOf(tabName) === -1) return;
+
+    document.querySelectorAll('.menu-item[data-section]').forEach(function (mi) {
+        mi.classList.remove('active');
+    });
+    document.querySelectorAll('.menu-item[data-section="' + tabName + '"]').forEach(function (mi) {
+        mi.classList.add('active');
+    });
+
+    document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(function (ni) {
+        ni.classList.remove('active');
+    });
+    const bottomNavItem = document.querySelector('.mobile-bottom-nav .nav-item[data-tab="' + tabName + '"]');
+    if (bottomNavItem) bottomNavItem.classList.add('active');
+
+    document.querySelectorAll('.content-section').forEach(function (section) {
+        section.classList.remove('active');
+    });
+    const targetSection = document.getElementById(tabName + 'Section');
+    if (targetSection) {
+        targetSection.classList.add('active');
         renderSectionContent(tabName);
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Alias for mobile bottom navigation

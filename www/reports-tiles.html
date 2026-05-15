@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta http-equiv="refresh" content="0;url=index.html?tab=reports">
+    <title>מעבר לדוחות</title>
+    <link rel="stylesheet" href="css/belding-theme.css">
+    <!-- Tailwind CSS (Play CDN) + Hebrew RTL Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            hebrew: ['Heebo', 'Assistant', 'Noto Sans Hebrew', 'sans-serif'],
+          },
+          lineHeight: {
+            hebrew: '1.7',
+            'hebrew-tight': '1.4',
+          },
+          colors: {
+            primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',600:'#2563eb',700:'#1e40af',800:'#1d4ed8' }
+          }
+        }
+      }
+    }
+    </script></head>
+<body>
+    <p style="font-family: system-ui, sans-serif; text-align: center; padding: 2rem;">
+        <a href="index.html?tab=reports">לחץ כאן אם הדף לא עבר אוטומטית לדוחות</a>
+    </p>
+    <script>window.location.replace('index.html?tab=reports');</script>
+</body>
+</html>

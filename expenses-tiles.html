@@ -1,8 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>ניהול הוצאות - ועד 2025</title>
     
     <!-- Favicon -->
@@ -12,11 +15,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Tiles Style -->
     <link rel="stylesheet" href="css/tiles-style.css">
-</head>
+    <link rel="stylesheet" href="css/belding-theme.css">
+    <!-- Tailwind CSS (Play CDN) + Hebrew RTL Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            hebrew: ['Heebo', 'Assistant', 'Noto Sans Hebrew', 'sans-serif'],
+          },
+          lineHeight: {
+            hebrew: '1.7',
+            'hebrew-tight': '1.4',
+          },
+          colors: {
+            primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',600:'#2563eb',700:'#1e40af',800:'#1d4ed8' }
+          }
+        }
+      }
+    }
+    </script></head>
 <body>
     <!-- Loading State -->
     <div class="loading" id="loadingState">

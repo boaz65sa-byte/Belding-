@@ -1,0 +1,33 @@
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778511163765,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778511187405,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":false,"hashLen":0},"timestamp":1778511244713,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":false,"reason":"not_logged_in","status":""},"timestamp":1778511273733,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"redirect no access","data":{"branch":"login","reason":"not_logged_in"},"timestamp":1778511273733,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778588851485,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":false,"hashLen":0},"timestamp":1778588908258,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":false,"reason":"not_logged_in","status":""},"timestamp":1778588937261,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"redirect no access","data":{"branch":"login","reason":"not_logged_in"},"timestamp":1778588937268,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778597476425,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":false,"hashLen":0},"timestamp":1778597482429,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":false,"reason":"not_logged_in","status":""},"timestamp":1778597482431,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"redirect no access","data":{"branch":"login","reason":"not_logged_in"},"timestamp":1778597482432,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778597504122,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":true,"hashLen":0},"timestamp":1778597505555,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"access granted before overlay","data":{"status":"trial"},"timestamp":1778597507099,"hypothesisId":"H5","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":true,"reason":"","status":"trial"},"timestamp":1778597507099,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778597532932,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":true,"hashLen":0},"timestamp":1778597533129,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":true,"reason":"","status":"trial"},"timestamp":1778597534003,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"access granted before overlay","data":{"status":"trial"},"timestamp":1778597534004,"hypothesisId":"H5","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778598179995,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":true,"hashLen":0},"timestamp":1778598180293,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":true,"reason":"","status":"trial"},"timestamp":1778598181332,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"access granted before overlay","data":{"status":"trial"},"timestamp":1778598181332,"hypothesisId":"H5","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778598307389,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":true,"hashLen":0},"timestamp":1778598307567,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"access granted before overlay","data":{"status":"trial"},"timestamp":1778598308259,"hypothesisId":"H5","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":true,"reason":"","status":"trial"},"timestamp":1778598308258,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after initSupabase","data":{"hasSupabaseClient":true,"hasInitFn":true},"timestamp":1778598309548,"hypothesisId":"H1","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"after getSession","data":{"hasSession":true,"hashLen":0},"timestamp":1778598309724,"hypothesisId":"H2","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"checkUserAccess result","data":{"hasAccess":true,"reason":"","status":"trial"},"timestamp":1778598310347,"hypothesisId":"H3","runId":"pre"}
+{"sessionId":"f3512e","location":"index.html:auth","message":"access granted before overlay","data":{"status":"trial"},"timestamp":1778598310347,"hypothesisId":"H5","runId":"pre"}

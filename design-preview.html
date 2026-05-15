@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תצוגת עיצוב - Belding</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tiles-style.css">
+    <link rel="stylesheet" href="css/belding-theme.css">
+    <!-- Tailwind CSS (Play CDN) + Hebrew RTL Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            hebrew: ['Heebo', 'Assistant', 'Noto Sans Hebrew', 'sans-serif'],
+          },
+          lineHeight: {
+            hebrew: '1.7',
+            'hebrew-tight': '1.4',
+          },
+          colors: {
+            primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',600:'#2563eb',700:'#1e40af',800:'#1d4ed8' }
+          }
+        }
+      }
+    }
+    </script></head>
+<body>
+    <main class="tiles-container">
+        <div class="top-bar">
+            <a href="dashboard-tiles.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                לדשבורד האמיתי
+            </a>
+            <button class="logout-btn" type="button">
+                <i class="fas fa-sign-out-alt"></i>
+                כפתור לדוגמה
+            </button>
+        </div>
+
+        <header class="tiles-header">
+            <h1>תצוגת עיצוב חדשה</h1>
+            <p class="subtitle">רקע בהיר, כרטיסים נקיים, צבע כחול מוביל וצללים עדינים יותר</p>
+        </header>
+
+        <section class="stats-grid" aria-label="סטטיסטיקות לדוגמה">
+            <article class="stat-card">
+                <div class="stat-icon" style="background: var(--primary);">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-value">24</div>
+                <div class="stat-label">דירות בבניין</div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon" style="background: var(--success);">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="stat-value">18</div>
+                <div class="stat-label">שילמו החודש</div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon" style="background: var(--warning);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value">6</div>
+                <div class="stat-label">ממתינים לתשלום</div>
+            </article>
+        </section>
+
+        <section class="cards-grid" aria-label="כרטיסים לדוגמה">
+            <article class="card">
+                <div class="card-header">
+                    <h2 class="card-title">דיירים</h2>
+                    <div class="card-icon" style="background: var(--success);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>כרטיס לבן עם גבול עדין, רדיוס אחיד וצל רך במקום גרדיאנט כבד.</p>
+                </div>
+                <div class="card-footer">
+                    <a href="tenants-tiles.html" class="btn btn-primary">פתח דיירים</a>
+                    <button class="btn btn-outline" type="button">פעולה משנית</button>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-header">
+                    <h2 class="card-title">תשלומים</h2>
+                    <div class="card-icon" style="background: var(--warning);">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="badge badge-warning">ממתין</span>
+                    <p style="margin-top: 1rem;">הטפסים, הכפתורים והתגיות משתמשים עכשיו בקו עיצוב נקי ועקבי יותר.</p>
+                </div>
+                <div class="card-footer">
+                    <a href="payments-tiles.html" class="btn btn-success">פתח תשלומים</a>
+                </div>
+            </article>
+
+            <article class="mobile-card status-paid">
+                <div class="mobile-card-header">
+                    <div class="mobile-card-avatar">ב</div>
+                    <div class="mobile-card-info">
+                        <div class="mobile-card-name">בועז סעדה</div>
+                        <div class="mobile-card-subtitle">דירה 12</div>
+                    </div>
+                    <span class="badge badge-success">שולם</span>
+                </div>
+                <div class="mobile-card-details">
+                    <div class="mobile-card-detail">
+                        <div class="mobile-card-detail-label">סכום</div>
+                        <div class="mobile-card-detail-value">₪500</div>
+                    </div>
+                    <div class="mobile-card-detail">
+                        <div class="mobile-card-detail-label">חודש</div>
+                        <div class="mobile-card-detail-value">ינואר</div>
+                    </div>
+                </div>
+                <div class="mobile-card-actions">
+                    <button class="btn btn-primary" type="button">צפה</button>
+                    <button class="btn btn-outline" type="button">ערוך</button>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

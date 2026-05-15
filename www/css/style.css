@@ -14,59 +14,69 @@
 
 /* === CSS Variables === */
 :root {
-    /* Primary Colors */
+    /* Primary Colors — Israeli design system blue */
     --primary-color: #2563eb;
     --primary-dark: #1e40af;
-    --primary-light: #60a5fa;
-    
-    /* Success, Warning, Danger */
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --info-color: #06b6d4;
-    
+    --primary-light: #eff6ff;
+    --primary-mid: #dbeafe;
+
+    /* Status colors (WCAG-AA contrast) */
+    --success-color: #16a34a;
+    --warning-color: #d97706;
+    --danger-color:  #dc2626;
+    --info-color:    #0891b2;
+
     /* Neutral Colors */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f9fafb;
-    --bg-tertiary: #f3f4f6;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --text-light: #9ca3af;
-    --border-color: #e5e7eb;
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    
+    --bg-primary:    #ffffff;
+    --bg-secondary:  #f9fafb;
+    --bg-tertiary:   #eff6ff;
+    --text-primary:  #111827;
+    --text-secondary:#6b7280;
+    --text-light:    #9ca3af;
+    --border-color:  #e5e7eb;
+
+    /* Shadows — refined depth system */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.10), 0 4px 12px rgba(0, 0, 0, 0.06);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.06);
+
     /* Spacing */
     --spacing-xs: 0.5rem;
     --spacing-sm: 0.75rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
-    
-    /* Border Radius */
+
+    /* Border Radius — slightly more rounded for modern look */
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
-    
+    --radius-2xl: 1.5rem;
+
     /* Transitions */
-    --transition-fast: 150ms ease;
+    --transition-fast: 120ms ease;
     --transition-base: 200ms ease;
-    --transition-slow: 300ms ease;
-    
-    /* Fonts */
-    --font-primary: 'Heebo', 'Assistant', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
-    --font-size-base: 1rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-size-3xl: 1.875rem;
+    --transition-slow: 350ms ease;
+
+    /* Hebrew fonts (Heebo + Inter pairing per israeli-ui-design-system) */
+    --font-primary: 'Heebo', 'Assistant', 'Noto Sans Hebrew', -apple-system, sans-serif;
+    --font-numbers: 'Inter', 'Outfit', system-ui, sans-serif;
+
+    /* Hebrew-optimized type scale */
+    --font-size-xs:   0.8125rem; /* 13px — min readable Hebrew */
+    --font-size-sm:   0.875rem;  /* 14px */
+    --font-size-base: 1rem;      /* 16px — Hebrew body minimum */
+    --font-size-lg:   1.125rem;
+    --font-size-xl:   1.25rem;
+    --font-size-2xl:  1.5rem;
+    --font-size-3xl:  1.875rem;
+
+    /* Hebrew line heights */
+    --line-height-tight:   1.4;
+    --line-height-normal:  1.7;
+    --line-height-relaxed: 1.9;
 }
 
 /* Dark Theme Variables */
@@ -3861,5 +3871,217 @@ body, button, input, select, textarea {
     #paymentStatusFilter {
         width: 100% !important;
         min-height: 46px !important;
+    }
+}
+
+/* === Belding Unified App Refresh === */
+:root {
+    --app-surface: rgba(255, 255, 255, 0.96);
+    --app-surface-strong: #ffffff;
+    --app-border-soft: rgba(226, 232, 240, 0.92);
+    --app-bg:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 34rem),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    --app-focus: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+body:not(.dark-theme) {
+    background: var(--app-bg);
+}
+
+.top-nav,
+body > header,
+.sidebar,
+.content-area .bg-white,
+.system-info-banner,
+.table-container,
+.filter-bar,
+.modal-content,
+.stat-card,
+.expense-category-card,
+.payments-table-header,
+.annual-payments-table-container,
+.debtor-list-card {
+    background: var(--app-surface) !important;
+    border: 1px solid var(--app-border-soft);
+    box-shadow: var(--shadow-md);
+}
+
+.top-nav,
+body > header {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-right: 0;
+    border-left: 0;
+    border-top: 0;
+}
+
+.sidebar {
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+}
+
+.content-area {
+    width: 100%;
+}
+
+.section-header h1,
+.content-section h1,
+.nav-brand,
+.text-blue-600 {
+    color: var(--primary-color) !important;
+}
+
+.menu-item,
+.btn,
+.btn-icon,
+.action-btn,
+.tenant-actions-btn,
+.method-btn,
+.modal-close,
+button,
+a {
+    transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.menu-item.active,
+.btn-primary,
+.tenant-tab.active {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+.menu-item.active:hover,
+.btn-primary:hover {
+    background: var(--primary-dark) !important;
+}
+
+.btn,
+.btn-icon,
+.action-btn,
+.tenant-actions-btn,
+.method-btn,
+.form-input,
+.form-select,
+.form-textarea,
+input,
+select,
+textarea {
+    border-radius: var(--radius-lg);
+}
+
+.btn,
+.btn-icon,
+.action-btn,
+.tenant-actions-btn,
+.method-btn {
+    min-height: 44px;
+}
+
+.btn-icon,
+.tenant-actions-btn,
+.method-btn,
+.btn-secondary {
+    border: 1px solid var(--app-border-soft);
+    background: var(--app-surface-strong);
+}
+
+.stat-card,
+.content-area .rounded-xl,
+.content-area .rounded-2xl,
+.table-container,
+.filter-bar,
+.modal-content,
+.expense-category-card,
+.debtor-list-card {
+    border-radius: var(--radius-xl) !important;
+}
+
+.stat-card:hover,
+.content-area .shadow-md:hover,
+.expense-category-card:hover,
+.method-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.form-input,
+.form-select,
+.form-textarea,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    border: 1px solid var(--border-color) !important;
+    background: var(--app-surface-strong) !important;
+    color: var(--text-primary);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color) !important;
+    box-shadow: var(--app-focus);
+}
+
+.data-table thead,
+.annual-payments-table thead,
+.preview-table th {
+    background: #eff6ff !important;
+    color: #1e3a8a !important;
+}
+
+.data-table tbody tr:hover,
+.annual-payments-table tbody tr:hover,
+.preview-table tr:hover {
+    background: #f8fafc !important;
+}
+
+.modal {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.48) !important;
+}
+
+.toast {
+    border: 1px solid var(--app-border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.menu-item:focus-visible,
+.btn:focus-visible,
+.btn-icon:focus-visible,
+.action-btn:focus-visible,
+.tenant-actions-btn:focus-visible,
+.method-btn:focus-visible,
+.modal-close:focus-visible,
+a:focus-visible,
+button:focus-visible {
+    outline: 3px solid var(--primary-dark);
+    outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+    .top-nav,
+    body > header {
+        background: rgba(255, 255, 255, 0.94) !important;
+    }
+
+    .content-area {
+        padding-inline: var(--spacing-md) !important;
+    }
+
+    .mobile-bottom-nav,
+    nav.fixed.bottom-0 {
+        background: rgba(255, 255, 255, 0.96) !important;
+        border-top: 1px solid var(--app-border-soft);
+        box-shadow: 0 -12px 24px -22px rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
     }
 }

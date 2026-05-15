@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <!--
     מערכת ניהול דיירים מתקדמת
@@ -63,7 +63,28 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-</head>
+    <link rel="stylesheet" href="css/belding-theme.css">
+    <!-- Tailwind CSS (Play CDN) + Hebrew RTL Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            hebrew: ['Heebo', 'Assistant', 'Noto Sans Hebrew', 'sans-serif'],
+          },
+          lineHeight: {
+            hebrew: '1.7',
+            'hebrew-tight': '1.4',
+          },
+          colors: {
+            primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',600:'#2563eb',700:'#1e40af',800:'#1d4ed8' }
+          }
+        }
+      }
+    }
+    </script></head>
 <body>
     <!-- Top Navigation Bar -->
     <nav class="top-nav">
@@ -235,7 +256,7 @@
 
                 <!-- Statistics Cards -->
                 <div class="stats-grid">
-                    <div class="stat-card card-primary">
+                    <div class="stat-card card-primary" role="button" tabindex="0" style="cursor:pointer;" aria-label="עבור לניהול דיירים" onclick="location.href='index.html?tab=tenants'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='index.html?tab=tenants';}">
                         <div class="stat-icon">
                             <i class="fas fa-users"></i>
                         </div>
@@ -245,7 +266,7 @@
                         </div>
                     </div>
                     
-                    <div class="stat-card card-success">
+                    <div class="stat-card card-success" role="button" tabindex="0" style="cursor:pointer;" aria-label="עבור לדיירים" onclick="location.href='index.html?tab=tenants'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='index.html?tab=tenants';}">
                         <div class="stat-icon">
                             <i class="fas fa-check-circle"></i>
                         </div>
@@ -255,7 +276,7 @@
                         </div>
                     </div>
                     
-                    <div class="stat-card card-warning">
+                    <div class="stat-card card-warning" role="button" tabindex="0" style="cursor:pointer;" aria-label="עבור לתשלומים" onclick="location.href='index.html?tab=payments'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='index.html?tab=payments';}">
                         <div class="stat-icon">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
@@ -265,7 +286,7 @@
                         </div>
                     </div>
                     
-                    <div class="stat-card card-info">
+                    <div class="stat-card card-info" role="button" tabindex="0" style="cursor:pointer;" aria-label="עבור לתשלומים" onclick="location.href='index.html?tab=payments'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='index.html?tab=payments';}">
                         <div class="stat-icon">
                             <i class="fas fa-shekel-sign"></i>
                         </div>
