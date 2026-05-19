@@ -1470,6 +1470,41 @@
         </div>
     </div>
 
+    <!-- Modal: Tenant Hub -->
+    <div class="modal modal-large" id="tenantHubModal">
+        <div class="modal-content tenant-hub-modal">
+            <div class="modal-header tenant-hub-header">
+                <div class="tenant-hub-title-wrap">
+                    <h2 id="hubTenantName">שם דייר</h2>
+                    <p class="tenant-hub-subtitle">דירה <span id="hubApartment">—</span> · <span id="hubStatusBadge" class="status-badge"></span></p>
+                </div>
+                <button type="button" class="modal-close" id="closeTenantHubModal" aria-label="סגור"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="tenant-hub-contact" id="hubContactStrip"></div>
+                <div class="tenant-hub-actions">
+                    <button type="button" class="tenant-hub-btn monthly" id="hubMonthlyBtn"><i class="fas fa-calendar-check"></i><span>תשלום חודשי</span></button>
+                    <button type="button" class="tenant-hub-btn annual" id="hubAnnualBtn"><i class="fas fa-calendar-alt"></i><span>תשלום שנתי</span></button>
+                    <button type="button" class="tenant-hub-btn whatsapp" id="hubWhatsappBtn"><i class="fab fa-whatsapp"></i><span>הודעה</span></button>
+                    <button type="button" class="tenant-hub-btn edit" id="hubEditBtn"><i class="fas fa-edit"></i><span>עריכת פרטים</span></button>
+                </div>
+                <div class="tenant-hub-stats">
+                    <div><span class="label">שולם השנה</span><strong id="hubPaidMonths">0/12</strong></div>
+                    <div><span class="label">חוב</span><strong id="hubDebt" class="danger">₪0</strong></div>
+                    <div><span class="label">סכום חודשי</span><strong id="hubMonthlyAmount">₪0</strong></div>
+                </div>
+                <div class="tenant-hub-year-row">
+                    <button type="button" class="btn-icon" id="hubPrevYear"><i class="fas fa-chevron-right"></i></button>
+                    <span id="hubYear">2026</span>
+                    <button type="button" class="btn-icon" id="hubNextYear"><i class="fas fa-chevron-left"></i></button>
+                </div>
+                <div class="hub-monthly-strip" id="hubMonthlyStrip"></div>
+                <h3 class="tenant-hub-section-title"><i class="fas fa-history"></i> תשלומים אחרונים</h3>
+                <div class="tenant-hub-payments-list" id="hubPaymentsList"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Monthly Tracking -->
     <div class="modal modal-large" id="monthlyTrackingModal">
         <div class="modal-content">
@@ -2050,6 +2085,8 @@
     
     <!-- Main App -->
     <script src="js/payment-sync.js"></script>
+    <script src="js/tenant-unified-ui.js"></script>
+    <script src="js/tenant-hub.js"></script>
     <script src="js/app.js"></script>
     <script src="js/payments-table.js"></script>
     <script src="js/mobile.js"></script>

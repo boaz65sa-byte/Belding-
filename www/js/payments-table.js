@@ -30,9 +30,12 @@ function switchTenantTab(tabName) {
         selectedBtn.classList.add('active');
     }
     
-    // Initialize payments table if switching to it
     if (tabName === 'paymentsTable') {
         initializePaymentsTableDates();
+    }
+    if (tabName === 'paymentsHistory') {
+        if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+        if (typeof updatePaymentSummary === 'function') updatePaymentSummary();
     }
 }
 

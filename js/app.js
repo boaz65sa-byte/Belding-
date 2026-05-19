@@ -74,7 +74,13 @@ function initializeApp() {
     if (typeof syncMonthlyPaymentsFromPaymentRecords === 'function') {
         syncMonthlyPaymentsFromPaymentRecords();
     }
+    if (typeof unifyPaymentsUnderTenants === 'function') {
+        unifyPaymentsUnderTenants();
+    }
     setupEventListeners();
+    if (typeof setupTenantHubListeners === 'function') {
+        setupTenantHubListeners();
+    }
     setupNavigation();
     applyTabFromUrl();
     renderDashboard();
@@ -602,7 +608,7 @@ function renderTenantsTable() {
         <tr>
             <td class="col-checkbox"><input type="checkbox" class="tenant-checkbox" data-id="${tenant.id}" ${appState.selectedTenants.has(tenant.id) ? 'checked' : ''}></td>
             <td data-label="דירה">${tenant.apartment}</td>
-            <td data-label="שם הדייר"><strong>${tenant.name}</strong></td>
+            <td data-label="שם הדייר"><strong class="tenant-name-link" role="button" tabindex="0" onclick="openTenantHub('${tenant.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTenantHub('${tenant.id}')}">${tenant.name}</strong></td>
             <td data-label="סכום חודשי"><strong>₪${Number(tenant.monthlyAmount).toLocaleString()}</strong></td>
             <td data-label="תשלומים">${paidMonths}/${totalMonths}</td>
             <td data-label="סטטוס"><span class="status-badge status-${badgeClass}">${statusLabel}</span></td>
@@ -612,13 +618,17 @@ function renderTenantsTable() {
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
                     <div class="tenant-actions-menu" id="tenantActions-${tenant.id}" style="display: none;">
+                        <button onclick="openTenantHub('${tenant.id}'); closeTenantActions();">
+                            <i class="fas fa-th-large"></i>
+                            <span>מרכז דייר</span>
+                        </button>
                         <button onclick="editTenant('${tenant.id}'); closeTenantActions();">
                             <i class="fas fa-edit"></i>
                             <span>ערוך דייר</span>
                         </button>
                         <button onclick="openMonthlyTracking('${tenant.id}'); closeTenantActions();">
                             <i class="fas fa-calendar-check"></i>
-                            <span>מעקב חודשי / רישום תשלום</span>
+                            <span>תשלום חודשי</span>
                         </button>
                         <button onclick="openAnnualPaymentForTenant('${tenant.id}'); closeTenantActions();">
                             <i class="fas fa-calendar-alt"></i>
@@ -678,7 +688,7 @@ function renderTenantCards(tenants) {
         const balanceColor = balance >= 0 ? '#34c759' : '#ff3b30';
         
         return `
-            <div class="tenant-card">
+            <div class="tenant-card tenant-card-unified" onclick="openTenantHub('${tenant.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTenantHub('${tenant.id}')}">
                 <div class="tenant-card-header">
                     <div class="tenant-card-info">
                         <div class="tenant-card-name">${tenant.name}</div>
@@ -702,22 +712,18 @@ function renderTenantCards(tenants) {
                     </div>
                 </div>
                 
-                <div class="tenant-card-actions">
-                    <button class="tenant-card-action-btn primary" onclick="navigateToPayments('${tenant.id}')">
-                        <i class="fas fa-dollar-sign"></i>
-                        רשום תשלום
+                <div class="tenant-card-actions" onclick="event.stopPropagation()">
+                    <button type="button" class="tenant-card-action-btn monthly" onclick="openMonthlyTracking('${tenant.id}')">
+                        <i class="fas fa-calendar-check"></i> חודשי
                     </button>
-                    <button class="tenant-card-action-btn secondary" onclick="editTenant('${tenant.id}')">
-                        <i class="fas fa-edit"></i>
-                        ערוך
+                    <button type="button" class="tenant-card-action-btn annual" onclick="openAnnualPaymentForTenant('${tenant.id}')">
+                        <i class="fas fa-calendar-alt"></i> שנתי
                     </button>
-                    <button class="tenant-card-action-btn secondary" onclick="openMonthlyTracking('${tenant.id}')">
-                        <i class="fas fa-calendar"></i>
-                        מעקב חודשי
+                    <button type="button" class="tenant-card-action-btn whatsapp" onclick="openWhatsappModal('${tenant.id}')">
+                        <i class="fab fa-whatsapp"></i> הודעה
                     </button>
-                    <button class="tenant-card-action-btn secondary" onclick="openWhatsappModal('${tenant.id}')">
-                        <i class="fab fa-whatsapp"></i>
-                        WhatsApp
+                    <button type="button" class="tenant-card-action-btn secondary" onclick="editTenant('${tenant.id}')">
+                        <i class="fas fa-edit"></i> פרטים
                     </button>
                 </div>
             </div>
@@ -994,6 +1000,12 @@ function switchTab(tabName) {
     const allowed = ['dashboard', 'tenants', 'payments', 'expenses', 'notices', 'reports', 'settings'];
     if (!tabName || allowed.indexOf(tabName) === -1) return;
 
+    let tenantSubTab = null;
+    if (tabName === 'payments') {
+        tabName = 'tenants';
+        tenantSubTab = 'paymentsHistory';
+    }
+
     document.querySelectorAll('.menu-item[data-section]').forEach(function (mi) {
         mi.classList.remove('active');
     });
@@ -1014,6 +1026,9 @@ function switchTab(tabName) {
     if (targetSection) {
         targetSection.classList.add('active');
         renderSectionContent(tabName);
+        if (tenantSubTab && typeof switchTenantTab === 'function') {
+            switchTenantTab(tenantSubTab);
+        }
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1025,14 +1040,13 @@ function showTab(tabName) {
 window.showTab = showTab;
 
 function navigateToPayments(tenantId) {
+    if (typeof openTenantHub === 'function') {
+        switchTab('tenants');
+        setTimeout(function () { openTenantHub(tenantId); }, 80);
+        return;
+    }
     switchTab('tenants');
-    setTimeout(() => {
-        openMonthlyTracking(tenantId);
-        const tenant = appState.tenants.find(t => t.id === tenantId);
-        if (tenant) {
-            showToast(`מעקב תשלומים — ${tenant.name}`, 'info');
-        }
-    }, 100);
+    setTimeout(function () { openMonthlyTracking(tenantId); }, 100);
 }
 
 // Make it globally accessible
@@ -4259,7 +4273,11 @@ document.addEventListener('DOMContentLoaded', function() {
 // WhatsApp Integration
 // ===================================
 
-function openWhatsappModal(tenant, messageType = 'billing') {
+function openWhatsappModal(tenantOrId, messageType = 'billing') {
+    const tenant = typeof tenantOrId === 'string'
+        ? appState.tenants.find(function (t) { return t.id === tenantOrId; })
+        : tenantOrId;
+    if (!tenant) return;
     appState.currentTenantForWhatsapp = tenant;
     
     document.getElementById('whatsappTemplate').value = messageType;
@@ -5601,3 +5619,6 @@ window.sendWhatsappToTenant = function(tenantId) {
 };
 window.openMonthlyTracking = openMonthlyTracking;
 window.toggleMonth = toggleMonth;
+window.openTenantHub = typeof openTenantHub !== 'undefined' ? openTenantHub : function (id) {
+    if (typeof openMonthlyTracking === 'function') openMonthlyTracking(id);
+};
