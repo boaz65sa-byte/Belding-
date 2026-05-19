@@ -2883,6 +2883,15 @@ body.dark-mode .tenant-actions-menu button:active {
     color: #065f46;
 }
 
+.payment-cell.clickable,
+.annual-matrix-cell {
+    cursor: pointer;
+}
+
+.payment-cell.clickable:hover {
+    filter: brightness(0.95);
+}
+
 .payment-cell.unpaid {
     background: #fee2e2;
     color: #991b1b;

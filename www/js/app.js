@@ -71,8 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initializeApp() {
     loadDataFromStorage();
+    if (typeof syncMonthlyPaymentsFromPaymentRecords === 'function') {
+        syncMonthlyPaymentsFromPaymentRecords();
+    }
     setupEventListeners();
     setupNavigation();
+    applyTabFromUrl();
     renderDashboard();
     renderTenantsTable();
     populatePaymentTenantFilter();
@@ -266,41 +270,46 @@ function loadDemoData() {
 // ===================================
 
 function setupNavigation() {
-    const menuItems = document.querySelectorAll('.menu-item');
-    const sections = document.querySelectorAll('.content-section');
-    
+    const menuItems = document.querySelectorAll('.menu-item[data-section]');
+
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const targetSection = item.dataset.section;
-            
-            // Skip if no target section defined
             if (!targetSection) return;
-            
-            // Update active menu item
-            menuItems.forEach(mi => mi.classList.remove('active'));
-            item.classList.add('active');
-            
-            // Show target section (with null check)
-            sections.forEach(section => section.classList.remove('active'));
-            const targetElement = document.getElementById(`${targetSection}Section`);
-            if (targetElement) {
-                targetElement.classList.add('active');
-                // Render section-specific content
-                renderSectionContent(targetSection);
-            }
+            switchTab(targetSection);
         });
     });
-    
+
     // Mobile menu toggle
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const sidebar = document.getElementById('sidebar');
-    
+
     if (mobileMenuToggle) {
         mobileMenuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
         });
     }
+}
+
+/** טעינה מ־?tab= או # (לינקים חיצוניים / קוביות) */
+function applyTabFromUrl() {
+    const allowed = ['dashboard', 'tenants', 'payments', 'expenses', 'notices', 'reports', 'settings'];
+    let tab = null;
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const q = params.get('tab');
+        if (q && allowed.indexOf(q) !== -1) tab = q;
+    } catch (e) { /* ignore */ }
+    if (!tab && window.location.hash) {
+        var h = String(window.location.hash).replace(/^#/, '');
+        if (allowed.indexOf(h) !== -1) tab = h;
+        else if (h.indexOf('Section') !== -1) {
+            var stripped = h.replace(/Section$/, '');
+            if (allowed.indexOf(stripped) !== -1) tab = stripped;
+        }
+    }
+    if (tab) switchTab(tab);
 }
 
 function renderSectionContent(section) {
@@ -582,10 +591,9 @@ function renderTenantsTable() {
     }
     
     tbody.innerHTML = filteredTenants.map(tenant => {
-        const paidMonths = appState.payments.filter(p => 
-            p.tenantId === tenant.id && 
-            p.year === new Date().getFullYear()
-        ).length;
+        const paidMonths = typeof getPaidMonthsCount === 'function'
+            ? getPaidMonthsCount(tenant, new Date().getFullYear())
+            : 0;
         const totalMonths = 12;
         const badgeClass = getTenantStatusBadgeClass(tenant.status);
         const statusLabel = getStatusText(tenant.status);
@@ -608,13 +616,9 @@ function renderTenantsTable() {
                             <i class="fas fa-edit"></i>
                             <span>ערוך דייר</span>
                         </button>
-                        <button onclick="navigateToPayments('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <span>רשום תשלום</span>
-                        </button>
                         <button onclick="openMonthlyTracking('${tenant.id}'); closeTenantActions();">
                             <i class="fas fa-calendar-check"></i>
-                            <span>מעקב חודשי</span>
+                            <span>מעקב חודשי / רישום תשלום</span>
                         </button>
                         <button onclick="openAnnualPaymentForTenant('${tenant.id}'); closeTenantActions();">
                             <i class="fas fa-calendar-alt"></i>
@@ -660,19 +664,16 @@ function renderTenantCards(tenants) {
     }
     
     cardsContainer.innerHTML = tenants.map(tenant => {
-        const paidMonths = appState.payments.filter(p => 
-            p.tenantId === tenant.id && 
-            p.year === new Date().getFullYear()
-        ).length;
+        const year = new Date().getFullYear();
+        const paidMonths = typeof getPaidMonthsCount === 'function'
+            ? getPaidMonthsCount(tenant, year)
+            : 0;
         const totalMonths = 12;
         const badgeClass = getTenantStatusBadgeClass(tenant.status);
         const statusLabel = getStatusText(tenant.status);
         
-        // Calculate debt/balance
         const totalExpected = tenant.monthlyAmount * totalMonths;
-        const totalPaid = appState.payments
-            .filter(p => p.tenantId === tenant.id && p.year === new Date().getFullYear())
-            .reduce((sum, p) => sum + p.amount, 0);
+        const totalPaid = paidMonths * tenant.monthlyAmount;
         const balance = totalPaid - totalExpected;
         const balanceColor = balance >= 0 ? '#34c759' : '#ff3b30';
         
@@ -990,34 +991,31 @@ function filterPaymentsByStatus() {
 // ===================================
 
 function switchTab(tabName) {
-    // Find the menu item for this tab
-    const menuItem = document.querySelector(`.menu-item[data-section="${tabName}"]`);
-    
-    if (menuItem) {
-        // Update active menu items (sidebar)
-        document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active'));
-        menuItem.classList.add('active');
-        
-        // Update active nav items (bottom mobile nav)
-        document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(ni => ni.classList.remove('active'));
-        const bottomNavItem = document.querySelector(`.mobile-bottom-nav .nav-item[data-tab="${tabName}"]`);
-        if (bottomNavItem) {
-            bottomNavItem.classList.add('active');
-        }
-        
-        // Show target section
-        document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-        const targetSection = document.getElementById(`${tabName}Section`);
-        if (targetSection) {
-            targetSection.classList.add('active');
-        }
-        
-        // Render section content
+    const allowed = ['dashboard', 'tenants', 'payments', 'expenses', 'notices', 'reports', 'settings'];
+    if (!tabName || allowed.indexOf(tabName) === -1) return;
+
+    document.querySelectorAll('.menu-item[data-section]').forEach(function (mi) {
+        mi.classList.remove('active');
+    });
+    document.querySelectorAll('.menu-item[data-section="' + tabName + '"]').forEach(function (mi) {
+        mi.classList.add('active');
+    });
+
+    document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(function (ni) {
+        ni.classList.remove('active');
+    });
+    const bottomNavItem = document.querySelector('.mobile-bottom-nav .nav-item[data-tab="' + tabName + '"]');
+    if (bottomNavItem) bottomNavItem.classList.add('active');
+
+    document.querySelectorAll('.content-section').forEach(function (section) {
+        section.classList.remove('active');
+    });
+    const targetSection = document.getElementById(tabName + 'Section');
+    if (targetSection) {
+        targetSection.classList.add('active');
         renderSectionContent(tabName);
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Alias for mobile bottom navigation
@@ -1027,28 +1025,14 @@ function showTab(tabName) {
 window.showTab = showTab;
 
 function navigateToPayments(tenantId) {
-    // 1. Switch to payments tab
-    switchTab('payments');
-    
-    // 2. Set the tenant filter
+    switchTab('tenants');
     setTimeout(() => {
-        const filterSelect = document.getElementById('paymentTenantFilter');
-        if (filterSelect) {
-            filterSelect.value = tenantId;
-        }
-        
-        // 3. Filter payments for this tenant
-        renderPaymentsTable(tenantId);
-        
-        // 4. Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // 5. Show toast message
+        openMonthlyTracking(tenantId);
         const tenant = appState.tenants.find(t => t.id === tenantId);
         if (tenant) {
-            showToast(`מציג תשלומים של ${tenant.name}`, 'info');
+            showToast(`מעקב תשלומים — ${tenant.name}`, 'info');
         }
-    }, 100); // Small delay to ensure the tab is switched
+    }, 100);
 }
 
 // Make it globally accessible
@@ -1078,32 +1062,42 @@ function savePayment(formData) {
         return;
     }
     
-    const payment = {
+    const amount = parseFloat(formData.get('amount'));
+    const date = formData.get('date');
+    const method = formData.get('method');
+    const notes = formData.get('notes') || '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+
+    setMonthPaidStatus(tenantId, year, month, true, {
+        amount,
+        date,
+        method,
+        notes: notes || 'רישום מלשונית תשלומים'
+    });
+
+    const payment = findPaymentRecordForMonth(tenantId, year, month) || {
         id: generateId(),
-        tenantId: tenantId,
-        amount: parseFloat(formData.get('amount')),
-        date: formData.get('date'),
-        method: formData.get('method'),
-        notes: formData.get('notes') || '',
-        createdAt: new Date().toISOString(),
+        tenantId,
+        tenantName: tenant.name,
+        apartment: tenant.apartment,
+        amount,
+        date,
+        method,
+        notes
     };
     
-    appState.payments.push(payment);
-    
-    // Update tenant status and last payment
-    tenant.lastPayment = payment.date;
-    tenant.status = 'paid';
-    
-    addActivity(`נרשם תשלום: ${tenant.name} - ₪${payment.amount}`, 'payment');
+    addActivity(`נרשם תשלום: ${tenant.name} - ₪${amount}`, 'payment');
     
     saveDataToStorage();
     renderPaymentsTable();
     renderTenantsTable();
+    if (typeof renderAnnualPaymentsMatrix === 'function') renderAnnualPaymentsMatrix();
     updateAllStatistics();
     renderDashboard();
     hideModal('paymentModal');
     
-    // Set current payment for receipt
     appState.currentPaymentForReceipt = { tenant, payment };
     console.log('💾 Set currentPaymentForReceipt in savePayment:', {
         tenant: tenant.name,
@@ -1126,34 +1120,33 @@ function savePayment(formData) {
 function deletePayment(id, skipConfirmation = false) {
     if (!skipConfirmation && !confirm('האם אתה בטוח שברצונך למחוק תשלום זה?')) return;
     
-    // מצא את התשלום לפני המחיקה
     const payment = appState.payments.find(p => p.id === id);
     
     if (payment) {
-        // מחק את התשלום
-        appState.payments = appState.payments.filter(p => p.id !== id);
-        addActivity(`נמחק תשלום של ${payment.tenantName} - ₪${payment.amount}`, 'delete');
-        
-        // עדכן את סטטוס הדייר
         const tenant = appState.tenants.find(t => t.id === payment.tenantId);
         if (tenant) {
-            // בדוק אם יש עוד תשלומים לדייר זה החודש
-            const tenantPaymentsThisMonth = appState.payments.filter(p => 
-                p.tenantId === payment.tenantId && 
-                isCurrentMonth(p.date)
-            );
-            
-            if (tenantPaymentsThisMonth.length === 0) {
-                // אם אין יותר תשלומים, שנה סטטוס ל"ממתין"
-                tenant.status = 'pending';
-                tenant.lastPayment = null;
-                addActivity(`סטטוס ${tenant.name} שונה ל"ממתין" לאחר מחיקת תשלום`, 'edit');
+            if (payment.isAnnual && payment.yearCovered) {
+                ensureTenantMonthlyPayments(tenant, payment.yearCovered);
+                for (let m = 1; m <= 12; m++) {
+                    delete tenant.monthlyPayments[payment.yearCovered][m];
+                }
+            } else {
+                const d = new Date(payment.date);
+                setMonthPaidStatus(tenant.id, d.getFullYear(), d.getMonth() + 1, false, {
+                    skipPaymentRecord: true,
+                    removePaymentRecord: true
+                });
             }
+            updateTenantStatusFromMonthly(tenant, new Date().getFullYear());
         }
+
+        appState.payments = appState.payments.filter(p => p.id !== id);
+        addActivity(`נמחק תשלום של ${payment.tenantName || tenant?.name} - ₪${payment.amount}`, 'delete');
         
         saveDataToStorage();
-        renderTenantsTable(); // ⭐ עדכון טבלת דיירים
+        renderTenantsTable();
         renderPaymentsTable();
+        if (typeof renderAnnualPaymentsMatrix === 'function') renderAnnualPaymentsMatrix();
         updateAllStatistics();
         renderDashboard();
         showToast('התשלום נמחק והסטטוס עודכן', 'success');
@@ -2405,45 +2398,37 @@ function updateBulkPaymentActionsUI() {
 function bulkMarkPaid() {
     if (appState.selectedTenants.size === 0) return;
     
-    if (!confirm(`האם לסמן ${appState.selectedTenants.size} דיירים כשילמו?`)) return;
+    if (!confirm(`האם לסמן ${appState.selectedTenants.size} דיירים כשילמו לחודש הנוכחי?`)) return;
     
-    const paymentDate = new Date().toISOString();
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const paymentDate = now.toISOString();
     let successCount = 0;
     
     appState.selectedTenants.forEach(id => {
-        const tenant = appState.tenants.find(t => t.id === id);
-        if (tenant) {
-            // עדכון סטטוס הדייר
-            tenant.status = 'paid';
-            tenant.lastPayment = paymentDate;
-            
-            // יצירת רשומת תשלום חדשה בלשונית תשלומים
-            const payment = {
-                id: generateId(),
-                tenantId: tenant.id,
-                tenantName: tenant.name,
-                apartment: tenant.apartment,
-                amount: tenant.monthlyAmount,
-                date: paymentDate,
-                method: 'other', // ברירת מחדל
-                notes: 'תשלום שסומן מלשונית דיירים',
-                createdAt: paymentDate
-            };
-            
-            appState.payments.push(payment);
+        if (setMonthPaidStatus(id, year, month, true, {
+            amount: appState.tenants.find(t => t.id === id)?.monthlyAmount,
+            date: paymentDate,
+            method: 'other',
+            notes: 'תשלום שסומן מלשונית דיירים'
+        })) {
             successCount++;
-            
-            addActivity(`תשלום נרשם עבור ${tenant.name} - ₪${tenant.monthlyAmount}`, 'payment');
+            const tenant = appState.tenants.find(t => t.id === id);
+            if (tenant) {
+                addActivity(`תשלום נרשם עבור ${tenant.name} - ₪${tenant.monthlyAmount}`, 'payment');
+            }
         }
     });
     
     appState.selectedTenants.clear();
     saveDataToStorage();
     renderTenantsTable();
-    renderPaymentsTable(); // ⭐ עדכון גם טבלת תשלומים
+    renderPaymentsTable();
+    if (typeof renderAnnualPaymentsMatrix === 'function') renderAnnualPaymentsMatrix();
     updateAllStatistics();
     renderDashboard();
-    showToast(`${successCount} דיירים סומנו כשילמו ונרשמו בלשונית תשלומים!`, 'success');
+    showToast(`${successCount} דיירים סומנו כשילמו לחודש הנוכחי!`, 'success');
 }
 
 function bulkSendReminder() {
@@ -4227,9 +4212,14 @@ function openAnnualPaymentForTenant(tenantId) {
     const tenant = appState.tenants.find(t => t.id === tenantId);
     if (!tenant) return;
     
-    // Open annual payment modal with pre-selected tenant
     openAnnualPaymentModal();
-    // You can add logic to pre-select this tenant if needed
+    setTimeout(() => {
+        const select = document.getElementById('annualPaymentTenant');
+        if (select) {
+            select.value = tenantId;
+            updateAnnualPaymentInfo();
+        }
+    }, 0);
 }
 
 // Helper function for tenant reports
@@ -4542,34 +4532,26 @@ function saveAnnualPayment(formData) {
         return;
     }
     
-    const annualAmount = tenant.monthlyAmount * 12;
     const paymentDate = formData.get('date');
+    const payment = applyAnnualPayment(
+        tenantId,
+        paymentDate,
+        formData.get('method'),
+        formData.get('notes') || ''
+    );
     
-    // Create payment record
-    const payment = {
-        id: generateId(),
-        tenantId: tenantId,
-        amount: annualAmount,
-        date: paymentDate,
-        method: formData.get('method'),
-        notes: `תשלום שנתי (12 חודשים) - ${formData.get('notes') || ''}`,
-        isAnnual: true,
-        monthsCovered: 12,
-        createdAt: new Date().toISOString(),
-    };
+    if (!payment) {
+        showToast('שגיאה ברישום תשלום שנתי', 'error');
+        return;
+    }
     
-    appState.payments.push(payment);
-    
-    // Update tenant status
-    tenant.lastPayment = paymentDate;
-    tenant.status = 'paid';
-    tenant.annualPaymentUntil = new Date(new Date(paymentDate).setFullYear(new Date(paymentDate).getFullYear() + 1)).toISOString();
-    
+    const annualAmount = payment.amount;
     addActivity(`נרשם תשלום שנתי: ${tenant.name} - ₪${annualAmount}`, 'payment');
     
     saveDataToStorage();
     renderPaymentsTable();
     renderTenantsTable();
+    if (typeof renderAnnualPaymentsMatrix === 'function') renderAnnualPaymentsMatrix();
     updateAllStatistics();
     renderDashboard();
     hideModal('annualPaymentModal');
@@ -5460,32 +5442,37 @@ function changeTrackingYear(direction) {
 function saveMonthlyChanges() {
     if (!currentTrackingTenant) return;
     
-    // Update tenant in appState
-    const index = appState.tenants.findIndex(t => t.id === currentTrackingTenant.id);
-    if (index !== -1) {
-        appState.tenants[index] = currentTrackingTenant;
-    }
+    const tenant = currentTrackingTenant;
+    const year = currentTrackingYear;
+    const yearData = tenant.monthlyPayments?.[year] || {};
     
-    // Update status based on current month
-    const currentMonth = new Date().getMonth() + 1;
-    const currentYear = new Date().getFullYear();
-    
-    if (currentTrackingYear === currentYear) {
-        const monthData = currentTrackingTenant.monthlyPayments[currentYear]?.[currentMonth];
-        if (monthData?.paid) {
-            currentTrackingTenant.status = 'paid';
-            currentTrackingTenant.lastPayment = monthData.date;
+    for (let month = 1; month <= 12; month++) {
+        if (yearData[month]?.paid) {
+            setMonthPaidStatus(tenant.id, year, month, true, {
+                amount: yearData[month].amount,
+                date: yearData[month].date,
+                notes: 'מעקב חודשי'
+            });
         } else {
-            currentTrackingTenant.status = 'pending';
+            setMonthPaidStatus(tenant.id, year, month, false, { removePaymentRecord: true });
         }
     }
     
+    const index = appState.tenants.findIndex(t => t.id === tenant.id);
+    if (index !== -1) {
+        appState.tenants[index] = tenant;
+    }
+    
+    updateTenantStatusFromMonthly(tenant, new Date().getFullYear());
+    
     saveDataToStorage();
     renderTenantsTable();
+    renderPaymentsTable();
+    if (typeof renderAnnualPaymentsMatrix === 'function') renderAnnualPaymentsMatrix();
     updateAllStatistics();
     
-    addActivity(`עודכן מעקב חודשי: ${currentTrackingTenant.name}`, 'edit');
-    showToast('השינויים נשמרו בהצלחה!', 'success');
+    addActivity(`עודכן מעקב חודשי: ${tenant.name}`, 'edit');
+    showToast('השינויים נשמרו וסונכרנו לתשלומים!', 'success');
 }
 
 function generateMonthlyReceipt() {

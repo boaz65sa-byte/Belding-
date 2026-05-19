@@ -44,6 +44,7 @@ function initializePaymentsTableDates() {
     
     document.getElementById('paymentsTableStartDate').value = startDate;
     document.getElementById('paymentsTableEndDate').value = endDate;
+    renderAnnualPaymentsMatrix();
 }
 
 // טבלת תשלומים שנתית (מטריצת דיירים × חודשים) — שם נפרד מ-renderPaymentsTable ב-app.js
@@ -98,21 +99,21 @@ function renderAnnualPaymentsMatrix() {
         html += `<td><strong>${tenant.name}</strong><br><small>דירה ${tenant.apartment}</small></td>`;
         
         months.forEach(m => {
-            // Use helper function to get payment
             const payment = getPaymentForMonth(tenant, m.year, m.month);
+            const cellAttrs = `class="annual-matrix-cell" role="button" tabindex="0" title="לחץ לשינוי סטטוס"
+                onclick="toggleAnnualMatrixCell('${tenant.id}', ${m.year}, ${m.month})"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAnnualMatrixCell('${tenant.id}', ${m.year}, ${m.month})}"`;
             
             if (payment) {
-                // Paid - show checkmark, amount, and date
                 const paymentDate = new Date(payment.date);
                 const dateStr = `${paymentDate.getDate()}/${paymentDate.getMonth() + 1}`;
-                html += `<td><div class="payment-cell paid">
+                html += `<td ${cellAttrs}><div class="payment-cell paid clickable">
                     <span class="check-mark">✅</span>
                     <span class="amount">₪${payment.amount}</span>
                     <span class="date">${dateStr}</span>
                 </div></td>`;
             } else {
-                // Not paid - empty with red background
-                html += '<td><div class="payment-cell unpaid"></div></td>';
+                html += `<td ${cellAttrs}><div class="payment-cell unpaid clickable"></div></td>`;
             }
         });
         
@@ -121,32 +122,6 @@ function renderAnnualPaymentsMatrix() {
     
     html += '</tbody></table>';
     container.innerHTML = html;
-}
-
-// Helper function to get payment data (checks both sources)
-function getPaymentForMonth(tenant, year, month) {
-    // First, check appState.payments
-    let payment = appState.payments.find(p => {
-        if (p.tenantId !== tenant.id) return false;
-        const paymentDate = new Date(p.date);
-        return paymentDate.getFullYear() === year && 
-               (paymentDate.getMonth() + 1) === month;
-    });
-    
-    // If no payment found, check monthlyPayments
-    if (!payment && tenant.monthlyPayments && tenant.monthlyPayments[year]) {
-        const monthlyData = tenant.monthlyPayments[year][month];
-        if (monthlyData && monthlyData.paid) {
-            // Create a virtual payment from monthlyData
-            payment = {
-                amount: monthlyData.amount || tenant.monthlyAmount,
-                date: monthlyData.date || `${year}-${String(month).padStart(2, '0')}-01`,
-                tenantId: tenant.id
-            };
-        }
-    }
-    
-    return payment;
 }
 
 // Print payments table
