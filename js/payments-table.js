@@ -6,36 +6,40 @@
 
 // Switch between tenant tabs
 function switchTenantTab(tabName) {
-    // Hide all tabs
-    document.querySelectorAll('.tenant-tab-content').forEach(tab => {
-        tab.style.display = 'none';
+    document.querySelectorAll('.tenant-tab-content').forEach(function (tab) {
         tab.classList.remove('active');
+        tab.style.display = 'none';
+        tab.classList.add('hidden');
     });
-    
-    // Remove active class from all tab buttons
-    document.querySelectorAll('.tenant-tab').forEach(btn => {
+
+    document.querySelectorAll('.tenant-tab').forEach(function (btn) {
         btn.classList.remove('active');
     });
-    
-    // Show selected tab
+
     const selectedTab = document.getElementById(tabName + 'Tab');
-    const selectedBtn = document.querySelector(`[data-tab="${tabName}"]`);
-    
+    const selectedBtn = document.querySelector('[data-tab="' + tabName + '"]');
+
     if (selectedTab) {
+        selectedTab.classList.remove('hidden');
         selectedTab.style.display = 'block';
         selectedTab.classList.add('active');
     }
-    
+
     if (selectedBtn) {
         selectedBtn.classList.add('active');
     }
-    
+
     if (tabName === 'paymentsTable') {
-        initializePaymentsTableDates();
+        setTimeout(function () {
+            if (typeof initializePaymentsTableDates === 'function') {
+                initializePaymentsTableDates();
+            }
+        }, 0);
     }
     if (tabName === 'paymentsHistory') {
         if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
         if (typeof updatePaymentSummary === 'function') updatePaymentSummary();
+        if (typeof populatePaymentTenantFilter === 'function') populatePaymentTenantFilter();
     }
 }
 
@@ -95,6 +99,11 @@ function renderAnnualPaymentsMatrix() {
     const sortedTenants = [...appState.tenants].sort((a, b) => {
         return parseInt(a.apartment) - parseInt(b.apartment);
     });
+
+    if (sortedTenants.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #6b7280;">אין דיירים להצגה. הוסף דיירים בלשונית רשימת דיירים.</p>';
+        return;
+    }
     
     // Build rows for each tenant
     sortedTenants.forEach(tenant => {

@@ -325,6 +325,7 @@ function renderSectionContent(section) {
             break;
         case 'tenants':
             renderTenantsTable();
+            if (typeof populatePaymentTenantFilter === 'function') populatePaymentTenantFilter();
             break;
         case 'payments':
             renderPaymentsTable();

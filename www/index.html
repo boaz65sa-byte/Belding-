@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <!--
     מערכת ניהול דיירים מתקדמת
@@ -352,6 +352,9 @@
                     <button class="tenant-tab flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-lg font-semibold whitespace-nowrap" data-tab="paymentsTable" onclick="switchTenantTab('paymentsTable')">
                         <i class="fas fa-calendar-check"></i> טבלת תשלומים שנתית
                     </button>
+                    <button type="button" class="tenant-tab flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-lg font-semibold whitespace-nowrap" data-tab="paymentsHistory" onclick="switchTenantTab('paymentsHistory')">
+                        <i class="fas fa-money-bill-wave"></i> היסטוריית תשלומים
+                    </button>
                 </div>
 
                 <!-- Tenants List Tab -->
@@ -489,19 +492,13 @@
                 </div>
                 <!-- End Payments Table Tab -->
 
-            </section>
-
-            <!-- Payments Section -->
-            <section id="paymentsSection" class="content-section">
+                <div id="paymentsHistoryTab" class="tenant-tab-content hidden">
                 <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
                     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-money-bill-wave text-blue-600"></i> ניהול תשלומים
-                        </h1>
+                        <h2 class="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-money-bill-wave text-blue-600"></i> היסטוריית תשלומים
+                        </h2>
                         <div class="flex flex-wrap gap-2">
-                            <button class="btn btn-secondary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg transition" onclick="switchTab('tenants')" title="חזור ללשונית דיירים">
-                                <i class="fas fa-users"></i> חזור לדיירים
-                            </button>
                             <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition" id="recordPaymentBtn">
                                 <i class="fas fa-plus"></i> רשום תשלום
                             </button>
@@ -585,6 +582,8 @@
                         <i class="fas fa-trash"></i> מחק
                     </button>
                 </div>
+                </div>
+
             </section>
 
             <!-- Expenses Section -->
