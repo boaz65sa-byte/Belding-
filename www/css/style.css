@@ -2565,7 +2565,7 @@ body.dark-mode .more-menu-item:active {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     color: var(--text-secondary);
     font-size: 1.2rem;
 }
@@ -2602,11 +2602,17 @@ body.dark-mode .more-menu-item:active {
     animation: none;
 }
 
-.tenant-actions-menu.is-open {
+#tenantActionsDropdown[hidden] {
+    display: none !important;
+}
+
+.tenant-actions-menu.is-open,
+#tenantActionsDropdown.is-open {
     display: block;
 }
 
-.tenant-actions-menu.open-upward {
+.tenant-actions-menu.open-upward,
+#tenantActionsDropdown.open-upward {
     /* position set in JS */
 }
 
@@ -2662,8 +2668,8 @@ body.dark-mode .more-menu-item:active {
     font-weight: 500;
 }
 
-/* Last button (delete) has red color */
-.tenant-actions-menu button:last-child i {
+.tenant-actions-menu button.tenant-action-danger,
+.tenant-actions-menu button.tenant-action-danger i {
     color: #ef4444;
 }
 
@@ -3965,12 +3971,15 @@ body > header {
 .btn,
 .btn-icon,
 .action-btn,
-.tenant-actions-btn,
 .method-btn,
 .modal-close,
 button,
 a {
     transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.tenant-actions-btn {
+    transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .menu-item.active,

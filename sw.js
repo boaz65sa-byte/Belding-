@@ -1,4 +1,4 @@
-const APP_VERSION = '2.10.2';
+const APP_VERSION = '2.10.3';
 const STATIC_CACHE = `tenant-management-static-${APP_VERSION}`;
 const RUNTIME_CACHE = `tenant-management-runtime-${APP_VERSION}`;
 

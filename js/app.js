@@ -81,6 +81,7 @@ function initializeApp() {
     if (typeof setupTenantHubListeners === 'function') {
         setupTenantHubListeners();
     }
+    setupTenantActionsDropdown();
     setupNavigation();
     applyTabFromUrl();
     renderDashboard();
@@ -553,6 +554,9 @@ function renderRecentActivity() {
 // ===================================
 
 function renderTenantsTable() {
+    if (typeof closeTenantActions === 'function') {
+        closeTenantActions();
+    }
     const tbody = document.getElementById('tenantsTableBody');
     if (!tbody) return;
     
@@ -614,41 +618,9 @@ function renderTenantsTable() {
             <td data-label="תשלומים">${paidMonths}/${totalMonths}</td>
             <td data-label="סטטוס"><span class="status-badge status-${badgeClass}">${statusLabel}</span></td>
             <td data-label="פעולות" style="text-align: center;">
-                <div class="tenant-actions-wrapper" style="position: relative; display: inline-block;">
-                    <button type="button" class="tenant-actions-btn" onclick="toggleTenantActions('${tenant.id}', event)" title="פעולות" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                    <div class="tenant-actions-menu" id="tenantActions-${tenant.id}" style="display: none;">
-                        <button onclick="openTenantHub('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-th-large"></i>
-                            <span>מרכז דייר</span>
-                        </button>
-                        <button onclick="editTenant('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-edit"></i>
-                            <span>ערוך דייר</span>
-                        </button>
-                        <button onclick="openMonthlyTracking('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>תשלום חודשי</span>
-                        </button>
-                        <button onclick="openAnnualPaymentForTenant('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>תשלום שנתי</span>
-                        </button>
-                        <button onclick="viewTenantReports('${tenant.id}'); closeTenantActions();">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>דוחות</span>
-                        </button>
-                        <button onclick="openWhatsappForTenant('${tenant.id}'); closeTenantActions();">
-                            <i class="fab fa-whatsapp"></i>
-                            <span>WhatsApp</span>
-                        </button>
-                        <button onclick="deleteTenant('${tenant.id}'); closeTenantActions();" style="color: #ef4444;">
-                            <i class="fas fa-trash"></i>
-                            <span>מחק</span>
-                        </button>
-                    </div>
-                </div>
+                <button type="button" class="tenant-actions-btn" data-tenant-id="${tenant.id}" onclick="toggleTenantActions('${tenant.id}', event)" title="פעולות" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
             </td>
         </tr>
         `;
@@ -4139,28 +4111,45 @@ function closeMoreMenu() {
 }
 
 // ===================================
-// Tenant Actions Menu
+// Tenant Actions Menu (תפריט יחיד צף — ללא ריצוד)
 // ===================================
 
-let currentOpenActionsMenu = null;
-let suppressActionsMenuOutsideClose = false;
+let currentOpenTenantActionsId = null;
+let tenantActionsOutsideHandler = null;
+let tenantActionsScrollHandler = null;
 
 function isMobileActionsViewport() {
     return window.matchMedia('(max-width: 768px)').matches;
 }
 
-function positionTenantActionsMenu(menu, button) {
-    menu.style.display = 'block';
-    menu.style.visibility = 'hidden';
+function getTenantActionsDropdown() {
+    return document.getElementById('tenantActionsDropdown');
+}
+
+function buildTenantActionsDropdownHtml(tenantId) {
+    return ''
+        + '<button type="button" data-tenant-action="hub"><i class="fas fa-th-large"></i><span>מרכז דייר</span></button>'
+        + '<button type="button" data-tenant-action="edit"><i class="fas fa-edit"></i><span>ערוך דייר</span></button>'
+        + '<button type="button" data-tenant-action="monthly"><i class="fas fa-calendar-check"></i><span>תשלום חודשי</span></button>'
+        + '<button type="button" data-tenant-action="annual"><i class="fas fa-calendar-alt"></i><span>תשלום שנתי</span></button>'
+        + '<button type="button" data-tenant-action="reports"><i class="fas fa-chart-bar"></i><span>דוחות</span></button>'
+        + '<button type="button" data-tenant-action="whatsapp"><i class="fab fa-whatsapp"></i><span>הודעה WhatsApp</span></button>'
+        + '<button type="button" data-tenant-action="delete" class="tenant-action-danger"><i class="fas fa-trash"></i><span>מחק</span></button>';
+}
+
+function positionTenantActionsDropdown(dropdown, button) {
+    dropdown.removeAttribute('hidden');
+    dropdown.style.visibility = 'hidden';
+    dropdown.style.display = 'block';
 
     const buttonRect = button.getBoundingClientRect();
-    const menuHeight = menu.offsetHeight || 320;
-    const menuWidth = menu.offsetWidth || 220;
+    const menuHeight = dropdown.offsetHeight || 320;
+    const menuWidth = dropdown.offsetWidth || 220;
     const windowHeight = window.innerHeight;
     const windowWidth = window.innerWidth;
+    const margin = 8;
     const spaceBelow = windowHeight - buttonRect.bottom;
     const spaceAbove = buttonRect.top;
-    const margin = 8;
 
     let leftPos = buttonRect.right - menuWidth;
     if (leftPos < 10) leftPos = 10;
@@ -4168,20 +4157,95 @@ function positionTenantActionsMenu(menu, button) {
         leftPos = windowWidth - menuWidth - 10;
     }
 
-    menu.style.left = leftPos + 'px';
-    menu.style.right = 'auto';
+    dropdown.style.left = leftPos + 'px';
+    dropdown.style.right = 'auto';
+    dropdown.style.transform = 'none';
 
     if (spaceBelow >= menuHeight || spaceBelow > spaceAbove) {
-        menu.style.top = (buttonRect.bottom + margin) + 'px';
-        menu.style.bottom = 'auto';
-        menu.classList.remove('open-upward');
+        dropdown.style.top = (buttonRect.bottom + margin) + 'px';
+        dropdown.style.bottom = 'auto';
+        dropdown.classList.remove('open-upward');
     } else {
-        menu.style.top = 'auto';
-        menu.style.bottom = (windowHeight - buttonRect.top + margin) + 'px';
-        menu.classList.add('open-upward');
+        dropdown.style.top = 'auto';
+        dropdown.style.bottom = (windowHeight - buttonRect.top + margin) + 'px';
+        dropdown.classList.add('open-upward');
     }
 
-    menu.style.visibility = 'visible';
+    dropdown.style.visibility = 'visible';
+}
+
+function unbindTenantActionsOutsideClose() {
+    if (tenantActionsOutsideHandler) {
+        window.removeEventListener('click', tenantActionsOutsideHandler, true);
+        tenantActionsOutsideHandler = null;
+    }
+}
+
+function bindTenantActionsOutsideClose() {
+    unbindTenantActionsOutsideClose();
+    tenantActionsOutsideHandler = function (e) {
+        if (e.target.closest('.tenant-actions-btn')) return;
+        if (e.target.closest('#tenantActionsDropdown')) return;
+        closeTenantActions();
+    };
+    window.addEventListener('click', tenantActionsOutsideHandler, true);
+}
+
+function unbindTenantActionsScrollClose() {
+    if (tenantActionsScrollHandler) {
+        window.removeEventListener('scroll', tenantActionsScrollHandler, true);
+        tenantActionsScrollHandler = null;
+    }
+}
+
+function bindTenantActionsScrollClose() {
+    unbindTenantActionsScrollClose();
+    tenantActionsScrollHandler = function () {
+        closeTenantActions();
+    };
+    window.addEventListener('scroll', tenantActionsScrollHandler, true);
+}
+
+function runTenantAction(action, tenantId) {
+    switch (action) {
+        case 'hub':
+            openTenantHub(tenantId);
+            break;
+        case 'edit':
+            editTenant(tenantId);
+            break;
+        case 'monthly':
+            openMonthlyTracking(tenantId);
+            break;
+        case 'annual':
+            openAnnualPaymentForTenant(tenantId);
+            break;
+        case 'reports':
+            viewTenantReports(tenantId);
+            break;
+        case 'whatsapp':
+            openWhatsappForTenant(tenantId);
+            break;
+        case 'delete':
+            deleteTenant(tenantId);
+            break;
+    }
+}
+
+function setupTenantActionsDropdown() {
+    const dropdown = getTenantActionsDropdown();
+    if (!dropdown || dropdown.dataset.bound === '1') return;
+    dropdown.dataset.bound = '1';
+
+    dropdown.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-tenant-action]');
+        if (!btn || !currentOpenTenantActionsId) return;
+        e.stopPropagation();
+        const action = btn.getAttribute('data-tenant-action');
+        const tenantId = currentOpenTenantActionsId;
+        closeTenantActions();
+        runTenantAction(action, tenantId);
+    });
 }
 
 function toggleTenantActions(tenantId, event) {
@@ -4190,62 +4254,69 @@ function toggleTenantActions(tenantId, event) {
         event.stopPropagation();
     }
 
-    const menu = document.getElementById('tenantActions-' + tenantId);
+    const dropdown = getTenantActionsDropdown();
     const overlay = document.getElementById('mobileActionsOverlay');
-    if (!menu) return;
+    if (!dropdown) return;
 
-    const isOpen = menu.classList.contains('is-open');
-
-    if (currentOpenActionsMenu && currentOpenActionsMenu !== menu) {
+    if (currentOpenTenantActionsId === tenantId && dropdown.classList.contains('is-open')) {
         closeTenantActions();
+        return;
     }
 
-    if (!isOpen) {
-        const button = event && event.currentTarget
-            ? event.currentTarget
-            : menu.parentElement && menu.parentElement.querySelector('.tenant-actions-btn');
-        if (!button) return;
+    closeTenantActions();
 
-        positionTenantActionsMenu(menu, button);
-        menu.classList.add('is-open');
-        currentOpenActionsMenu = menu;
+    const button = event && event.currentTarget
+        ? event.currentTarget
+        : document.querySelector('.tenant-actions-btn[data-tenant-id="' + tenantId + '"]');
+    if (!button) return;
 
-        if (overlay && isMobileActionsViewport()) {
-            overlay.classList.add('active');
-        }
+    dropdown.innerHTML = buildTenantActionsDropdownHtml(tenantId);
+    positionTenantActionsDropdown(dropdown, button);
+    dropdown.classList.add('is-open');
+    currentOpenTenantActionsId = tenantId;
+    button.setAttribute('aria-expanded', 'true');
 
-        suppressActionsMenuOutsideClose = true;
-        setTimeout(function () {
-            suppressActionsMenuOutsideClose = false;
-        }, 150);
-    } else {
-        closeTenantActions();
+    if (overlay && isMobileActionsViewport()) {
+        overlay.classList.add('active');
     }
+
+    setTimeout(function () {
+        bindTenantActionsOutsideClose();
+        bindTenantActionsScrollClose();
+    }, 0);
 }
 
 function closeTenantActions() {
+    const dropdown = getTenantActionsDropdown();
     const overlay = document.getElementById('mobileActionsOverlay');
-    document.querySelectorAll('.tenant-actions-menu.is-open').forEach(function (menu) {
-        menu.classList.remove('is-open', 'open-upward');
-        menu.style.display = 'none';
-        menu.style.visibility = '';
+
+    unbindTenantActionsOutsideClose();
+    unbindTenantActionsScrollClose();
+
+    if (dropdown) {
+        dropdown.classList.remove('is-open', 'open-upward');
+        dropdown.setAttribute('hidden', '');
+        dropdown.style.display = 'none';
+        dropdown.style.visibility = '';
+        dropdown.innerHTML = '';
+    }
+
+    document.querySelectorAll('.tenant-actions-btn[aria-expanded="true"]').forEach(function (btn) {
+        btn.setAttribute('aria-expanded', 'false');
     });
-    currentOpenActionsMenu = null;
+
+    currentOpenTenantActionsId = null;
     if (overlay) overlay.classList.remove('active');
 }
 
-document.addEventListener('click', function (event) {
-    if (suppressActionsMenuOutsideClose) return;
-    if (!currentOpenActionsMenu) return;
-    if (event.target.closest('.tenant-actions-wrapper')) return;
-    closeTenantActions();
-});
-
 document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && currentOpenActionsMenu) {
+    if (event.key === 'Escape' && currentOpenTenantActionsId) {
         closeTenantActions();
     }
 });
+
+window.toggleTenantActions = toggleTenantActions;
+window.closeTenantActions = closeTenantActions;
 
 // Helper function for annual payment for specific tenant
 function openAnnualPaymentForTenant(tenantId) {
