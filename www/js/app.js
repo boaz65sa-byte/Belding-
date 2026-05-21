@@ -615,7 +615,7 @@ function renderTenantsTable() {
             <td data-label="סטטוס"><span class="status-badge status-${badgeClass}">${statusLabel}</span></td>
             <td data-label="פעולות" style="text-align: center;">
                 <div class="tenant-actions-wrapper" style="position: relative; display: inline-block;">
-                    <button class="tenant-actions-btn" onclick="toggleTenantActions('${tenant.id}', event)" title="פעולות">
+                    <button type="button" class="tenant-actions-btn" onclick="toggleTenantActions('${tenant.id}', event)" title="פעולות" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
                     <div class="tenant-actions-menu" id="tenantActions-${tenant.id}" style="display: none;">
@@ -4143,81 +4143,106 @@ function closeMoreMenu() {
 // ===================================
 
 let currentOpenActionsMenu = null;
+let suppressActionsMenuOutsideClose = false;
+
+function isMobileActionsViewport() {
+    return window.matchMedia('(max-width: 768px)').matches;
+}
+
+function positionTenantActionsMenu(menu, button) {
+    menu.style.display = 'block';
+    menu.style.visibility = 'hidden';
+
+    const buttonRect = button.getBoundingClientRect();
+    const menuHeight = menu.offsetHeight || 320;
+    const menuWidth = menu.offsetWidth || 220;
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    const spaceBelow = windowHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+    const margin = 8;
+
+    let leftPos = buttonRect.right - menuWidth;
+    if (leftPos < 10) leftPos = 10;
+    if (leftPos + menuWidth > windowWidth - 10) {
+        leftPos = windowWidth - menuWidth - 10;
+    }
+
+    menu.style.left = leftPos + 'px';
+    menu.style.right = 'auto';
+
+    if (spaceBelow >= menuHeight || spaceBelow > spaceAbove) {
+        menu.style.top = (buttonRect.bottom + margin) + 'px';
+        menu.style.bottom = 'auto';
+        menu.classList.remove('open-upward');
+    } else {
+        menu.style.top = 'auto';
+        menu.style.bottom = (windowHeight - buttonRect.top + margin) + 'px';
+        menu.classList.add('open-upward');
+    }
+
+    menu.style.visibility = 'visible';
+}
 
 function toggleTenantActions(tenantId, event) {
-    event.stopPropagation();
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
 
-    const menu = document.getElementById(`tenantActions-${tenantId}`);
+    const menu = document.getElementById('tenantActions-' + tenantId);
     const overlay = document.getElementById('mobileActionsOverlay');
     if (!menu) return;
 
-    // Close any other open menus
+    const isOpen = menu.classList.contains('is-open');
+
     if (currentOpenActionsMenu && currentOpenActionsMenu !== menu) {
-        currentOpenActionsMenu.style.display = 'none';
-        currentOpenActionsMenu.classList.remove('open-upward');
+        closeTenantActions();
     }
 
-    // Toggle current menu
-    if (menu.style.display === 'none' || menu.style.display === '') {
-        menu.style.display = 'block';
+    if (!isOpen) {
+        const button = event && event.currentTarget
+            ? event.currentTarget
+            : menu.parentElement && menu.parentElement.querySelector('.tenant-actions-btn');
+        if (!button) return;
+
+        positionTenantActionsMenu(menu, button);
+        menu.classList.add('is-open');
         currentOpenActionsMenu = menu;
-        
-        // Show overlay
-        if (overlay) {
+
+        if (overlay && isMobileActionsViewport()) {
             overlay.classList.add('active');
         }
-        
-        // Position the menu using fixed positioning
-        const button = event.currentTarget;
-        const buttonRect = button.getBoundingClientRect();
-        const menuHeight = menu.offsetHeight || 350;
-        const menuWidth = menu.offsetWidth || 200;
-        const windowHeight = window.innerHeight;
-        const windowWidth = window.innerWidth;
-        const spaceBelow = windowHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
-        
-        // Calculate horizontal position (align to right of button, but don't go off screen)
-        let leftPos = buttonRect.right - menuWidth;
-        if (leftPos < 10) leftPos = 10;
-        if (leftPos + menuWidth > windowWidth - 10) leftPos = windowWidth - menuWidth - 10;
-        
-        menu.style.left = leftPos + 'px';
-        menu.style.right = 'auto';
-        
-        // Calculate vertical position
-        if (spaceBelow >= menuHeight || spaceBelow > spaceAbove) {
-            // Open downward
-            menu.style.top = (buttonRect.bottom + 8) + 'px';
-            menu.style.bottom = 'auto';
-            menu.classList.remove('open-upward');
-        } else {
-            // Open upward
-            menu.style.top = 'auto';
-            menu.style.bottom = (windowHeight - buttonRect.top + 8) + 'px';
-            menu.classList.add('open-upward');
-        }
+
+        suppressActionsMenuOutsideClose = true;
+        setTimeout(function () {
+            suppressActionsMenuOutsideClose = false;
+        }, 150);
     } else {
-        menu.style.display = 'none';
-        menu.classList.remove('open-upward');
-        if (overlay) overlay.classList.remove('active');
-        currentOpenActionsMenu = null;
+        closeTenantActions();
     }
 }
 
 function closeTenantActions() {
     const overlay = document.getElementById('mobileActionsOverlay');
-    if (currentOpenActionsMenu) {
-        currentOpenActionsMenu.style.display = 'none';
-        currentOpenActionsMenu.classList.remove('open-upward');
-        currentOpenActionsMenu = null;
-    }
+    document.querySelectorAll('.tenant-actions-menu.is-open').forEach(function (menu) {
+        menu.classList.remove('is-open', 'open-upward');
+        menu.style.display = 'none';
+        menu.style.visibility = '';
+    });
+    currentOpenActionsMenu = null;
     if (overlay) overlay.classList.remove('active');
 }
 
-// Close menu when clicking outside
-document.addEventListener('click', function(event) {
-    if (currentOpenActionsMenu && !event.target.closest('.tenant-actions-wrapper')) {
+document.addEventListener('click', function (event) {
+    if (suppressActionsMenuOutsideClose) return;
+    if (!currentOpenActionsMenu) return;
+    if (event.target.closest('.tenant-actions-wrapper')) return;
+    closeTenantActions();
+});
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && currentOpenActionsMenu) {
         closeTenantActions();
     }
 });

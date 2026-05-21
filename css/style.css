@@ -2573,8 +2573,13 @@ body.dark-mode .more-menu-item:active {
 .tenant-actions-btn:hover {
     background: var(--primary-color);
     color: white;
-    transform: scale(1.1);
     box-shadow: var(--shadow-md);
+}
+
+@media (min-width: 769px) {
+    .tenant-actions-btn:hover {
+        transform: none;
+    }
 }
 
 .tenant-actions-btn:active {
@@ -2582,6 +2587,7 @@ body.dark-mode .more-menu-item:active {
 }
 
 .tenant-actions-menu {
+    display: none;
     position: fixed;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -2590,36 +2596,29 @@ body.dark-mode .more-menu-item:active {
     z-index: 10001;
     min-width: 200px;
     max-width: 280px;
-    overflow: visible;
+    overflow: hidden;
+    opacity: 1;
+    transform: none;
+    animation: none;
 }
 
-/* Open upward when near bottom */
+.tenant-actions-menu.is-open {
+    display: block;
+}
+
 .tenant-actions-menu.open-upward {
-    top: auto;
-    bottom: calc(100% + 8px);
-    animation: slideUp 0.3s ease;
+    /* position set in JS */
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
+@media (max-width: 768px) {
+    .tenant-actions-menu.is-open {
+        animation: tenantMenuFadeIn 0.15s ease;
     }
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
+@keyframes tenantMenuFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .tenant-actions-menu button {
