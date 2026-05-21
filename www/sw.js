@@ -1,4 +1,4 @@
-const APP_VERSION = '2.7.3';
+const APP_VERSION = '2.10.2';
 const STATIC_CACHE = `tenant-management-static-${APP_VERSION}`;
 const RUNTIME_CACHE = `tenant-management-runtime-${APP_VERSION}`;
 
@@ -8,9 +8,18 @@ const ASSETS_TO_PRECACHE = [
     '/install.html',
     '/manifest.json',
     '/css/style.css',
+    '/css/belding-theme.css',
+    '/css/mobile-native.css',
     '/css/tiles-style.css',
+    '/js/payment-sync.js',
+    '/js/tenant-unified-ui.js',
+    '/js/tenant-hub.js',
     '/js/app.js',
+    '/js/payments-table.js',
+    '/js/mobile.js',
     '/js/auth.js',
+    '/js/config.js',
+    '/js/supabase-client.js',
     '/js/tiles-app.js',
     '/icon-512.png',
 ];

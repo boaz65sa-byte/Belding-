@@ -19,7 +19,7 @@
 // ===================================
 
 const APP_CONFIG = {
-    version: '2.10.1',
+    version: '2.10.2',
     author: 'בועז סעדה',
     copyright: '© 2024 בועז סעדה',
     lastUpdate: '13/01/2026',
