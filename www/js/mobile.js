@@ -30,20 +30,24 @@ function initFabLogic() {
 
         switch (sectionId) {
             case 'dashboardSection':
-                currentFab.style.display = 'none'; // Maybe no FAB for dashboard
+                currentFab.style.display = 'none';
                 break;
-            case 'tenantsSection':
-                currentIcon.className = 'fas fa-user-plus';
-                currentFab.onclick = () => {
-                    if (typeof addTenant === 'function') addTenant();
-                };
+            case 'tenantsSection': {
+                const paymentsTab = document.getElementById('paymentsHistoryTab');
+                const onPaymentsHistory = paymentsTab && !paymentsTab.classList.contains('hidden');
+                if (onPaymentsHistory) {
+                    currentIcon.className = 'fas fa-hand-holding-usd';
+                    currentFab.onclick = () => {
+                        document.getElementById('recordPaymentBtn')?.click();
+                    };
+                } else {
+                    currentIcon.className = 'fas fa-user-plus';
+                    currentFab.onclick = () => {
+                        if (typeof addTenant === 'function') addTenant();
+                    };
+                }
                 break;
-            case 'paymentsSection':
-                currentIcon.className = 'fas fa-hand-holding-usd';
-                currentFab.onclick = () => {
-                    document.getElementById('recordPaymentBtn')?.click();
-                };
-                break;
+            }
             case 'expensesSection':
                 currentIcon.className = 'fas fa-file-invoice-dollar';
                 currentFab.onclick = () => {
@@ -80,6 +84,10 @@ function initFabLogic() {
             setTimeout(updateFab, 50);
         });
     });
+
+    document.querySelectorAll('.tenant-tab[data-tab]').forEach(tab => {
+        tab.addEventListener('click', () => setTimeout(updateFab, 80));
+    });
 }
 
 function initMobileOverrides() {
@@ -106,21 +114,18 @@ function initMobileOverrides() {
 }
 
 function injectCardContainers() {
-    // Payments
-    const paymentsSection = document.getElementById('paymentsSection');
-    if (paymentsSection && !document.getElementById('paymentsCardsContainer')) {
+    const paymentsHistoryTab = document.getElementById('paymentsHistoryTab');
+    if (paymentsHistoryTab && !document.getElementById('paymentsCardsContainer')) {
         const container = document.createElement('div');
         container.id = 'paymentsCardsContainer';
         container.className = 'mobile-cards-container md:hidden';
-        
-        // Find the table container and insert after it
-        const tableContainer = paymentsSection.querySelector('.table-container');
+
+        const tableContainer = paymentsHistoryTab.querySelector('.table-container');
         if (tableContainer) {
             tableContainer.parentNode.insertBefore(container, tableContainer.nextSibling);
         }
     }
 
-    // Expenses
     const expensesSection = document.getElementById('expensesSection');
     if (expensesSection && !document.getElementById('expensesCardsContainer')) {
         const container = document.createElement('div');

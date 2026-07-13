@@ -2989,6 +2989,7 @@ body.dark-mode .tenant-actions-menu button:active {
     min-height: 15rem;
 }
 
+.tenant-card:active {
     transform: scale(0.98);
 }
 

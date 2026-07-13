@@ -974,6 +974,7 @@ function switchTab(tabName) {
     if (!tabName || allowed.indexOf(tabName) === -1) return;
 
     let tenantSubTab = null;
+    const navTab = tabName;
     if (tabName === 'payments') {
         tabName = 'tenants';
         tenantSubTab = 'paymentsHistory';
@@ -989,7 +990,7 @@ function switchTab(tabName) {
     document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(function (ni) {
         ni.classList.remove('active');
     });
-    const bottomNavItem = document.querySelector('.mobile-bottom-nav .nav-item[data-tab="' + tabName + '"]');
+    const bottomNavItem = document.querySelector('.mobile-bottom-nav .nav-item[data-tab="' + navTab + '"]');
     if (bottomNavItem) bottomNavItem.classList.add('active');
 
     document.querySelectorAll('.content-section').forEach(function (section) {

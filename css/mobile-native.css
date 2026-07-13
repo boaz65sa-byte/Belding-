@@ -181,7 +181,7 @@
         border: 1px solid var(--border-color) !important;
         border-radius: 12px;
         padding: 8px 16px !important;
-        min-height: 40px !important;
+        min-height: 44px !important;
         font-size: 0.875rem;
     }
 
@@ -364,8 +364,42 @@
         outline: none !important;
     }
 
-    /* ── 13. HIDE DESKTOP TABLES ── */
-    .table-container, table.data-table { display: none !important; }
+    /* ── 13. MOBILE DATA VIEWS (cards instead of tables where available) ── */
+    #tenantsSection .table-container,
+    #paymentsHistoryTab .table-container,
+    #expensesSection .table-container {
+        display: none !important;
+    }
+
+    #paymentsHistoryTab .mobile-cards-container,
+    #expensesSection .mobile-cards-container,
+    .tenants-cards-container {
+        display: block !important;
+    }
+
+    /* Notices history — horizontal scroll (no card view yet) */
+    #noticesSection .table-container {
+        display: block !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #noticesSection table.data-table {
+        display: table !important;
+        min-width: max-content;
+    }
+
+    /* Annual matrix — keep scrollable */
+    .annual-payments-table-wrapper,
+    .table-container.annual-scroll {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .annual-payments-table {
+        display: table !important;
+        min-width: max-content;
+    }
 
     /* ── 14. ACTION SHEETS ── */
     .item-action-menu {
@@ -379,8 +413,47 @@
     .item-action-menu .action-btn:hover { background: var(--bg-tertiary) !important; }
 }
 
-/* ── Safe-area padding for notched devices (outside media query) ── */
+/* ── Safe-area + bottom nav clearance (notched devices) ── */
+:root {
+    --bottom-nav-offset: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
 .main-container,
-.page-wrapper {
-    padding-bottom: env(safe-area-inset-bottom);
+.page-wrapper,
+.content-area {
+    padding-bottom: var(--bottom-nav-offset);
+}
+
+@media (max-width: 768px) {
+    .fab-container {
+        inset-block-end: calc(var(--bottom-nav-offset) + 12px);
+    }
+
+    .more-menu.active {
+        bottom: var(--bottom-nav-offset);
+        max-height: min(70dvh, calc(100dvh - var(--bottom-nav-offset)));
+        overflow-y: auto;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .modal {
+        align-items: flex-end !important;
+        padding: 0;
+    }
+
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 28px 28px 0 0 !important;
+        max-height: 92dvh !important;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .btn-icon,
+    .action-btn,
+    .modal-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
 }

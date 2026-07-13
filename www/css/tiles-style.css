@@ -764,10 +764,11 @@ body {
     
     .bottom-nav {
         display: block;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     
     .tiles-container {
-        padding-bottom: 80px;
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     }
     
     .modal-content {

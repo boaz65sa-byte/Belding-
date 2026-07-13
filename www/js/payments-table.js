@@ -40,6 +40,10 @@ function switchTenantTab(tabName) {
         if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
         if (typeof updatePaymentSummary === 'function') updatePaymentSummary();
         if (typeof populatePaymentTenantFilter === 'function') populatePaymentTenantFilter();
+        if (typeof renderMobilePaymentsCards === 'function') {
+            const tenantId = document.getElementById('paymentTenantFilter')?.value || null;
+            renderMobilePaymentsCards(tenantId);
+        }
     }
 }
 
