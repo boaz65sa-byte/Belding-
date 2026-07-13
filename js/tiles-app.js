@@ -14,27 +14,30 @@ window.TilesApp = {
     // Initialize
     async init() {
         try {
-            // Get Supabase client
-            this.supabase = await getSupabase();
-            
-            if (!this.supabase) {
-                throw new Error('Supabase לא מאותחל');
-            }
-            
-            // Check authentication
-            const { data: { session }, error } = await this.supabase.auth.getSession();
-            
-            if (error || !session) {
+            const session = typeof getCurrentSession === 'function' ? await getCurrentSession() : null;
+            if (!session) {
                 console.log('לא מחובר, מפנה ל-login');
                 window.location.href = 'login.html';
                 return false;
             }
-            
+
+            if (session.simple) {
+                this.user = session.user;
+                const access = typeof checkUserAccess === 'function' ? await checkUserAccess() : null;
+                this.profile = access && access.profile ? access.profile : null;
+                this.supabase = typeof getSupabase === 'function' ? getSupabase() : null;
+                return true;
+            }
+
+            this.supabase = typeof getSupabase === 'function' ? getSupabase() : null;
+            if (!this.supabase) {
+                throw new Error('Supabase לא מאותחל');
+            }
+
             this.user = session.user;
-            console.log('✅ משתמש מחובר:', this.user.email);
-            
-            // Get profile
-            const { data: profile, error: profileError } = await this.supabase
+            console.log('✅ משתמש מחובר:', this.user.email || this.user.id);
+
+            const { data: profile } = await this.supabase
                 .from('user_profiles')
                 .select('*')
                 .eq('id', this.user.id)

@@ -62,11 +62,86 @@ function getSupabase() {
     return ensureSupabaseClientSync();
 }
 
+/** ——— כניסה פשוטה (משתמש+סיסמה מקומיים) ——— */
+const SIMPLE_AUTH_STORAGE_KEY = 'vaad_simple_auth_v1';
+
+function isSimpleAuthEnabled() {
+    return typeof SIMPLE_AUTH !== 'undefined' && SIMPLE_AUTH && SIMPLE_AUTH.enabled === true;
+}
+
+function readSimpleAuthSession() {
+    try {
+        const raw = localStorage.getItem(SIMPLE_AUTH_STORAGE_KEY)
+            || sessionStorage.getItem(SIMPLE_AUTH_STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        return data && data.username ? data : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function writeSimpleAuthSession(username, remember) {
+    const payload = JSON.stringify({
+        username: username,
+        loggedInAt: new Date().toISOString(),
+        mode: 'simple'
+    });
+    sessionStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+    localStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+    if (remember) {
+        localStorage.setItem(SIMPLE_AUTH_STORAGE_KEY, payload);
+    } else {
+        sessionStorage.setItem(SIMPLE_AUTH_STORAGE_KEY, payload);
+    }
+}
+
+function clearSimpleAuthSession() {
+    sessionStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+    localStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+}
+
+function getSimpleAuthProfile() {
+    const cfg = (typeof SIMPLE_AUTH !== 'undefined' && SIMPLE_AUTH) ? SIMPLE_AUTH : {};
+    return {
+        id: 'simple-user',
+        email: cfg.displayEmail || 'vaad@local',
+        full_name: cfg.displayName || 'מנהל הועד',
+        role: 'super_admin',
+        status: 'active',
+        has_lifetime_access: true,
+        subscription_type: 'lifetime'
+    };
+}
+
+function simpleAuthLogin(username, password, remember) {
+    if (!isSimpleAuthEnabled()) {
+        return { success: false, error: 'מצב כניסה פשוטה לא מופעל' };
+    }
+    const u = String(username || '').trim();
+    const p = String(password || '');
+    if (u === SIMPLE_AUTH.username && p === SIMPLE_AUTH.password) {
+        writeSimpleAuthSession(u, !!remember);
+        return { success: true, user: { username: u } };
+    }
+    return { success: false, error: 'שם משתמש או סיסמה שגויים' };
+}
+
 /**
  * 🛑 פונקציית בדיקת גישה מורחבת
  * בודקת אם למשתמש יש גישה ומחזירה פרטי פרופיל מלאים
  */
 async function checkUserAccess() {
+    if (isSimpleAuthEnabled() && readSimpleAuthSession()) {
+        const profile = getSimpleAuthProfile();
+        return {
+            hasAccess: true,
+            status: 'active',
+            daysLeft: null,
+            profile: profile
+        };
+    }
+
     const supabase = getSupabase();
     if (!supabase) return { hasAccess: false, reason: 'error' };
 
@@ -255,12 +330,16 @@ async function signupWithBuilding(email, password, fullName, phone, buildingAddr
 }
 
 // 2. התחברות
-async function login(email, password) {
+async function login(usernameOrEmail, password, rememberMe) {
+    if (isSimpleAuthEnabled()) {
+        return simpleAuthLogin(usernameOrEmail, password, rememberMe);
+    }
+
     const supabase = getSupabase();
     if (!supabase) return { success: false, error: 'שגיאת חיבור לשרת. רענן את הדף או בדוק חסימת תוכן/פרסומות.' };
 
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email: usernameOrEmail, password });
         if (error) throw error;
         return { success: true, user: data.user };
     } catch (error) {
@@ -280,6 +359,7 @@ async function login(email, password) {
 
 // 3. יציאה
 async function logout() {
+    clearSimpleAuthSession();
     const supabase = getSupabase();
     if (supabase) await supabase.auth.signOut();
     window.location.href = 'login.html';
@@ -287,6 +367,14 @@ async function logout() {
 
 // 4. בדיקת סשן (פשוטה)
 async function getCurrentSession() {
+    if (isSimpleAuthEnabled() && readSimpleAuthSession()) {
+        const s = readSimpleAuthSession();
+        return {
+            user: { id: 'simple-user', email: (SIMPLE_AUTH && SIMPLE_AUTH.displayEmail) || 'vaad@local' },
+            simple: true,
+            username: s.username
+        };
+    }
     const supabase = getSupabase();
     if (!supabase) return null;
     const { data: { session } } = await supabase.auth.getSession();

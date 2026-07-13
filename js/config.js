@@ -28,6 +28,18 @@ if (typeof window.supabase === 'undefined' || typeof window.supabase.createClien
 }
 
 /**
+ * 🔐 כניסה פשוטה — משתמש וסיסמה אחדים (ללא Supabase בהתחברות)
+ * שנה כאן את username ו-password לפני פריסה לציבור.
+ */
+const SIMPLE_AUTH = {
+    enabled: true,
+    username: 'vaad',
+    password: 'vaad2025',
+    displayName: 'מנהל הועד',
+    displayEmail: 'vaad@local'
+};
+
+/**
  * 💰 הגדרות מחירים - מעודכן
  */
 const PRICING_CONFIG = {
