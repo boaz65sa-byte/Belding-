@@ -6,16 +6,14 @@
 
 // ✅ תיקון 1: שמתי כאן את המפתחות של הפרויקט החדש (Vaad 2025)
 const SUPABASE_CONFIG = {
-    url: 'https://msozsfuogkxtnqtidwig.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zb3pzZnVvZ2t4dG5xdGlkd2lnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDQwOTQsImV4cCI6MjA4NTI4MDA5NH0.Fuifr9nRKdCLd7iBPmdr0aFojnz2VQ5cpUDddFpS3-M',
+    url: 'https://hyntopdwnibuxmpylunz.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5bnRvcGR3bmlidXhtcHlsdW56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MzM3NDYsImV4cCI6MjA5OTUwOTc0Nn0.6yMj6tn1F56rb8SbXmCk_rJosSE1-_RkhfNM0QzDNdE',
 };
 
-// ✅ תיקון 2: הוספת לוגיקת החיבור (קריטי!)
-// בדיקה אם ספריית Supabase נטענה מה-CDN (window.supabase)
-if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
-    console.error('CRITICAL ERROR: Supabase library not loaded! Check HTML script tags.');
-} else {
-    // יצירת החיבור והפיכתו לזמין בכל האתר (PKCE + זיהוי סשן מה-URL — נדרש ל-Google OAuth ואיפוס סיסמה)
+// Supabase client נוצר ב-auth.js (ensureSupabaseClientSync) כשה-SDK נטען — לא נדרש בדף כניסה
+if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function'
+    && typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey
+    && !window.supabaseClient) {
     window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
         auth: {
             persistSession: true,
@@ -24,7 +22,6 @@ if (typeof window.supabase === 'undefined' || typeof window.supabase.createClien
             flowType: 'pkce'
         }
     });
-    console.log('✅ Supabase Connected Successfully (Project: Vaad 2025)');
 }
 
 /**
@@ -32,7 +29,7 @@ if (typeof window.supabase === 'undefined' || typeof window.supabase.createClien
  * שנה כאן את username ו-password לפני פריסה לציבור.
  */
 const SIMPLE_AUTH = {
-    enabled: true,
+    enabled: false,
     username: 'vaad',
     password: 'vaad2025',
     displayName: 'מנהל הועד',

@@ -1,27 +1,28 @@
-const APP_VERSION = '2.10.3';
+const APP_VERSION = '2.12.1';
 const STATIC_CACHE = `tenant-management-static-${APP_VERSION}`;
 const RUNTIME_CACHE = `tenant-management-runtime-${APP_VERSION}`;
 
 const ASSETS_TO_PRECACHE = [
-    '/',
-    '/index.html',
-    '/install.html',
-    '/manifest.json',
-    '/css/style.css',
-    '/css/belding-theme.css',
-    '/css/mobile-native.css',
-    '/css/tiles-style.css',
-    '/js/payment-sync.js',
-    '/js/tenant-unified-ui.js',
-    '/js/tenant-hub.js',
-    '/js/app.js',
-    '/js/payments-table.js',
-    '/js/mobile.js',
-    '/js/auth.js',
-    '/js/config.js',
-    '/js/supabase-client.js',
-    '/js/tiles-app.js',
-    '/icon-512.png',
+    './',
+    './index.html',
+    './login.html',
+    './install.html',
+    './manifest.json',
+    './css/style.css',
+    './css/belding-theme.css',
+    './css/mobile-native.css',
+    './css/tiles-style.css',
+    './js/payment-sync.js',
+    './js/tenant-unified-ui.js',
+    './js/tenant-hub.js',
+    './js/app.js',
+    './js/payments-table.js',
+    './js/mobile.js',
+    './js/auth.js',
+    './js/config.js',
+    './js/supabase-client.js',
+    './js/tiles-app.js',
+    './icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -56,7 +57,7 @@ async function networkFirst(request) {
         return response;
     } catch (_error) {
         const cached = await caches.match(request);
-        return cached || caches.match('/index.html');
+        return cached || caches.match('./index.html');
     }
 }
 
@@ -82,7 +83,15 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
 
+    const path = url.pathname;
+    const isAuthAsset = /\/js\/(auth|config)\.js$/i.test(path);
+
     if (request.mode === 'navigate') {
+        event.respondWith(networkFirst(request));
+        return;
+    }
+
+    if (isAuthAsset) {
         event.respondWith(networkFirst(request));
         return;
     }
@@ -93,7 +102,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
     const options = {
         body: event.data ? event.data.text() : 'התראה חדשה',
-        icon: '/icon-512.png',
+        icon: './icon-512.png',
         vibrate: [200, 100, 200],
         dir: 'rtl',
         lang: 'he',
@@ -104,5 +113,5 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    event.waitUntil(clients.openWindow('/'));
+    event.waitUntil(clients.openWindow('./'));
 });

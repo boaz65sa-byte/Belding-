@@ -4,6 +4,13 @@
  * ========================================
  */
 
+// משתמשי מנהל על — גישה מלאה אוטומטית
+const SUPER_ADMIN_EMAILS = ['boaz65sa@gmail.com', 'chef@roxoneilat.co.il'];
+
+function isSuperAdminEmail(email) {
+    return SUPER_ADMIN_EMAILS.includes(String(email || '').trim().toLowerCase());
+}
+
 // משתנה גלובלי ללקוח Supabase
 let supabaseInstance = null;
 
@@ -35,7 +42,9 @@ function ensureSupabaseClientSync() {
         ? window.supabase.createClient.bind(window.supabase)
         : null;
     if (!create) {
-        console.error('❌ Supabase SDK לא נטען מה-CDN');
+        if (!isSimpleAuthEnabled()) {
+            console.warn('Supabase SDK לא נטען — לא נדרש במצב כניסה פשוטה');
+        }
         return null;
     }
     if (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
@@ -64,20 +73,75 @@ function getSupabase() {
 
 /** ——— כניסה פשוטה (משתמש+סיסמה מקומיים) ——— */
 const SIMPLE_AUTH_STORAGE_KEY = 'vaad_simple_auth_v1';
+const SIMPLE_AUTH_COOKIE_KEY = 'vaad_simple_auth_v1';
+
+function getSimpleAuthConfig() {
+    if (typeof SIMPLE_AUTH !== 'undefined' && SIMPLE_AUTH) return SIMPLE_AUTH;
+    return {
+        enabled: false,
+        username: 'vaad',
+        password: 'vaad2025',
+        displayName: 'מנהל הועד',
+        displayEmail: 'vaad@local'
+    };
+}
 
 function isSimpleAuthEnabled() {
-    return typeof SIMPLE_AUTH !== 'undefined' && SIMPLE_AUTH && SIMPLE_AUTH.enabled === true;
+    const cfg = getSimpleAuthConfig();
+    return !!(cfg && cfg.enabled !== false);
+}
+
+function getAuthStoragePath() {
+    try {
+        const p = window.location.pathname || '/';
+        const i = p.lastIndexOf('/');
+        return i > 0 ? p.slice(0, i + 1) : '/';
+    } catch (e) {
+        return '/';
+    }
+}
+
+function readAuthCookie(name) {
+    try {
+        const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return match ? decodeURIComponent(match[1]) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function writeAuthCookie(name, value, remember) {
+    try {
+        let cookie = name + '=' + encodeURIComponent(value) + '; path=' + getAuthStoragePath() + '; SameSite=Lax';
+        if (remember) cookie += '; max-age=2592000';
+        document.cookie = cookie;
+    } catch (e) { /* ignore */ }
+}
+
+function clearAuthCookie(name) {
+    try {
+        document.cookie = name + '=; path=' + getAuthStoragePath() + '; max-age=0';
+    } catch (e) { /* ignore */ }
+}
+
+function parseSimpleAuthSession(raw) {
+    if (!raw) return null;
+    try {
+        const data = JSON.parse(raw);
+        return data && data.username ? data : null;
+    } catch (e) {
+        return null;
+    }
 }
 
 function readSimpleAuthSession() {
     try {
         const raw = localStorage.getItem(SIMPLE_AUTH_STORAGE_KEY)
-            || sessionStorage.getItem(SIMPLE_AUTH_STORAGE_KEY);
-        if (!raw) return null;
-        const data = JSON.parse(raw);
-        return data && data.username ? data : null;
+            || sessionStorage.getItem(SIMPLE_AUTH_STORAGE_KEY)
+            || readAuthCookie(SIMPLE_AUTH_COOKIE_KEY);
+        return parseSimpleAuthSession(raw);
     } catch (e) {
-        return null;
+        return parseSimpleAuthSession(readAuthCookie(SIMPLE_AUTH_COOKIE_KEY));
     }
 }
 
@@ -87,22 +151,30 @@ function writeSimpleAuthSession(username, remember) {
         loggedInAt: new Date().toISOString(),
         mode: 'simple'
     });
-    sessionStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
-    localStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
-    if (remember) {
-        localStorage.setItem(SIMPLE_AUTH_STORAGE_KEY, payload);
-    } else {
-        sessionStorage.setItem(SIMPLE_AUTH_STORAGE_KEY, payload);
+    try {
+        sessionStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+        localStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+        if (remember) {
+            localStorage.setItem(SIMPLE_AUTH_STORAGE_KEY, payload);
+        } else {
+            sessionStorage.setItem(SIMPLE_AUTH_STORAGE_KEY, payload);
+        }
+    } catch (e) {
+        /* Safari private mode / storage blocked — cookie fallback */
     }
+    writeAuthCookie(SIMPLE_AUTH_COOKIE_KEY, payload, remember);
 }
 
 function clearSimpleAuthSession() {
-    sessionStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
-    localStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+    try {
+        sessionStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+        localStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY);
+    } catch (e) { /* ignore */ }
+    clearAuthCookie(SIMPLE_AUTH_COOKIE_KEY);
 }
 
 function getSimpleAuthProfile() {
-    const cfg = (typeof SIMPLE_AUTH !== 'undefined' && SIMPLE_AUTH) ? SIMPLE_AUTH : {};
+    const cfg = getSimpleAuthConfig();
     return {
         id: 'simple-user',
         email: cfg.displayEmail || 'vaad@local',
@@ -118,9 +190,10 @@ function simpleAuthLogin(username, password, remember) {
     if (!isSimpleAuthEnabled()) {
         return { success: false, error: 'מצב כניסה פשוטה לא מופעל' };
     }
+    const cfg = getSimpleAuthConfig();
     const u = String(username || '').trim();
     const p = String(password || '');
-    if (u === SIMPLE_AUTH.username && p === SIMPLE_AUTH.password) {
+    if (u === cfg.username && p === cfg.password) {
         writeSimpleAuthSession(u, !!remember);
         return { success: true, user: { username: u } };
     }
@@ -142,8 +215,12 @@ async function checkUserAccess() {
         };
     }
 
+    if (isSimpleAuthEnabled()) {
+        return { hasAccess: false, reason: 'not_logged_in' };
+    }
+
     const supabase = getSupabase();
-    if (!supabase) return { hasAccess: false, reason: 'error' };
+    if (!supabase) return { hasAccess: false, reason: 'not_logged_in' };
 
     try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -164,7 +241,7 @@ async function checkUserAccess() {
             console.log('📝 יוצר פרופיל חדש למשתמש...');
             
             // בדוק אם זה הסופר אדמין
-            const isSuperAdmin = session.user.email === 'boaz65sa@gmail.com';
+            const isSuperAdmin = isSuperAdminEmail(session.user.email);
             
             const { data: newProfile, error: insertError } = await supabase
                 .from('user_profiles')
@@ -202,7 +279,7 @@ async function checkUserAccess() {
         }
 
         // תיקון: אם זה boaz65sa@gmail.com ואין לו role של super_admin, עדכן
-        if (session.user.email === 'boaz65sa@gmail.com' && profile.role !== 'super_admin') {
+        if (isSuperAdminEmail(session.user.email) && profile.role !== 'super_admin') {
             console.log('🔧 מעדכן הרשאות סופר אדמין...');
             const { data: updatedProfile, error: updateError } = await supabase
                 .from('user_profiles')
@@ -336,7 +413,9 @@ async function login(usernameOrEmail, password, rememberMe) {
     }
 
     const supabase = getSupabase();
-    if (!supabase) return { success: false, error: 'שגיאת חיבור לשרת. רענן את הדף או בדוק חסימת תוכן/פרסומות.' };
+    if (!supabase) {
+        return { success: false, error: 'לא ניתן להתחבר כרגע. רענן את הדף או נסה שוב מאוחר יותר.' };
+    }
 
     try {
         const { data, error } = await supabase.auth.signInWithPassword({ email: usernameOrEmail, password });
@@ -367,10 +446,11 @@ async function logout() {
 
 // 4. בדיקת סשן (פשוטה)
 async function getCurrentSession() {
-    if (isSimpleAuthEnabled() && readSimpleAuthSession()) {
+    if (isSimpleAuthEnabled()) {
         const s = readSimpleAuthSession();
+        if (!s) return null;
         return {
-            user: { id: 'simple-user', email: (SIMPLE_AUTH && SIMPLE_AUTH.displayEmail) || 'vaad@local' },
+            user: { id: 'simple-user', email: getSimpleAuthConfig().displayEmail || 'vaad@local' },
             simple: true,
             username: s.username
         };
@@ -537,9 +617,9 @@ async function getUserProfile(userId) {
                     email: user.email,
                     full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
                     phone: user.user_metadata?.phone || '',
-                    role: user.email === 'boaz65sa@gmail.com' ? 'super_admin' : 'user',
-                    status: user.email === 'boaz65sa@gmail.com' ? 'active' : 'trial',
-                    subscription_type: user.email === 'boaz65sa@gmail.com' ? 'lifetime' : null,
+                    role: isSuperAdminEmail(user.email) ? 'super_admin' : 'user',
+                    status: isSuperAdminEmail(user.email) ? 'active' : 'trial',
+                    subscription_type: isSuperAdminEmail(user.email) ? 'lifetime' : null,
                     created_at: new Date().toISOString()
                 };
                 

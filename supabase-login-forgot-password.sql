@@ -113,15 +113,15 @@ BEGIN
         ),
         COALESCE(NEW.raw_user_meta_data->>'phone', ''),
         CASE
-            WHEN NEW.email = 'boaz65sa@gmail.com' THEN 'super_admin'
+            WHEN NEW.email IN ('boaz65sa@gmail.com', 'chef@roxoneilat.co.il') THEN 'super_admin'
             ELSE 'user'
         END,
         CASE
-            WHEN NEW.email = 'boaz65sa@gmail.com' THEN 'active'
+            WHEN NEW.email IN ('boaz65sa@gmail.com', 'chef@roxoneilat.co.il') THEN 'active'
             ELSE 'trial'
         END,
         CASE
-            WHEN NEW.email = 'boaz65sa@gmail.com' THEN NULL
+            WHEN NEW.email IN ('boaz65sa@gmail.com', 'chef@roxoneilat.co.il') THEN NULL
             ELSE NOW() + INTERVAL '14 days'
         END,
         NOW(),
@@ -146,17 +146,8 @@ CREATE TRIGGER on_auth_user_created
 -- הרשאות לטריגר לקרוא auth (בדרך כלל כבר קיים ב-Supabase)
 GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
 
--- ---------- 4) בדיקות מהירות ----------
-SELECT tablename
-FROM pg_tables
-WHERE schemaname = 'public' AND tablename = 'user_profiles';
-
-SELECT policyname
-FROM pg_policies
-WHERE schemaname = 'public' AND tablename = 'user_profiles'
-ORDER BY policyname;
-
--- =====================================================
+-- סיום — אם הופיעה הודעת Success, הכל תקין.
+-- (אל תדביק לכאן שורות כמו "0 rows" מתוצאות שאילתה קודמת)
 -- מה לסדר ב-Dashboard (לא ב-SQL) — שכחתי סיסמה והתחברות
 -- =====================================================
 -- Authentication → URL Configuration

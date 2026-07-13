@@ -2055,7 +2055,7 @@
                 console.log('👤 תפקיד:', userRole, '| אימייל:', userEmail);
                 
                 // בדיקה אם סופר אדמין
-                const isSuperAdmin = userRole === 'super_admin' || userEmail === 'boaz65sa@gmail.com';
+                const isSuperAdmin = userRole === 'super_admin' || (typeof isSuperAdminEmail === 'function' && isSuperAdminEmail(userEmail));
                 console.log('🔑 סופר אדמין:', isSuperAdmin);
                 
                 // הצג כפתור פאנל אדמין לסופר אדמין
@@ -2169,7 +2169,7 @@
         // Register Service Worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('sw.js', { scope: './' })
                     .then((registration) => {
                         console.log('✅ Service Worker נרשם בהצלחה:', registration.scope);
                         
