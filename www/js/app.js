@@ -1831,23 +1831,35 @@ function saveNotificationSettings() {
     showToast('הגדרות ההתראות נשמרו!', 'success');
 }
 
-function applySettings() {
-    // Apply theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme');
-        document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+function applyVaadTheme(mode) {
+    const theme = mode === 'light' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#071422' : '#0c1b33');
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+        const goingLight = theme === 'dark';
+        btn.innerHTML = theme === 'dark'
+            ? '<i class="fas fa-sun" aria-hidden="true"></i>'
+            : '<i class="fas fa-moon" aria-hidden="true"></i>';
+        btn.setAttribute('aria-label', goingLight ? 'עבור למצב בהיר' : 'עבור למצב כהה');
+        btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
     }
 }
 
+function applySettings() {
+    const savedTheme = localStorage.getItem('theme');
+    applyVaadTheme(savedTheme === 'light' ? 'light' : 'dark');
+}
+
 function toggleTheme() {
-    document.body.classList.toggle('dark-theme');
-    const isDark = document.body.classList.contains('dark-theme');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    document.getElementById('themeToggle').innerHTML = isDark ? 
-        '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    
-    showToast(`מצב ${isDark ? 'כהה' : 'בהיר'} הופעל`, 'info');
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', next);
+    applyVaadTheme(next);
+    if (typeof showToast === 'function') {
+        showToast(next === 'dark' ? 'מצב כהה: כחול וזהב' : 'מצב בהיר הופעל', 'info');
+    }
 }
 
 // ===================================
@@ -4090,24 +4102,34 @@ function deleteNotice(id) {
 function openMoreMenu() {
     const overlay = document.getElementById('moreMenuOverlay');
     const menu = document.getElementById('moreMenu');
-    
+    const trigger = document.querySelector('.mobile-bottom-nav .nav-item[data-tab="more"]');
+
     if (overlay && menu) {
         overlay.classList.add('active');
         menu.classList.add('active');
-        // Prevent body scroll when menu is open
+        menu.setAttribute('role', 'dialog');
+        menu.setAttribute('aria-modal', 'true');
+        menu.setAttribute('aria-label', 'תפריט נוסף');
         document.body.style.overflow = 'hidden';
+        if (trigger) trigger.setAttribute('aria-expanded', 'true');
+        const first = menu.querySelector('button, a');
+        if (first) first.focus();
     }
 }
 
 function closeMoreMenu() {
     const overlay = document.getElementById('moreMenuOverlay');
     const menu = document.getElementById('moreMenu');
-    
+    const trigger = document.querySelector('.mobile-bottom-nav .nav-item[data-tab="more"]');
+
     if (overlay && menu) {
         overlay.classList.remove('active');
         menu.classList.remove('active');
-        // Re-enable body scroll
         document.body.style.overflow = '';
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.focus();
+        }
     }
 }
 

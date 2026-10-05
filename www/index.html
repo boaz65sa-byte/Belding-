@@ -20,10 +20,20 @@
     <meta name="description" content="מערכת מתקדמת לניהול דיירים, תשלומים, קבלות PDF, דוחות והוצאות.">
     <meta name="keywords" content="ניהול דיירים, ועד בית, תשלומים, קבלות, דוחות, WhatsApp">
     
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#071422">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ניהול דיירים">
+    <script>
+        (function () {
+            var saved = localStorage.getItem('theme');
+            var theme = saved === 'light' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', theme === 'dark' ? '#071422' : '#0c1b33');
+        })();
+    </script>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -63,6 +73,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/mobile-native.css">
     <link rel="stylesheet" href="css/belding-theme.css">
+    <link rel="stylesheet" href="css/vaad-prestige.css">
     
     <style>
         /* SaaS Dashboard overrides - keep for app.js compatibility */
@@ -81,6 +92,7 @@
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-50 text-gray-900 min-h-screen" dir="rtl">
+    <a class="skip-link" href="#mainContent">דלג לתוכן</a>
     <!-- Mobile Actions Overlay -->
     <div id="mobileActionsOverlay" onclick="closeTenantActions()"></div>
     <!-- תפריט פעולות דייר יחיד (מחוץ לטבלה — מונע ריצוד) -->
@@ -112,8 +124,8 @@
                     <i class="fas fa-tags"></i>
                     <span class="hidden sm:inline">מחירים</span>
                 </a>
-                <button id="themeToggle" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="החלף מצב">
-                    <i class="fas fa-moon text-gray-600"></i>
+                <button id="themeToggle" type="button" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="החלף מצב תצוגה" aria-label="עבור למצב בהיר" aria-pressed="true">
+                    <i class="fas fa-sun" aria-hidden="true"></i>
                 </button>
                 <button id="notificationsBtn" class="relative p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="התראות">
                     <i class="fas fa-bell text-gray-600"></i>
@@ -165,7 +177,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="content-area md:mr-64 pt-4 pb-24 md:pb-8 px-4 md:px-6 max-w-7xl mx-auto">
+    <main id="mainContent" tabindex="-1" class="content-area md:mr-64 pt-4 pb-24 md:pb-8 px-4 md:px-6 max-w-7xl mx-auto">
             <!-- Dashboard Section -->
             <section id="dashboardSection" class="content-section active">
                 <div class="mb-6">
@@ -1851,25 +1863,25 @@
     </div>
 
     <!-- Mobile Bottom Navigation (visible only on mobile) -->
-    <nav class="mobile-bottom-nav">
-        <button class="nav-item" onclick="showTab('dashboard')" data-tab="dashboard">
-            <i class="fas fa-home"></i>
+    <nav class="mobile-bottom-nav" aria-label="ניווט ראשי">
+        <button type="button" class="nav-item" onclick="showTab('dashboard')" data-tab="dashboard" aria-label="ראשי">
+            <i class="fas fa-home" aria-hidden="true"></i>
             <span>ראשי</span>
         </button>
-        <button class="nav-item" onclick="showTab('tenants')" data-tab="tenants">
-            <i class="fas fa-users"></i>
+        <button type="button" class="nav-item" onclick="showTab('tenants')" data-tab="tenants" aria-label="דיירים">
+            <i class="fas fa-users" aria-hidden="true"></i>
             <span>דיירים</span>
         </button>
-        <button class="nav-item" onclick="showTab('payments')" data-tab="payments">
-            <i class="fas fa-credit-card"></i>
+        <button type="button" class="nav-item" onclick="showTab('payments')" data-tab="payments" aria-label="תשלומים">
+            <i class="fas fa-credit-card" aria-hidden="true"></i>
             <span>תשלומים</span>
         </button>
-        <button class="nav-item" onclick="showTab('expenses')" data-tab="expenses">
-            <i class="fas fa-receipt"></i>
+        <button type="button" class="nav-item" onclick="showTab('expenses')" data-tab="expenses" aria-label="הוצאות">
+            <i class="fas fa-receipt" aria-hidden="true"></i>
             <span>הוצאות</span>
         </button>
-        <button class="nav-item" onclick="openMoreMenu()" data-tab="more">
-            <i class="fas fa-ellipsis-h"></i>
+        <button type="button" class="nav-item" onclick="openMoreMenu()" data-tab="more" aria-label="עוד" aria-expanded="false" aria-controls="moreMenu">
+            <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
             <span>עוד</span>
         </button>
     </nav>
@@ -1879,7 +1891,7 @@
     <div class="more-menu" id="moreMenu">
         <div class="more-menu-header">
             <h3>תפריט נוסף</h3>
-            <button class="close-more-menu" onclick="closeMoreMenu()">
+            <button class="close-more-menu" onclick="closeMoreMenu()" type="button" aria-label="סגור תפריט">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -2167,7 +2179,8 @@
         });
         
         // Register Service Worker for PWA functionality
-        if ('serviceWorker' in navigator) {
+        var inNativeApp = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        if ('serviceWorker' in navigator && !inNativeApp) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js', { scope: './' })
                     .then((registration) => {

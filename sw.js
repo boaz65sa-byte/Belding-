@@ -1,4 +1,4 @@
-const APP_VERSION = '2.13.0';
+const APP_VERSION = '2.15.0';
 const STATIC_CACHE = `tenant-management-static-${APP_VERSION}`;
 const RUNTIME_CACHE = `tenant-management-runtime-${APP_VERSION}`;
 
@@ -10,6 +10,7 @@ const ASSETS_TO_PRECACHE = [
     './manifest.json',
     './css/style.css',
     './css/belding-theme.css',
+    './css/vaad-prestige.css',
     './css/mobile-native.css',
     './css/tiles-style.css',
     './js/payment-sync.js',

@@ -25,15 +25,18 @@ if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClien
 }
 
 /**
- * 🔐 כניסה פשוטה — משתמש וסיסמה אחדים (ללא Supabase בהתחברות)
- * שנה כאן את username ו-password לפני פריסה לציבור.
+ * 🔐 כניסת בעלים בסיסמה רגילה — בלי גוגל ובלי סשן Supabase.
+ * enabled=true מחליף את כל ההתחברות. ownerPasswordEnabled מוסיף כניסת בעלים
+ * לצד אימייל/גוגל/פייסבוק.
  */
 const SIMPLE_AUTH = {
     enabled: false,
+    ownerPasswordEnabled: true,
     username: 'vaad',
     password: 'vaad2025',
     displayName: 'מנהל הועד',
-    displayEmail: 'vaad@local'
+    displayEmail: 'chef@roxoneilat.co.il',
+    ownerEmails: ['chef@roxoneilat.co.il', 'boaz65sa@gmail.com']
 };
 
 /**

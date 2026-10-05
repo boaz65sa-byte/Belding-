@@ -88,7 +88,23 @@ function getSimpleAuthConfig() {
 
 function isSimpleAuthEnabled() {
     const cfg = getSimpleAuthConfig();
-    return !!(cfg && cfg.enabled !== false);
+    return !!(cfg && cfg.enabled === true);
+}
+
+function isOwnerPasswordEnabled() {
+    const cfg = getSimpleAuthConfig();
+    return !!(cfg && cfg.ownerPasswordEnabled !== false && cfg.password);
+}
+
+function isOwnerLoginId(usernameOrEmail) {
+    const u = String(usernameOrEmail || '').trim().toLowerCase();
+    if (!u) return false;
+    const cfg = getSimpleAuthConfig();
+    if (cfg.username && u === String(cfg.username).trim().toLowerCase()) return true;
+    const emails = Array.isArray(cfg.ownerEmails) ? cfg.ownerEmails : [];
+    if (emails.some(function (email) { return String(email || '').trim().toLowerCase() === u; })) return true;
+    if (typeof isSuperAdminEmail === 'function' && isSuperAdminEmail(u)) return true;
+    return false;
 }
 
 function getAuthStoragePath() {
@@ -175,15 +191,34 @@ function clearSimpleAuthSession() {
 
 function getSimpleAuthProfile() {
     const cfg = getSimpleAuthConfig();
+    const session = readSimpleAuthSession();
+    const raw = session && session.username ? String(session.username).trim() : '';
+    const email = raw.indexOf('@') !== -1 ? raw : (cfg.displayEmail || 'chef@roxoneilat.co.il');
     return {
-        id: 'simple-user',
-        email: cfg.displayEmail || 'vaad@local',
+        id: 'owner-local',
+        email: email,
         full_name: cfg.displayName || 'מנהל הועד',
         role: 'super_admin',
         status: 'active',
         has_lifetime_access: true,
         subscription_type: 'lifetime'
     };
+}
+
+function hasLocalOwnerSession() {
+    const session = readSimpleAuthSession();
+    if (!session) return false;
+    if (isSimpleAuthEnabled()) return true;
+    return isOwnerPasswordEnabled() && isOwnerLoginId(session.username);
+}
+
+function ownerPasswordLogin(username, password, remember) {
+    if (!isOwnerPasswordEnabled() || !isOwnerLoginId(username)) return null;
+    const cfg = getSimpleAuthConfig();
+    if (String(password || '') !== String(cfg.password || '')) return null;
+    const id = String(username || '').trim();
+    writeSimpleAuthSession(id, !!remember);
+    return { success: true, user: { username: id, email: id.indexOf('@') !== -1 ? id : (cfg.displayEmail || id) } };
 }
 
 function simpleAuthLogin(username, password, remember) {
@@ -205,7 +240,7 @@ function simpleAuthLogin(username, password, remember) {
  * בודקת אם למשתמש יש גישה ומחזירה פרטי פרופיל מלאים
  */
 async function checkUserAccess() {
-    if (isSimpleAuthEnabled() && readSimpleAuthSession()) {
+    if (hasLocalOwnerSession()) {
         const profile = getSimpleAuthProfile();
         return {
             hasAccess: true,
@@ -412,6 +447,9 @@ async function login(usernameOrEmail, password, rememberMe) {
         return simpleAuthLogin(usernameOrEmail, password, rememberMe);
     }
 
+    const ownerResult = ownerPasswordLogin(usernameOrEmail, password, rememberMe);
+    if (ownerResult && ownerResult.success) return ownerResult;
+
     const supabase = getSupabase();
     if (!supabase) {
         return { success: false, error: 'לא ניתן להתחבר כרגע. רענן את הדף או נסה שוב מאוחר יותר.' };
@@ -446,13 +484,13 @@ async function logout() {
 
 // 4. בדיקת סשן (פשוטה)
 async function getCurrentSession() {
-    if (isSimpleAuthEnabled()) {
+    if (hasLocalOwnerSession()) {
         const s = readSimpleAuthSession();
-        if (!s) return null;
+        const profile = getSimpleAuthProfile();
         return {
-            user: { id: 'simple-user', email: getSimpleAuthConfig().displayEmail || 'vaad@local' },
+            user: { id: profile.id, email: profile.email },
             simple: true,
-            username: s.username
+            username: s && s.username
         };
     }
     const supabase = getSupabase();

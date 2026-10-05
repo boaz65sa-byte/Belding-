@@ -1,5 +1,19 @@
 {
-  "appId": "com.example.app",
-  "appName": "App# הוסף iOS platformnpx cap add iosnpx cap copynpx cap open ios# בנה ב-Xcode# Upload ל-App Store Connect",
-  "webDir": "www"
+  "appId": "com.bssimple.vaad2025",
+  "appName": "ניהול דיירים",
+  "webDir": "www",
+  "backgroundColor": "#071422",
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#071422",
+    "scrollEnabled": true,
+    "preferredContentMode": "mobile"
+  },
+  "android": {
+    "backgroundColor": "#071422"
+  },
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https"
+  }
 }
