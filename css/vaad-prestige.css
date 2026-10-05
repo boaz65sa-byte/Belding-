@@ -168,6 +168,22 @@ html[data-theme="light"] header .bg-blue-600 {
     outline-offset: 2px;
 }
 
+@media (max-width: 1024px) {
+    header h1 {
+        white-space: nowrap;
+        min-width: max-content;
+    }
+
+    header h1 + p {
+        display: none !important;
+    }
+
+    .chart-container {
+        height: 360px !important;
+        overflow: visible;
+    }
+}
+
 @media (max-width: 768px) {
     #themeToggle,
     #backupBtn {

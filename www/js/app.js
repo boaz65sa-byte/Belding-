@@ -440,8 +440,10 @@ function renderPaymentStatusChart() {
                     position: 'bottom',
                     rtl: true,
                     labels: {
-                        font: { family: 'Heebo', size: 12 },
-                        padding: 15,
+                        color: document.documentElement.getAttribute('data-theme') === 'light' ? '#10203a' : '#f6f1e4',
+                        font: { family: 'Heebo', size: 14 },
+                        padding: 12,
+                        boxWidth: 14,
                     }
                 }
             }
@@ -486,13 +488,15 @@ function renderMonthlyRevenueChart() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        font: { family: 'Heebo' },
+                        color: document.documentElement.getAttribute('data-theme') === 'light' ? '#10203a' : '#f6f1e4',
+                        font: { family: 'Heebo', size: 12 },
                         callback: (value) => `₪${value}`
                     }
                 },
                 x: {
                     ticks: {
-                        font: { family: 'Heebo' }
+                        color: document.documentElement.getAttribute('data-theme') === 'light' ? '#10203a' : '#f6f1e4',
+                        font: { family: 'Heebo', size: 12 }
                     }
                 }
             }
