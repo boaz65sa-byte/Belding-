@@ -489,8 +489,8 @@
                 // Get Supabase client
                 const supabase = await getSupabase();
                 
-                if (!supabase) {
-                    window.location.href = 'login.html';
+                if (!supabase || (typeof isLocalOnlyMode === 'function' && isLocalOnlyMode())) {
+                    window.location.replace('index.html');
                     return;
                 }
 

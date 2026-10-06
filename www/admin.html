@@ -1293,6 +1293,10 @@
         // הגנת גישה - רק מי ש-role שלו super_admin ב-user_profiles
         (async function() {
             try {
+                if (typeof isLocalOnlyMode === 'function' && isLocalOnlyMode()) {
+                    window.location.replace('index.html');
+                    return;
+                }
                 await initSupabase();
                 
                 // בדוק אם מחובר

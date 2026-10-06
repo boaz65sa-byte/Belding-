@@ -61,6 +61,7 @@ function ensureSupabaseClientSync() {
 
 // פונקציית אתחול - נקראת מהדף הראשי
 async function initSupabase() {
+    if (typeof isLocalOnlyMode === 'function' && isLocalOnlyMode()) return null;
     return ensureSupabaseClientSync();
 }
 
@@ -235,6 +236,15 @@ function simpleAuthLogin(username, password, remember) {
  * בודקת אם למשתמש יש גישה ומחזירה פרטי פרופיל מלאים
  */
 async function checkUserAccess() {
+    if (typeof isLocalOnlyMode === 'function' && isLocalOnlyMode()) {
+        return {
+            hasAccess: true,
+            status: 'active',
+            daysLeft: null,
+            profile: { role: 'user', status: 'active', has_lifetime_access: true }
+        };
+    }
+
     if (hasLocalOwnerSession()) {
         const profile = getSimpleAuthProfile();
         return {

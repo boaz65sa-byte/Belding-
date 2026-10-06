@@ -13,6 +13,7 @@ function getSupabase() {
  * אתחול Supabase Client
  */
 async function initSupabase() {
+    if (typeof isLocalOnlyMode === 'function' && isLocalOnlyMode()) return null;
     try {
         // אם כבר מוגדר מ-config.js, השתמש בו
         if (window.supabaseClient) {

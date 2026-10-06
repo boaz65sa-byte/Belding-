@@ -1,32 +1,20 @@
 /**
- * ========================================
- * 🔧 קובץ הגדרות - Supabase Configuration
- * ========================================
+ * המערכת רצה מקומית על המכשיר. אין שרת התחברות ואין קריאת רשת בהפעלה.
  */
-
-// ✅ תיקון 1: שמתי כאן את המפתחות של הפרויקט החדש (Vaad 2025)
 const SUPABASE_CONFIG = {
-    url: 'https://hyntopdwnibuxmpylunz.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5bnRvcGR3bmlidXhtcHlsdW56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MzM3NDYsImV4cCI6MjA5OTUwOTc0Nn0.6yMj6tn1F56rb8SbXmCk_rJosSE1-_RkhfNM0QzDNdE',
+    enabled: false,
+    url: '',
+    anonKey: ''
 };
 
-// Supabase client נוצר ב-auth.js (ensureSupabaseClientSync) כשה-SDK נטען — לא נדרש בדף כניסה
-if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function'
-    && typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey
-    && !window.supabaseClient) {
-    window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
-        auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true,
-            flowType: 'pkce'
-        }
-    });
+function isLocalOnlyMode() {
+    return !SUPABASE_CONFIG || SUPABASE_CONFIG.enabled !== true || !SUPABASE_CONFIG.url;
 }
 
+window.isLocalOnlyMode = isLocalOnlyMode;
+
 /**
- * כניסה מקומית בסיסמה כבויה. ההתחברות היא רק דרך Supabase Auth.
- * תפקיד מנהל ראשי נקבע בטבלת user_profiles (role = super_admin), לא בקוד.
+ * כניסה מקומית בסיסמה כבויה. אין חשבון משתמש באפליקציה.
  */
 const SIMPLE_AUTH = {
     enabled: false,
