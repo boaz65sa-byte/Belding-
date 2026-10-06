@@ -392,8 +392,8 @@
             <div class="user-info-top">
                 <div class="user-avatar" id="userAvatar">ב</div>
                 <div style="text-align: right;">
-                    <div style="font-weight: 600;" id="userName">בועז סעדה</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;" id="userEmail">boaz65sa@gmail.com</div>
+                    <div style="font-weight: 600;" id="userName">טוען...</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;" id="userEmail"></div>
                 </div>
             </div>
         </div>
@@ -489,8 +489,8 @@
                 // Get Supabase client
                 const supabase = await getSupabase();
                 
-                if (!supabase) {
-                    window.location.href = 'login.html';
+                if (!supabase || (typeof isLocalOnlyMode === 'function' && isLocalOnlyMode())) {
+                    window.location.replace('index.html');
                     return;
                 }
 

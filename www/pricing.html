@@ -73,10 +73,15 @@
 <body>
 
     <div class="container">
-        <h1>בחר את המסלול המתאים לך</h1>
-        <p class="subtitle">המשך ליהנות מניהול חכם, שקוף ופשוט של הבניין</p>
+        <h1 data-ios-hide="purchase">בחר את המסלול המתאים לך</h1>
+        <p class="subtitle" data-ios-hide="purchase">המשך ליהנות מניהול חכם, שקוף ופשוט של הבניין</p>
 
-        <div class="pricing-grid">
+        <div id="iosPricingNote" hidden style="max-width:520px;margin:0 auto 24px;background:#fff;border-radius:16px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,0.05);">
+            <h2 style="margin:0 0 8px;font-size:22px;">המנוי אינו נמכר בתוך האפליקציה</h2>
+            <p style="margin:0 0 18px;color:#4a5568;">ניהול הדיירים, התשלומים וההוצאות זמין כאן. רכישת מנוי מתבצעת מחוץ לאפליקציה.</p>
+            <a href="index.html" class="btn btn-primary" style="text-decoration:none;">חזרה למערכת</a>
+        </div>
+        <div class="pricing-grid" id="pricingOffers">
             <div class="card">
                 <h3>מנוי חודשי</h3>
                 <div class="price">₪49<span>/חודש</span></div>
@@ -108,17 +113,16 @@
         </p>
     </div>
 
+    <script src="js/config.js"></script>
     <script>
         function startCheckout(plan) {
-            // כאן נחבר בעתיד את מערכת הסליקה (כמו Meshulam או Stripe)
-            // בינתיים נעשה סימולציה
-            const message = plan === 'monthly' 
-                ? "שלום, אני מעוניין להצטרף למנוי חודשי ב-49 שח" 
+            if (typeof isNativeIosApp === 'function' && isNativeIosApp()) {
+                return;
+            }
+            const message = plan === 'monthly'
+                ? "שלום, אני מעוניין להצטרף למנוי חודשי ב-49 שח"
                 : "שלום, אני מעוניין להצטרף למנוי שנתי ב-490 שח";
-            
-            // מפנה לוואטסאפ שלך לתשלום ידני (בתור התחלה)
-            // תחליף את המספר למספר שלך!
-            const myPhone = "972500000000"; 
+            const myPhone = "972500000000";
             const url = `https://wa.me/${myPhone}?text=${encodeURIComponent(message)}`;
             window.open(url, '_blank');
         }

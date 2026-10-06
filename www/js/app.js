@@ -78,6 +78,7 @@ function initializeApp() {
         unifyPaymentsUnderTenants();
     }
     setupEventListeners();
+    updateNotificationBadge();
     if (typeof setupTenantHubListeners === 'function') {
         setupTenantHubListeners();
     }
@@ -89,6 +90,7 @@ function initializeApp() {
     populatePaymentTenantFilter();
     renderPaymentsTable();
     updateAllStatistics();
+    refreshLocalDataNotices();
     checkAutoBackup();
     
     // Show loading animation
@@ -154,10 +156,9 @@ function loadDataFromStorage() {
                     };
                 }
             });
+            appState.isSampleData = !!parsed.isSampleData;
         } else {
-            console.log('ℹ️ אין נתונים שמורים, טוען נתוני demo');
-            // Load demo data for first time users
-            loadDemoData();
+            appState.isSampleData = false;
         }
         
         if (savedSettings) {
@@ -181,6 +182,7 @@ function saveDataToStorage() {
             expenses: appState.expenses,
             activities: appState.activities,
             notices: appState.notices || [],
+            isSampleData: !!appState.isSampleData,
             lastSaved: new Date().toISOString(),
         };
         
@@ -215,9 +217,9 @@ function loadDemoData() {
             createdAt: new Date().toISOString(),
             monthlyPayments: {
                 [currentYear]: {
-                    1: { paid: true, date: '2024-01-05', amount: 500 },
-                    2: { paid: true, date: '2024-02-05', amount: 500 },
-                    3: { paid: true, date: '2024-03-05', amount: 500 },
+                    1: { paid: true, date: currentYear + '-01-05', amount: 500 },
+                    2: { paid: true, date: currentYear + '-02-05', amount: 500 },
+                    3: { paid: true, date: currentYear + '-03-05', amount: 500 },
                     [currentMonth]: { paid: true, date: new Date().toISOString(), amount: 500 }
                 }
             }
@@ -225,7 +227,7 @@ function loadDemoData() {
         {
             id: generateId(),
             apartment: '2',
-            name: 'שרה לevi',
+            name: 'שרה לוי',
             phone: '052-9876543',
             email: 'sara@example.com',
             monthlyAmount: 500,
@@ -250,8 +252,8 @@ function loadDemoData() {
             createdAt: new Date().toISOString(),
             monthlyPayments: {
                 [currentYear]: {
-                    1: { paid: true, date: '2024-01-10', amount: 600 },
-                    2: { paid: true, date: '2024-02-10', amount: 600 }
+                    1: { paid: true, date: currentYear + '-01-10', amount: 600 },
+                    2: { paid: true, date: currentYear + '-02-10', amount: 600 }
                 }
             }
         },
@@ -268,8 +270,54 @@ function loadDemoData() {
         }
     ];
     
-    addActivity('המערכת אותחלה עם נתוני דמו', 'info');
+    appState.isSampleData = true;
+    addActivity('נטענו נתוני דוגמה להמחשה', 'info');
     saveDataToStorage();
+}
+
+function refreshLocalDataNotices() {
+    const emptyEl = document.getElementById('localEmptyState');
+    const sampleEl = document.getElementById('sampleDataBanner');
+    const hasTenants = appState.tenants && appState.tenants.length > 0;
+    if (emptyEl) emptyEl.classList.toggle('hidden', hasTenants);
+    if (sampleEl) sampleEl.classList.toggle('hidden', !appState.isSampleData);
+}
+
+function loadSampleData() {
+    if (appState.tenants.length > 0 && !appState.isSampleData) {
+        if (!confirm('להחליף את הנתונים השמורים בנתוני דוגמה?')) return;
+    }
+    loadDemoData();
+    refreshAfterLocalDataChange();
+    showToast('נטענו נתוני דוגמה. הם מסומנים ואינם דיירים אמיתיים.', 'info');
+}
+
+function clearSampleData() {
+    if (!confirm('למחוק את נתוני הדוגמה מהמכשיר?')) return;
+    appState.tenants = [];
+    appState.payments = [];
+    appState.expenses = [];
+    appState.activities = [];
+    appState.notices = [];
+    appState.isSampleData = false;
+    appState.selectedTenants.clear();
+    appState.selectedPayments.clear();
+    saveDataToStorage();
+    refreshAfterLocalDataChange();
+    showToast('נתוני הדוגמה נמחקו', 'success');
+}
+
+function refreshAfterLocalDataChange() {
+    if (typeof syncMonthlyPaymentsFromPaymentRecords === 'function') {
+        syncMonthlyPaymentsFromPaymentRecords();
+    }
+    renderDashboard();
+    renderTenantsTable();
+    if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+    if (typeof renderAnnualPaymentsMatrix === 'function') renderAnnualPaymentsMatrix();
+    updateAllStatistics();
+    updateNotificationBadge();
+    refreshLocalDataNotices();
 }
 
 // ===================================
@@ -409,7 +457,7 @@ function renderCharts() {
 
 function renderPaymentStatusChart() {
     const canvas = document.getElementById('paymentStatusChart');
-    if (!canvas) return;
+    if (!canvas || typeof Chart === 'undefined') return;
     
     const ctx = canvas.getContext('2d');
     
@@ -453,7 +501,7 @@ function renderPaymentStatusChart() {
 
 function renderMonthlyRevenueChart() {
     const canvas = document.getElementById('monthlyRevenueChart');
-    if (!canvas) return;
+    if (!canvas || typeof Chart === 'undefined') return;
     
     const ctx = canvas.getContext('2d');
     
@@ -592,11 +640,14 @@ function renderTenantsTable() {
     });
     
     if (filteredTenants.length === 0) {
+        const emptyMessage = appState.tenants.length === 0
+            ? 'אין דיירים עדיין. הוסיפו דייר, או טענו נתוני דוגמה מלוח המחוונים.'
+            : 'לא נמצאו דיירים';
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" style="text-align: center; padding: 2rem;">
-                    <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
-                    <p>לא נמצאו דיירים</p>
+                    <i class="fas fa-users" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+                    <p>${emptyMessage}</p>
                 </td>
             </tr>
         `;
@@ -2435,11 +2486,112 @@ function bulkMarkPaid() {
     showToast(`${successCount} דיירים סומנו כשילמו לחודש הנוכחי!`, 'success');
 }
 
+function whatsappPhone(raw) {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('972')) return digits;
+    if (digits.startsWith('0')) return '972' + digits.substring(1);
+    return '972' + digits;
+}
+
 function bulkSendReminder() {
     if (appState.selectedTenants.size === 0) return;
-    
-    showToast(`נשלחו תזכורות ל-${appState.selectedTenants.size} דיירים (סימולציה)`, 'info');
-    addActivity(`נשלחו תזכורות ל-${appState.selectedTenants.size} דיירים`, 'notification');
+
+    const tenants = Array.from(appState.selectedTenants)
+        .map(id => appState.tenants.find(t => t.id === id))
+        .filter(Boolean);
+    const withPhone = tenants.filter(t => whatsappPhone(t.phone));
+    const missing = tenants.length - withPhone.length;
+
+    if (withPhone.length === 0) {
+        showToast('לדיירים שנבחרו אין מספר טלפון', 'error');
+        return;
+    }
+    if (withPhone.length > 1 && !confirm(`לפתוח וואטסאפ עם תזכורת עבור ${withPhone.length} דיירים?`)) {
+        return;
+    }
+
+    withPhone.forEach(tenant => {
+        const url = `https://wa.me/${whatsappPhone(tenant.phone)}?text=${encodeURIComponent(generateReminderMessage(tenant))}`;
+        window.open(url, '_blank');
+    });
+
+    if (missing) {
+        showToast(`נפתחה תזכורת בוואטסאפ ל-${withPhone.length} דיירים. ${missing} בלי טלפון.`, 'info');
+    } else {
+        showToast(`נפתחה תזכורת בוואטסאפ ל-${withPhone.length} דיירים`, 'success');
+    }
+    addActivity(`נשלחה תזכורת בוואטסאפ ל-${withPhone.length} דיירים`, 'notification');
+}
+
+function collectAppNotifications() {
+    const items = [];
+    (appState.tenants || []).forEach(tenant => {
+        if (tenant.status === 'overdue') {
+            items.push({
+                title: 'חוב פתוח',
+                body: `${tenant.name} · דירה ${tenant.apartment}`,
+                section: 'tenants'
+            });
+        } else if (tenant.status === 'pending') {
+            items.push({
+                title: 'תשלום ממתין',
+                body: `${tenant.name} · דירה ${tenant.apartment}`,
+                section: 'tenants'
+            });
+        }
+    });
+    return items.slice(0, 12);
+}
+
+function updateNotificationBadge() {
+    const badge = document.getElementById('notificationBadge');
+    if (!badge) return;
+    const count = collectAppNotifications().length;
+    badge.textContent = String(count);
+    badge.style.display = count === 0 ? 'none' : 'flex';
+}
+
+function hideNotificationsPanel() {
+    const panel = document.getElementById('notificationsPanel');
+    if (panel) panel.classList.add('hidden');
+}
+
+function renderNotificationsPanel() {
+    const list = document.getElementById('notificationsList');
+    if (!list) return;
+    const items = collectAppNotifications();
+    updateNotificationBadge();
+    if (!items.length) {
+        list.innerHTML = '<p class="px-4 py-6 text-sm text-gray-500">אין התראות חדשות</p>';
+        return;
+    }
+    list.innerHTML = items.map(item =>
+        `<button type="button" class="w-full text-right px-4 py-3 hover:bg-gray-50 border-b border-gray-100" data-section="${item.section}">
+            <div class="font-semibold text-sm text-gray-900"></div>
+            <div class="text-xs text-gray-500 mt-1"></div>
+        </button>`
+    ).join('');
+    list.querySelectorAll('button').forEach((btn, index) => {
+        const item = items[index];
+        btn.querySelector('.font-semibold').textContent = item.title;
+        btn.querySelector('.text-xs').textContent = item.body;
+        btn.addEventListener('click', () => {
+            hideNotificationsPanel();
+            if (typeof showTab === 'function') showTab(item.section);
+        });
+    });
+}
+
+function toggleNotificationsPanel() {
+    const panel = document.getElementById('notificationsPanel');
+    if (!panel) return;
+    if (panel.classList.contains('hidden')) {
+        renderNotificationsPanel();
+        panel.classList.remove('hidden');
+    } else {
+        panel.classList.add('hidden');
+    }
 }
 
 function bulkDelete() {
@@ -2496,6 +2648,19 @@ function setupEventListeners() {
     document.getElementById('statusFilter')?.addEventListener('change', renderTenantsTable);
     document.getElementById('bulkMarkPaidTenantsBtn')?.addEventListener('click', bulkMarkPaid);
     document.getElementById('bulkReminderTenantsBtn')?.addEventListener('click', bulkSendReminder);
+    document.getElementById('loadSampleDataBtn')?.addEventListener('click', loadSampleData);
+    document.getElementById('clearSampleDataBtn')?.addEventListener('click', clearSampleData);
+    document.getElementById('goAddTenantBtn')?.addEventListener('click', () => {
+        if (typeof showTab === 'function') showTab('tenants');
+    });
+    document.getElementById('notificationsBtn')?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleNotificationsPanel();
+    });
+    document.addEventListener('click', (event) => {
+        const wrap = document.getElementById('notificationsWrap');
+        if (wrap && !wrap.contains(event.target)) hideNotificationsPanel();
+    });
     document.getElementById('bulkDeleteTenantsBtn')?.addEventListener('click', bulkDelete);
     document.getElementById('refreshBtn')?.addEventListener('click', () => {
         renderTenantsTable();

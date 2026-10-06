@@ -1,43 +1,61 @@
 /**
- * ========================================
- * 🔧 קובץ הגדרות - Supabase Configuration
- * ========================================
+ * המערכת רצה מקומית על המכשיר. אין שרת התחברות ואין קריאת רשת בהפעלה.
  */
-
-// ✅ תיקון 1: שמתי כאן את המפתחות של הפרויקט החדש (Vaad 2025)
 const SUPABASE_CONFIG = {
-    url: 'https://hyntopdwnibuxmpylunz.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5bnRvcGR3bmlidXhtcHlsdW56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MzM3NDYsImV4cCI6MjA5OTUwOTc0Nn0.6yMj6tn1F56rb8SbXmCk_rJosSE1-_RkhfNM0QzDNdE',
+    enabled: false,
+    url: '',
+    anonKey: ''
 };
 
-// Supabase client נוצר ב-auth.js (ensureSupabaseClientSync) כשה-SDK נטען — לא נדרש בדף כניסה
-if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function'
-    && typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey
-    && !window.supabaseClient) {
-    window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
-        auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true,
-            flowType: 'pkce'
-        }
-    });
+function isLocalOnlyMode() {
+    return !SUPABASE_CONFIG || SUPABASE_CONFIG.enabled !== true || !SUPABASE_CONFIG.url;
 }
 
+window.isLocalOnlyMode = isLocalOnlyMode;
+
 /**
- * 🔐 כניסת בעלים בסיסמה רגילה — בלי גוגל ובלי סשן Supabase.
- * enabled=true מחליף את כל ההתחברות. ownerPasswordEnabled מוסיף כניסת בעלים
- * לצד אימייל/גוגל/פייסבוק.
+ * כניסה מקומית בסיסמה כבויה. אין חשבון משתמש באפליקציה.
  */
 const SIMPLE_AUTH = {
     enabled: false,
-    ownerPasswordEnabled: true,
-    username: 'vaad',
-    password: 'vaad2025',
+    ownerPasswordEnabled: false,
+    username: '',
     displayName: 'מנהל הועד',
-    displayEmail: 'chef@roxoneilat.co.il',
-    ownerEmails: ['chef@roxoneilat.co.il', 'boaz65sa@gmail.com']
+    displayEmail: ''
 };
+
+/** אפליקציית iOS המקורית (Capacitor). באתר זה תמיד false. */
+function isNativeIosApp() {
+    try {
+        var cap = window.Capacitor;
+        if (!cap || typeof cap.getPlatform !== 'function') return false;
+        return cap.getPlatform() === 'ios';
+    } catch (e) {
+        return false;
+    }
+}
+
+function applyNativeIosChrome() {
+    if (!isNativeIosApp()) return;
+    document.documentElement.setAttribute('data-native-ios', 'true');
+    if (!document.getElementById('native-ios-chrome-style')) {
+        var style = document.createElement('style');
+        style.id = 'native-ios-chrome-style';
+        style.textContent = '[data-native-ios] [data-ios-hide], [data-native-ios] a[href="pricing.html"], [data-native-ios] a[href^="pricing.html"], [data-native-ios] a[href="install.html"], [data-native-ios] a[href^="install.html"] { display: none !important; }';
+        document.head.appendChild(style);
+    }
+    var offers = document.getElementById('pricingOffers');
+    var note = document.getElementById('iosPricingNote');
+    if (offers) offers.style.display = 'none';
+    if (note) note.hidden = false;
+}
+
+window.isNativeIosApp = isNativeIosApp;
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyNativeIosChrome);
+} else {
+    applyNativeIosChrome();
+}
 
 /**
  * 💰 הגדרות מחירים - מעודכן

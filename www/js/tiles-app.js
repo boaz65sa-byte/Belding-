@@ -14,6 +14,10 @@ window.TilesApp = {
     // Initialize
     async init() {
         try {
+            if (typeof isLocalOnlyMode === 'function' && isLocalOnlyMode()) {
+                window.location.replace('index.html');
+                return false;
+            }
             const session = typeof getCurrentSession === 'function' ? await getCurrentSession() : null;
             if (!session) {
                 console.log('לא מחובר, מפנה ל-login');
