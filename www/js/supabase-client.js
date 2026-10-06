@@ -4,27 +4,35 @@
  * ========================================
  */
 
-// ייבוא Supabase מ-CDN
-let supabase = null;
+// הפונקציה מחזירה את ה-client הפעיל
+function getSupabase() {
+    return window.supabaseClient;
+}
 
 /**
  * אתחול Supabase Client
  */
 async function initSupabase() {
     try {
+        // אם כבר מוגדר מ-config.js, השתמש בו
+        if (window.supabaseClient) {
+            console.log('✅ Supabase Client נטען מ-config.js');
+            return window.supabaseClient;
+        }
+
         // בדיקה אם Supabase JS SDK נטען
         if (typeof window.supabase === 'undefined') {
             throw new Error('Supabase JS SDK לא נטען. ודא שהוספת את ה-CDN ב-HTML');
         }
 
         // יצירת client
-        supabase = window.supabase.createClient(
+        window.supabaseClient = window.supabase.createClient(
             SUPABASE_CONFIG.url,
             SUPABASE_CONFIG.anonKey
         );
-
+        
         console.log('✅ Supabase Client אותחל בהצלחה');
-        return supabase;
+        return window.supabaseClient;
     } catch (error) {
         console.error('❌ שגיאה באתחול Supabase:', error);
         throw error;
@@ -36,7 +44,7 @@ async function initSupabase() {
  */
 async function getCurrentSession() {
     try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await getSupabase().auth.getSession();
         if (error) throw error;
         return session;
     } catch (error) {
@@ -50,7 +58,7 @@ async function getCurrentSession() {
  */
 async function getCurrentUser() {
     try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error } = await getSupabase().auth.getUser();
         if (error) throw error;
         return user;
     } catch (error) {
@@ -61,16 +69,51 @@ async function getCurrentUser() {
 
 /**
  * 📊 קבלת פרופיל משתמש מורחב מהטבלה
+ * אם הפרופיל לא קיים - יוצר אותו אוטומטית
  */
 async function getUserProfile(userId) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .eq('id', userId)
             .single();
 
-        if (error) throw error;
+        if (error || !data) {
+            console.log('📝 פרופיל לא נמצא, יוצר חדש...');
+            
+            // קבל פרטי משתמש מ-auth
+            const { data: { user } } = await getSupabase().auth.getUser();
+            
+            if (user) {
+                const newProfile = {
+                    id: userId,
+                    email: user.email,
+                    full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+                    phone: user.user_metadata?.phone || '',
+                    role: 'user',
+                    status: 'trial',
+                    subscription_type: null,
+                    created_at: new Date().toISOString()
+                };
+                
+                const { data: createdProfile, error: insertError } = await getSupabase()
+                    .from('user_profiles')
+                    .upsert(newProfile)
+                    .select()
+                    .single();
+                
+                if (insertError) {
+                    console.error('שגיאה ביצירת פרופיל:', insertError);
+                    return newProfile;
+                }
+                
+                console.log('✅ פרופיל נוצר בהצלחה:', createdProfile);
+                return createdProfile;
+            }
+            return null;
+        }
+        
         return data;
     } catch (error) {
         console.error('שגיאה בקבלת פרופיל:', error);
@@ -83,7 +126,7 @@ async function getUserProfile(userId) {
  */
 async function updateUserProfile(userId, updates) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update(updates)
             .eq('id', userId)
@@ -168,7 +211,7 @@ async function checkUserAccess() {
 }
 
 /**
- * 👑 בדיקה אם המשתמש הוא אדמין
+ * 👑 בדיקה אם המשתמש הוא אדמין (כולל super_admin)
  */
 async function isAdmin() {
     try {
@@ -176,9 +219,25 @@ async function isAdmin() {
         if (!user) return false;
 
         const profile = await getUserProfile(user.id);
-        return profile && profile.role === ROLES.ADMIN;
+        return profile && (profile.role === ROLES.ADMIN || profile.role === ROLES.SUPER_ADMIN);
     } catch (error) {
         console.error('שגיאה בבדיקת אדמין:', error);
+        return false;
+    }
+}
+
+/**
+ * 🔥 בדיקה אם המשתמש הוא סופר-אדמין (מנהל כללי)
+ */
+async function isSuperAdmin() {
+    try {
+        const user = await getCurrentUser();
+        if (!user) return false;
+
+        const profile = await getUserProfile(user.id);
+        return profile && profile.role === ROLES.SUPER_ADMIN;
+    } catch (error) {
+        console.error('שגיאה בבדיקת סופר-אדמין:', error);
         return false;
     }
 }
@@ -191,7 +250,7 @@ async function logActivity(actionType, description, metadata = {}) {
         const user = await getCurrentUser();
         if (!user) return;
 
-        const { error } = await supabase
+        const { error } = await getSupabase()
             .from('activity_log')
             .insert({
                 user_id: user.id,
@@ -210,12 +269,12 @@ async function logActivity(actionType, description, metadata = {}) {
  * 🔔 האזנה לשינויים באימות
  */
 function onAuthStateChange(callback) {
-    if (!supabase) {
+    if (!getSupabase()) {
         console.error('Supabase לא אותחל');
         return;
     }
 
-    return supabase.auth.onAuthStateChange((event, session) => {
+    return getSupabase().auth.onAuthStateChange((event, session) => {
         console.log('🔐 אירוע אימות:', event);
         callback(event, session);
     });
@@ -226,7 +285,7 @@ function onAuthStateChange(callback) {
  */
 async function signOut() {
     try {
-        const { error } = await supabase.auth.signOut();
+        const { error } = await getSupabase().auth.signOut();
         if (error) throw error;
         
         // ניקוי localStorage

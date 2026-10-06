@@ -86,17 +86,14 @@ async function getUserProfile(userId) {
             const { data: { user } } = await getSupabase().auth.getUser();
             
             if (user) {
-                // בדוק אם זה המשתמש הראשי
-                const isBossUser = user.email === 'boaz65sa@gmail.com';
-                
                 const newProfile = {
                     id: userId,
                     email: user.email,
                     full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
                     phone: user.user_metadata?.phone || '',
-                    role: isBossUser ? 'super_admin' : 'user',
-                    status: isBossUser ? 'active' : 'trial',
-                    subscription_type: isBossUser ? 'lifetime' : null,
+                    role: 'user',
+                    status: 'trial',
+                    subscription_type: null,
                     created_at: new Date().toISOString()
                 };
                 
@@ -115,23 +112,6 @@ async function getUserProfile(userId) {
                 return createdProfile;
             }
             return null;
-        }
-        
-        // אם זה המשתמש הראשי ואין לו הרשאות - עדכן
-        if (data.email === 'boaz65sa@gmail.com' && data.role !== 'super_admin') {
-            console.log('🔧 מעדכן הרשאות למשתמש ראשי...');
-            const { data: updatedProfile } = await getSupabase()
-                .from('user_profiles')
-                .update({ 
-                    role: 'super_admin', 
-                    status: 'active',
-                    subscription_type: 'lifetime'
-                })
-                .eq('id', userId)
-                .select()
-                .single();
-            
-            return updatedProfile || data;
         }
         
         return data;

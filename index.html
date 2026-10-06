@@ -120,21 +120,27 @@
                     <i class="fas fa-crown"></i>
                     <span class="hidden sm:inline">אדמין</span>
                 </a>
-                <a href="pricing.html" id="pricingBtnTop" class="inline-flex items-center gap-2 px-3 py-2.5 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition active:scale-95" title="מחירים ומנויים">
+                <a href="pricing.html" id="pricingBtnTop" data-ios-hide="purchase" class="inline-flex items-center gap-2 px-3 py-2.5 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition active:scale-95" title="מחירים ומנויים">
                     <i class="fas fa-tags"></i>
                     <span class="hidden sm:inline">מחירים</span>
                 </a>
                 <button id="themeToggle" type="button" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="החלף מצב תצוגה" aria-label="עבור למצב בהיר" aria-pressed="true">
                     <i class="fas fa-sun" aria-hidden="true"></i>
                 </button>
-                <button id="notificationsBtn" class="relative p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="התראות">
-                    <i class="fas fa-bell text-gray-600"></i>
-                    <span id="notificationBadge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold bg-orange-500 text-white rounded-full px-1">0</span>
-                </button>
+                <div class="relative" id="notificationsWrap">
+                    <button id="notificationsBtn" type="button" class="relative p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center" title="התראות" aria-haspopup="true" aria-controls="notificationsPanel">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        <span id="notificationBadge" style="display:none" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold bg-orange-500 text-white rounded-full px-1">0</span>
+                    </button>
+                    <div id="notificationsPanel" class="hidden absolute left-0 top-full mt-2 w-80 max-w-[90vw] bg-white rounded-xl shadow-xl border border-gray-200 z-50 text-right overflow-hidden">
+                        <div class="px-4 py-3 font-bold border-b border-gray-100 text-gray-900">התראות</div>
+                        <div id="notificationsList" class="max-h-80 overflow-y-auto"></div>
+                    </div>
+                </div>
                 <button id="backupBtn" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 hidden sm:flex min-w-[44px] min-h-[44px] items-center justify-center" title="גיבוי">
                     <i class="fas fa-database text-gray-600"></i>
                 </button>
-                <a href="install.html" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 hidden sm:flex min-w-[44px] min-h-[44px] items-center justify-center" title="התקן אפליקציה">
+                <a href="install.html" data-ios-hide="pwa" class="p-3 rounded-lg hover:bg-gray-100 transition active:scale-95 hidden sm:flex min-w-[44px] min-h-[44px] items-center justify-center" title="התקן אפליקציה">
                     <i class="fas fa-mobile-alt text-gray-600"></i>
                 </a>
             </div>
@@ -200,7 +206,7 @@
                                 <p id="subscriptionText" class="text-white/90 m-0 mt-1">נותרו לך 14 ימים חינם</p>
                             </div>
                         </div>
-                        <a href="pricing.html" class="inline-flex items-center gap-2 bg-white text-amber-600 px-5 py-3 rounded-lg font-bold shadow hover:scale-105 transition">
+                        <a href="pricing.html" id="subscriptionUpgradeLink" data-ios-hide="purchase" class="inline-flex items-center gap-2 bg-white text-amber-600 px-5 py-3 rounded-lg font-bold shadow hover:scale-105 transition">
                             <i class="fas fa-credit-card"></i>
                             שדרג עכשיו
                         </a>
@@ -222,7 +228,7 @@
 
                 <!-- Action Cards Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white shadow-md">
+                    <div id="installHomeCard" data-ios-hide="pwa" class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white shadow-md">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl">📱</span>
                             <div class="flex-1 min-w-0">
@@ -234,7 +240,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white shadow-md">
+                    <div id="downloadAppCard" data-ios-hide="pwa" class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white shadow-md">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl">📦</span>
                             <div class="flex-1 min-w-0">
@@ -443,7 +449,7 @@
                         <i class="fas fa-check"></i> סמן כשולם
                     </button>
                     <button type="button" class="btn btn-sm btn-primary" id="bulkReminderTenantsBtn">
-                        <i class="fas fa-bell"></i> תזכורת (סימולציה)
+                        <i class="fas fa-bell"></i> תזכורת בוואטסאפ
                     </button>
                     <button type="button" class="btn btn-sm btn-danger" id="bulkDeleteTenantsBtn">
                         <i class="fas fa-trash"></i> מחק
@@ -1911,7 +1917,7 @@
                 <span>הגדרות</span>
                 <i class="fas fa-chevron-left"></i>
             </button>
-            <a href="pricing.html" class="more-menu-item" style="text-decoration:none;color:inherit;">
+            <a href="pricing.html" data-ios-hide="purchase" class="more-menu-item" style="text-decoration:none;color:inherit;">
                 <i class="fas fa-tags" style="color:#10b981;"></i>
                 <span>מחירים ומנויים</span>
                 <i class="fas fa-chevron-left"></i>
@@ -1932,54 +1938,25 @@
     <script>
         // 🔒 בדיקת אימות לפני טעינת האפליקציה
         document.addEventListener('DOMContentLoaded', async function() {
-            window.__DBG_F3512E = window.__DBG_F3512E || [];
-            function __agentDbgF3512e(payload) {
-                try { window.__DBG_F3512E.push(payload); } catch (e) {}
-                try { console.log('[f3512e]', JSON.stringify(payload)); } catch (e2) {}
-                try {
-                    var _k = '__DBG_F3512E';
-                    function _pushStore(store) {
-                        var _prev = store.getItem(_k);
-                        var _arr = _prev ? JSON.parse(_prev) : [];
-                        if (!Array.isArray(_arr)) { _arr = []; }
-                        _arr.push(payload);
-                        if (_arr.length > 40) { _arr = _arr.slice(-40); }
-                        store.setItem(_k, JSON.stringify(_arr));
-                    }
-                    _pushStore(sessionStorage);
-                    _pushStore(localStorage);
-                } catch (e3) {}
-                // #region agent log
-                fetch('http://127.0.0.1:7898/ingest/9131c919-dd65-4211-891e-dd19c03c447f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f3512e'},body:JSON.stringify(payload)}).catch(function(){});
-                // #endregion
-            }
             try {
                 // המתן לאתחול Supabase
                 await initSupabase();
-                __agentDbgF3512e({sessionId:'f3512e',location:'index.html:auth',message:'after initSupabase',data:{hasSupabaseClient:!!window.supabaseClient,hasInitFn:typeof initSupabase==='function'},timestamp:Date.now(),hypothesisId:'H1',runId:'pre'});
                 // חילוף קוד PKCE / אימות מה-URL לפני בדיקת סשן (Google, Facebook, וכו')
                 if (typeof finalizeAuthFromRedirectUrl === 'function' && window.supabaseClient) {
                     await finalizeAuthFromRedirectUrl(window.supabaseClient);
                 }
-                // ריענון סשן מה-URL (התחברות OAuth / לינק אימות אחרי redirect)
-                var __dbgHasSession = false;
+                // חילוף סשן מה-URL (התחברות OAuth / לינק אימות אחרי redirect) כבר בוצע למעלה
                 if (window.supabaseClient) {
-                    var __gs = await window.supabaseClient.auth.getSession();
-                    __dbgHasSession = !!(__gs && __gs.data && __gs.data.session);
+                    await window.supabaseClient.auth.getSession();
                 }
-                __agentDbgF3512e({sessionId:'f3512e',location:'index.html:auth',message:'after getSession',data:{hasSession:__dbgHasSession,hashLen:(location.hash||'').length},timestamp:Date.now(),hypothesisId:'H2',runId:'pre'});
+
+                const nativeIos = typeof isNativeIosApp === 'function' && isNativeIosApp();
                 
                 // בדוק גישה
                 const accessCheck = await checkUserAccess();
-                console.log('🔐 תוצאת בדיקת גישה:', accessCheck);
-                __agentDbgF3512e({sessionId:'f3512e',location:'index.html:auth',message:'checkUserAccess result',data:{hasAccess:!!accessCheck.hasAccess,reason:String(accessCheck.reason||''),status:String(accessCheck.status||'')},timestamp:Date.now(),hypothesisId:'H3',runId:'pre'});
+                console.log('🔐 תוצאת בדיקת גישה:', accessCheck && accessCheck.status, accessCheck && accessCheck.reason);
                 
                 if (!accessCheck.hasAccess) {
-                    var __branch = 'fallback_login';
-                    if (accessCheck.reason === 'not_logged_in') __branch = 'login';
-                    else if (accessCheck.reason === 'blocked') __branch = 'blocked';
-                    else if (accessCheck.reason === 'expired' || accessCheck.reason === 'trial_expired' || accessCheck.reason === 'subscription_expired') __branch = 'pricing';
-                    __agentDbgF3512e({sessionId:'f3512e',location:'index.html:auth',message:'redirect no access',data:{branch:__branch,reason:String(accessCheck.reason||'')},timestamp:Date.now(),hypothesisId:'H3',runId:'pre'});
                     if (accessCheck.reason === 'not_logged_in') {
                         window.location.href = 'login.html';
                         return;
@@ -1988,19 +1965,22 @@
                         window.location.href = 'blocked.html';
                         return;
                     }
-                    if (accessCheck.reason === 'expired' ||
+                    const subscriptionEnded = accessCheck.reason === 'expired' ||
                         accessCheck.reason === 'trial_expired' ||
-                        accessCheck.reason === 'subscription_expired') {
+                        accessCheck.reason === 'subscription_expired';
+                    if (subscriptionEnded && nativeIos) {
+                        accessCheck.hasAccess = true;
+                    } else if (subscriptionEnded) {
                         window.location.href = 'pricing.html?expired=true';
                         return;
+                    } else {
+                        window.location.href = 'login.html';
+                        return;
                     }
-                    window.location.href = 'login.html';
-                    return;
                 }
                 
                 // יש גישה - הצג מידע על המנוי
                 console.log('✅ גישה אושרה:', accessCheck.status);
-                __agentDbgF3512e({sessionId:'f3512e',location:'index.html:auth',message:'access granted before overlay',data:{status:String(accessCheck.status||'')},timestamp:Date.now(),hypothesisId:'H5',runId:'pre'});
 
                 // העלמת מסך הטעינה
                 const loadingOverlay = document.getElementById('loadingOverlay');
@@ -2036,15 +2016,19 @@
                         banner.style.display = 'block';
                         banner.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
                         title.textContent = '🎁 תקופת ניסיון חינם';
-                        text.textContent = accessCheck.daysLeft 
-                            ? `נותרו לך ${accessCheck.daysLeft} ימים - שדרג עכשיו ותיהנה מכל התכונות!`
+                        text.textContent = accessCheck.daysLeft
+                            ? (nativeIos
+                                ? `נותרו לך ${accessCheck.daysLeft} ימים`
+                                : `נותרו לך ${accessCheck.daysLeft} ימים - שדרג עכשיו ותיהנה מכל התכונות!`)
                             : 'תקופת הניסיון שלך פעילה';
                     } else if (profile.status === 'active' && !profile.has_lifetime_access) {
                         if (accessCheck.daysLeft && accessCheck.daysLeft <= 7) {
                             banner.style.display = 'block';
                             banner.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
                             title.textContent = '⚠️ המנוי עומד לפוג';
-                            text.textContent = `נותרו ${accessCheck.daysLeft} ימים - חדש עכשיו!`;
+                            text.textContent = nativeIos
+                                ? `נותרו ${accessCheck.daysLeft} ימים`
+                                : `נותרו ${accessCheck.daysLeft} ימים - חדש עכשיו!`;
                         }
                     } else if (profile.has_lifetime_access) {
                         banner.style.display = 'block';
@@ -2058,33 +2042,19 @@
                 
                 // === הצג כפתורים בראש הדף ===
                 const userRole = accessCheck.profile?.role;
-                const userEmail = accessCheck.profile?.email;
-                
-                // כפתורים בראש הדף
                 const adminBtnTop = document.getElementById('adminPanelBtnTop');
                 const pricingBtnTop = document.getElementById('pricingBtnTop');
-                
-                console.log('👤 תפקיד:', userRole, '| אימייל:', userEmail);
-                
-                // בדיקה אם סופר אדמין
-                const isSuperAdmin = userRole === 'super_admin' || (typeof isSuperAdminEmail === 'function' && isSuperAdminEmail(userEmail));
-                console.log('🔑 סופר אדמין:', isSuperAdmin);
-                
-                // הצג כפתור פאנל אדמין לסופר אדמין
-                if (isSuperAdmin && adminBtnTop) {
+
+                if (userRole === 'super_admin' && adminBtnTop) {
                     adminBtnTop.style.display = 'inline-flex';
-                    console.log('✅ כפתור פאנל אדמין מוצג');
                 }
-                
-                // הצג כפתור מחירים לכולם
-                if (pricingBtnTop) {
+
+                if (pricingBtnTop && !nativeIos) {
                     pricingBtnTop.style.display = 'inline-flex';
-                    console.log('✅ כפתור מחירים מוצג');
                 }
                 
             } catch (error) {
                 console.error('❌ שגיאה בבדיקת אימות:', error);
-                __agentDbgF3512e({sessionId:'f3512e',location:'index.html:auth',message:'auth gate catch',data:{errName:String(error&&error.name||''),errMsg:String(error&&error.message||'').slice(0,120)},timestamp:Date.now(),hypothesisId:'H4',runId:'pre'});
                 window.location.href = 'login.html';
             }
         });

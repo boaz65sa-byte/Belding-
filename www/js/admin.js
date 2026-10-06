@@ -2,10 +2,14 @@
  * ========================================
  * 👑 Admin.js - ניהול אדמין
  * ========================================
+ * תומך ב-3 רמות הרשאות:
+ * - super_admin: רואה את כל המשתמשים בכל הבניינים
+ * - admin: רואה רק משתמשים מהבניין שלו
+ * - user: אין גישה לפאנל אדמין
  */
 
 /**
- * 📊 קבלת כל המשתמשים (אדמין בלבד)
+ * 📊 קבלת כל המשתמשים (לפי הרשאות)
  */
 async function getAllUsers(filters = {}) {
     try {
@@ -15,10 +19,20 @@ async function getAllUsers(filters = {}) {
             throw new Error('אין הרשאות אדמין');
         }
 
-        let query = supabase
+        // בדוק אם סופר-אדמין
+        const superAdmin = await isSuperAdmin();
+        const currentUser = await getCurrentUser();
+        const currentProfile = await getUserProfile(currentUser.id);
+
+        let query = getSupabase()
             .from('user_profiles')
             .select('*')
             .order('created_at', { ascending: false });
+
+        // אם לא סופר-אדמין, הצג רק משתמשים מאותו בניין
+        if (!superAdmin && currentProfile.building_id) {
+            query = query.eq('building_id', currentProfile.building_id);
+        }
 
         // פילטרים
         if (filters.status) {
@@ -30,12 +44,15 @@ async function getAllUsers(filters = {}) {
         if (filters.search) {
             query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
         }
+        if (filters.building_id) {
+            query = query.eq('building_id', filters.building_id);
+        }
 
         const { data, error } = await query;
 
         if (error) throw error;
 
-        return { success: true, users: data };
+        return { success: true, users: data, isSuperAdmin: superAdmin };
     } catch (error) {
         console.error('שגיאה בקבלת משתמשים:', error);
         return { success: false, error: error.message };
@@ -52,7 +69,7 @@ async function blockUser(userId) {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update({ status: USER_STATUS.BLOCKED })
             .eq('id', userId)
@@ -81,7 +98,7 @@ async function unblockUser(userId) {
         }
 
         // קבע סטטוס לפי מנוי
-        const { data: user } = await supabase
+        const { data: user } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .eq('id', userId)
@@ -102,7 +119,7 @@ async function unblockUser(userId) {
             newStatus = new Date() < expiresAt ? USER_STATUS.ACTIVE : USER_STATUS.EXPIRED;
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update({ status: newStatus })
             .eq('id', userId)
@@ -134,7 +151,7 @@ async function changeUserRole(userId, newRole) {
             throw new Error('תפקיד לא תקין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update({ role: newRole })
             .eq('id', userId)
@@ -185,7 +202,7 @@ async function updateUserSubscription(userId, subscriptionData) {
             updates.subscription_start = new Date().toISOString();
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .update(updates)
             .eq('id', userId)
@@ -195,7 +212,7 @@ async function updateUserSubscription(userId, subscriptionData) {
         if (error) throw error;
 
         // רישום תשלום (manual)
-        await supabase
+        await getSupabase()
             .from('payments')
             .insert({
                 user_id: userId,
@@ -217,6 +234,152 @@ async function updateUserSubscription(userId, subscriptionData) {
 }
 
 /**
+ * ⏸️ הפסקת מנוי משתמש
+ */
+async function cancelSubscription(userId) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                status: USER_STATUS.EXPIRED,
+                subscription_expires: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_cancel_subscription', `אדמין ביטל מנוי למשתמש: ${data.email}`);
+
+        return { success: true, user: data, message: 'המנוי בוטל בהצלחה' };
+    } catch (error) {
+        console.error('שגיאה בביטול מנוי:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 🔄 חידוש מנוי משתמש (הארכה)
+ */
+async function renewSubscription(userId, months = 1) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        // קבל פרטי משתמש נוכחיים
+        const { data: user, error: userError } = await getSupabase()
+            .from('user_profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (userError) throw userError;
+
+        // חשב תאריך תפוגה חדש
+        let newExpiry = new Date();
+        if (user.subscription_expires && new Date(user.subscription_expires) > new Date()) {
+            // אם יש תאריך תפוגה עתידי, הוסף עליו
+            newExpiry = new Date(user.subscription_expires);
+        }
+        newExpiry.setMonth(newExpiry.getMonth() + months);
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                status: USER_STATUS.ACTIVE,
+                subscription_expires: newExpiry.toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_renew_subscription', `אדמין חידש מנוי למשתמש ${data.email} ב-${months} חודשים`);
+
+        return { success: true, user: data, message: `המנוי חודש ב-${months} חודשים` };
+    } catch (error) {
+        console.error('שגיאה בחידוש מנוי:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 🏢 הקצאת משתמש לבניין
+ */
+async function assignUserToBuilding(userId, buildingId, buildingName) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                building_id: buildingId,
+                building_name: buildingName,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_assign_building', `אדמין הקצה משתמש ${data.email} לבניין: ${buildingName}`);
+
+        return { success: true, user: data, message: 'המשתמש הוקצה לבניין בהצלחה' };
+    } catch (error) {
+        console.error('שגיאה בהקצאת בניין:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 👑 הפיכת משתמש לאדמין של בניין
+ */
+async function makeUserBuildingAdmin(userId, buildingId, buildingName) {
+    try {
+        const superAdmin = await isSuperAdmin();
+        if (!superAdmin) {
+            throw new Error('רק סופר-אדמין יכול למנות אדמינים');
+        }
+
+        const { data, error } = await getSupabase()
+            .from('user_profiles')
+            .update({
+                role: ROLES.ADMIN,
+                building_id: buildingId,
+                building_name: buildingName,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logActivity('admin_make_building_admin', `סופר-אדמין מינה את ${data.email} כאדמין של בניין: ${buildingName}`);
+
+        return { success: true, user: data, message: 'המשתמש מונה כאדמין בניין בהצלחה' };
+    } catch (error) {
+        console.error('שגיאה במינוי אדמין בניין:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
  * 💳 קבלת תשלומי משתמש
  */
 async function getUserPayments(userId) {
@@ -226,7 +389,7 @@ async function getUserPayments(userId) {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('payments')
             .select('*')
             .eq('user_id', userId)
@@ -242,7 +405,7 @@ async function getUserPayments(userId) {
 }
 
 /**
- * 📊 סטטיסטיקות אדמין
+ * 📊 סטטיסטיקות אדמין - מורחבות
  */
 async function getAdminStats() {
     try {
@@ -251,12 +414,27 @@ async function getAdminStats() {
             throw new Error('אין הרשאות אדמין');
         }
 
+        // בדוק אם סופר-אדמין
+        const superAdmin = await isSuperAdmin();
+        const currentUser = await getCurrentUser();
+        const currentProfile = currentUser ? await getUserProfile(currentUser.id) : null;
+
         // ספירת משתמשים לפי סטטוס
-        const { data: users, error: usersError } = await supabase
+        let query = getSupabase()
             .from('user_profiles')
-            .select('status, subscription_type');
+            .select('status, subscription_type, building_id, building_name, created_at, last_login');
+
+        // אם לא סופר-אדמין, הצג רק משתמשים מאותו בניין
+        if (!superAdmin && currentProfile?.building_id) {
+            query = query.eq('building_id', currentProfile.building_id);
+        }
+
+        const { data: users, error: usersError } = await query;
 
         if (usersError) throw usersError;
+
+        // חישוב בניינים ייחודיים
+        const uniqueBuildings = [...new Set(users.filter(u => u.building_id).map(u => u.building_id))];
 
         const stats = {
             total: users.length,
@@ -266,25 +444,46 @@ async function getAdminStats() {
             blocked: users.filter(u => u.status === USER_STATUS.BLOCKED).length,
             monthly: users.filter(u => u.subscription_type === 'monthly').length,
             yearly: users.filter(u => u.subscription_type === 'yearly').length,
-            lifetime: users.filter(u => u.subscription_type === 'lifetime').length
+            lifetime: users.filter(u => u.subscription_type === 'lifetime').length,
+            buildings: uniqueBuildings.length,
+            todayLogins: 0
         };
 
-        // סכום תשלומים
-        const { data: payments, error: paymentsError } = await supabase
+        // ספירת התחברויות היום
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        stats.todayLogins = users.filter(u => {
+            if (!u.last_login) return false;
+            const loginDate = new Date(u.last_login);
+            return loginDate >= today;
+        }).length;
+
+        // סכום תשלומים כולל
+        const { data: payments, error: paymentsError } = await getSupabase()
             .from('payments')
-            .select('amount, status')
+            .select('amount, status, created_at')
             .eq('status', 'completed');
 
         if (!paymentsError && payments) {
-            stats.totalRevenue = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            stats.totalRevenue = payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            
+            // הכנסות החודש הנוכחי
+            const firstOfMonth = new Date();
+            firstOfMonth.setDate(1);
+            firstOfMonth.setHours(0, 0, 0, 0);
+            
+            stats.monthlyRevenue = payments
+                .filter(p => new Date(p.created_at) >= firstOfMonth)
+                .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
         } else {
             stats.totalRevenue = 0;
+            stats.monthlyRevenue = 0;
         }
 
         return { success: true, stats };
     } catch (error) {
         console.error('שגיאה בקבלת סטטיסטיקות:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: error.message, stats: {} };
     }
 }
 
@@ -299,14 +498,14 @@ async function deleteUser(userId) {
         }
 
         // קודם קבל את פרטי המשתמש
-        const { data: user } = await supabase
+        const { data: user } = await getSupabase()
             .from('user_profiles')
             .select('email')
             .eq('id', userId)
             .single();
 
         // מחק את המשתמש (CASCADE ימחק הכל)
-        const { error } = await supabase
+        const { error } = await getSupabase()
             .from('user_profiles')
             .delete()
             .eq('id', userId);
@@ -332,7 +531,7 @@ async function searchUsers(searchTerm) {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`)
@@ -371,6 +570,158 @@ async function sendMessageToUser(userId, message) {
 }
 
 /**
+ * 📱 שליחת תזכורת תשלום בוואטסאפ
+ */
+async function sendPaymentReminderWhatsApp(userId) {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        // קבל פרטי משתמש
+        const { data: user, error } = await getSupabase()
+            .from('user_profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+
+        if (!user.phone) {
+            return { success: false, error: 'למשתמש אין מספר טלפון' };
+        }
+
+        // נקה את מספר הטלפון (הסר מקפים, רווחים וכו')
+        let phone = user.phone.replace(/[\s\-\(\)]/g, '');
+        
+        // אם מתחיל ב-0, החלף ל-972
+        if (phone.startsWith('0')) {
+            phone = '972' + phone.substring(1);
+        }
+        
+        // אם לא מתחיל ב-+, הוסף
+        if (!phone.startsWith('+')) {
+            phone = '+' + phone;
+        }
+
+        // הכן את ההודעה
+        const userName = user.full_name || 'לקוח יקר';
+        const subscriptionType = user.subscription_type || 'trial';
+        const status = user.status;
+        
+        let message = '';
+        
+        if (status === 'expired' || status === 'blocked') {
+            message = `שלום ${userName}! 👋
+
+המנוי שלך למערכת ניהול הדיירים פג תוקף.
+
+💳 לחידוש המנוי והמשך השימוש במערכת:
+https://belding.vercel.app/pricing.html
+
+📞 לשאלות ותמיכה אנחנו כאן!
+
+בברכה,
+צוות ניהול הדיירים`;
+        } else if (status === 'trial') {
+            const trialEnds = user.trial_ends ? new Date(user.trial_ends) : null;
+            const daysLeft = trialEnds ? Math.ceil((trialEnds - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+            
+            message = `שלום ${userName}! 👋
+
+תקופת הניסיון שלך ${daysLeft > 0 ? `מסתיימת בעוד ${daysLeft} ימים` : 'הסתיימה'}.
+
+🎁 שדרג עכשיו ותיהנה מכל התכונות:
+https://belding.vercel.app/pricing.html
+
+✅ מנוי חודשי: ₪49
+✅ מנוי שנתי: ₪490 (חיסכון של 17%!)
+✅ לכל החיים: ₪499 בלבד!
+
+בברכה,
+צוות ניהול הדיירים`;
+        } else {
+            message = `שלום ${userName}! 👋
+
+תודה שאתה משתמש במערכת ניהול הדיירים שלנו!
+
+📊 סטטוס המנוי שלך: ${getSubscriptionTypeText(subscriptionType)}
+
+לכל שאלה אנחנו כאן!
+
+בברכה,
+צוות ניהול הדיירים`;
+        }
+
+        // קידוד ההודעה ל-URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // יצירת קישור וואטסאפ
+        const whatsappUrl = `https://wa.me/${phone.replace('+', '')}?text=${encodedMessage}`;
+        
+        // רישום פעילות
+        await logActivity('admin_whatsapp_reminder', `נשלחה תזכורת תשלום ב-WhatsApp ל: ${user.email}`);
+
+        return { 
+            success: true, 
+            url: whatsappUrl,
+            message: 'קישור וואטסאפ נוצר בהצלחה'
+        };
+    } catch (error) {
+        console.error('שגיאה בשליחת תזכורת וואטסאפ:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * 📱 שליחת תזכורת תשלום לכל המשתמשים שפג להם המנוי
+ */
+async function sendBulkPaymentReminders() {
+    try {
+        const admin = await isAdmin();
+        if (!admin) {
+            throw new Error('אין הרשאות אדמין');
+        }
+
+        // קבל משתמשים עם מנוי שפג או בניסיון
+        const { data: users, error } = await getSupabase()
+            .from('user_profiles')
+            .select('*')
+            .in('status', ['expired', 'trial'])
+            .not('phone', 'is', null);
+
+        if (error) throw error;
+
+        const results = [];
+        for (const user of users) {
+            const result = await sendPaymentReminderWhatsApp(user.id);
+            results.push({ user: user.email, ...result });
+        }
+
+        return { 
+            success: true, 
+            count: results.length,
+            results 
+        };
+    } catch (error) {
+        console.error('שגיאה בשליחת תזכורות:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// פונקציית עזר לטקסט סוג מנוי
+function getSubscriptionTypeText(type) {
+    const texts = {
+        monthly: 'חודשי',
+        yearly: 'שנתי',
+        lifetime: 'לכל החיים',
+        trial: 'ניסיון'
+    };
+    return texts[type] || type;
+}
+
+/**
  * 📋 ייצוא רשימת משתמשים ל-CSV
  */
 async function exportUsersToCSV() {
@@ -380,7 +731,7 @@ async function exportUsersToCSV() {
             throw new Error('אין הרשאות אדמין');
         }
 
-        const { data: users, error } = await supabase
+        const { data: users, error } = await getSupabase()
             .from('user_profiles')
             .select('*')
             .order('created_at', { ascending: false });
@@ -416,5 +767,11 @@ async function exportUsersToCSV() {
         return { success: false, error: error.message };
     }
 }
+
+// חשיפה לחלון
+window.cancelSubscription = cancelSubscription;
+window.renewSubscription = renewSubscription;
+window.assignUserToBuilding = assignUserToBuilding;
+window.makeUserBuildingAdmin = makeUserBuildingAdmin;
 
 console.log('✅ Admin.js נטען בהצלחה');

@@ -78,6 +78,7 @@ function initializeApp() {
         unifyPaymentsUnderTenants();
     }
     setupEventListeners();
+    updateNotificationBadge();
     if (typeof setupTenantHubListeners === 'function') {
         setupTenantHubListeners();
     }
@@ -215,9 +216,9 @@ function loadDemoData() {
             createdAt: new Date().toISOString(),
             monthlyPayments: {
                 [currentYear]: {
-                    1: { paid: true, date: '2024-01-05', amount: 500 },
-                    2: { paid: true, date: '2024-02-05', amount: 500 },
-                    3: { paid: true, date: '2024-03-05', amount: 500 },
+                    1: { paid: true, date: currentYear + '-01-05', amount: 500 },
+                    2: { paid: true, date: currentYear + '-02-05', amount: 500 },
+                    3: { paid: true, date: currentYear + '-03-05', amount: 500 },
                     [currentMonth]: { paid: true, date: new Date().toISOString(), amount: 500 }
                 }
             }
@@ -225,7 +226,7 @@ function loadDemoData() {
         {
             id: generateId(),
             apartment: '2',
-            name: 'שרה לevi',
+            name: 'שרה לוי',
             phone: '052-9876543',
             email: 'sara@example.com',
             monthlyAmount: 500,
@@ -250,8 +251,8 @@ function loadDemoData() {
             createdAt: new Date().toISOString(),
             monthlyPayments: {
                 [currentYear]: {
-                    1: { paid: true, date: '2024-01-10', amount: 600 },
-                    2: { paid: true, date: '2024-02-10', amount: 600 }
+                    1: { paid: true, date: currentYear + '-01-10', amount: 600 },
+                    2: { paid: true, date: currentYear + '-02-10', amount: 600 }
                 }
             }
         },
@@ -2435,11 +2436,112 @@ function bulkMarkPaid() {
     showToast(`${successCount} דיירים סומנו כשילמו לחודש הנוכחי!`, 'success');
 }
 
+function whatsappPhone(raw) {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('972')) return digits;
+    if (digits.startsWith('0')) return '972' + digits.substring(1);
+    return '972' + digits;
+}
+
 function bulkSendReminder() {
     if (appState.selectedTenants.size === 0) return;
-    
-    showToast(`נשלחו תזכורות ל-${appState.selectedTenants.size} דיירים (סימולציה)`, 'info');
-    addActivity(`נשלחו תזכורות ל-${appState.selectedTenants.size} דיירים`, 'notification');
+
+    const tenants = Array.from(appState.selectedTenants)
+        .map(id => appState.tenants.find(t => t.id === id))
+        .filter(Boolean);
+    const withPhone = tenants.filter(t => whatsappPhone(t.phone));
+    const missing = tenants.length - withPhone.length;
+
+    if (withPhone.length === 0) {
+        showToast('לדיירים שנבחרו אין מספר טלפון', 'error');
+        return;
+    }
+    if (withPhone.length > 1 && !confirm(`לפתוח וואטסאפ עם תזכורת עבור ${withPhone.length} דיירים?`)) {
+        return;
+    }
+
+    withPhone.forEach(tenant => {
+        const url = `https://wa.me/${whatsappPhone(tenant.phone)}?text=${encodeURIComponent(generateReminderMessage(tenant))}`;
+        window.open(url, '_blank');
+    });
+
+    if (missing) {
+        showToast(`נפתחה תזכורת בוואטסאפ ל-${withPhone.length} דיירים. ${missing} בלי טלפון.`, 'info');
+    } else {
+        showToast(`נפתחה תזכורת בוואטסאפ ל-${withPhone.length} דיירים`, 'success');
+    }
+    addActivity(`נשלחה תזכורת בוואטסאפ ל-${withPhone.length} דיירים`, 'notification');
+}
+
+function collectAppNotifications() {
+    const items = [];
+    (appState.tenants || []).forEach(tenant => {
+        if (tenant.status === 'overdue') {
+            items.push({
+                title: 'חוב פתוח',
+                body: `${tenant.name} · דירה ${tenant.apartment}`,
+                section: 'tenants'
+            });
+        } else if (tenant.status === 'pending') {
+            items.push({
+                title: 'תשלום ממתין',
+                body: `${tenant.name} · דירה ${tenant.apartment}`,
+                section: 'tenants'
+            });
+        }
+    });
+    return items.slice(0, 12);
+}
+
+function updateNotificationBadge() {
+    const badge = document.getElementById('notificationBadge');
+    if (!badge) return;
+    const count = collectAppNotifications().length;
+    badge.textContent = String(count);
+    badge.style.display = count === 0 ? 'none' : 'flex';
+}
+
+function hideNotificationsPanel() {
+    const panel = document.getElementById('notificationsPanel');
+    if (panel) panel.classList.add('hidden');
+}
+
+function renderNotificationsPanel() {
+    const list = document.getElementById('notificationsList');
+    if (!list) return;
+    const items = collectAppNotifications();
+    updateNotificationBadge();
+    if (!items.length) {
+        list.innerHTML = '<p class="px-4 py-6 text-sm text-gray-500">אין התראות חדשות</p>';
+        return;
+    }
+    list.innerHTML = items.map(item =>
+        `<button type="button" class="w-full text-right px-4 py-3 hover:bg-gray-50 border-b border-gray-100" data-section="${item.section}">
+            <div class="font-semibold text-sm text-gray-900"></div>
+            <div class="text-xs text-gray-500 mt-1"></div>
+        </button>`
+    ).join('');
+    list.querySelectorAll('button').forEach((btn, index) => {
+        const item = items[index];
+        btn.querySelector('.font-semibold').textContent = item.title;
+        btn.querySelector('.text-xs').textContent = item.body;
+        btn.addEventListener('click', () => {
+            hideNotificationsPanel();
+            if (typeof showTab === 'function') showTab(item.section);
+        });
+    });
+}
+
+function toggleNotificationsPanel() {
+    const panel = document.getElementById('notificationsPanel');
+    if (!panel) return;
+    if (panel.classList.contains('hidden')) {
+        renderNotificationsPanel();
+        panel.classList.remove('hidden');
+    } else {
+        panel.classList.add('hidden');
+    }
 }
 
 function bulkDelete() {
@@ -2496,6 +2598,14 @@ function setupEventListeners() {
     document.getElementById('statusFilter')?.addEventListener('change', renderTenantsTable);
     document.getElementById('bulkMarkPaidTenantsBtn')?.addEventListener('click', bulkMarkPaid);
     document.getElementById('bulkReminderTenantsBtn')?.addEventListener('click', bulkSendReminder);
+    document.getElementById('notificationsBtn')?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleNotificationsPanel();
+    });
+    document.addEventListener('click', (event) => {
+        const wrap = document.getElementById('notificationsWrap');
+        if (wrap && !wrap.contains(event.target)) hideNotificationsPanel();
+    });
     document.getElementById('bulkDeleteTenantsBtn')?.addEventListener('click', bulkDelete);
     document.getElementById('refreshBtn')?.addEventListener('click', () => {
         renderTenantsTable();

@@ -25,19 +25,49 @@ if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClien
 }
 
 /**
- * 🔐 כניסת בעלים בסיסמה רגילה — בלי גוגל ובלי סשן Supabase.
- * enabled=true מחליף את כל ההתחברות. ownerPasswordEnabled מוסיף כניסת בעלים
- * לצד אימייל/גוגל/פייסבוק.
+ * כניסה מקומית בסיסמה כבויה. ההתחברות היא רק דרך Supabase Auth.
+ * תפקיד מנהל ראשי נקבע בטבלת user_profiles (role = super_admin), לא בקוד.
  */
 const SIMPLE_AUTH = {
     enabled: false,
-    ownerPasswordEnabled: true,
-    username: 'vaad',
-    password: 'vaad2025',
+    ownerPasswordEnabled: false,
+    username: '',
     displayName: 'מנהל הועד',
-    displayEmail: 'chef@roxoneilat.co.il',
-    ownerEmails: ['chef@roxoneilat.co.il', 'boaz65sa@gmail.com']
+    displayEmail: ''
 };
+
+/** אפליקציית iOS המקורית (Capacitor). באתר זה תמיד false. */
+function isNativeIosApp() {
+    try {
+        var cap = window.Capacitor;
+        if (!cap || typeof cap.getPlatform !== 'function') return false;
+        return cap.getPlatform() === 'ios';
+    } catch (e) {
+        return false;
+    }
+}
+
+function applyNativeIosChrome() {
+    if (!isNativeIosApp()) return;
+    document.documentElement.setAttribute('data-native-ios', 'true');
+    if (!document.getElementById('native-ios-chrome-style')) {
+        var style = document.createElement('style');
+        style.id = 'native-ios-chrome-style';
+        style.textContent = '[data-native-ios] [data-ios-hide], [data-native-ios] a[href="pricing.html"], [data-native-ios] a[href^="pricing.html"], [data-native-ios] a[href="install.html"], [data-native-ios] a[href^="install.html"] { display: none !important; }';
+        document.head.appendChild(style);
+    }
+    var offers = document.getElementById('pricingOffers');
+    var note = document.getElementById('iosPricingNote');
+    if (offers) offers.style.display = 'none';
+    if (note) note.hidden = false;
+}
+
+window.isNativeIosApp = isNativeIosApp;
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyNativeIosChrome);
+} else {
+    applyNativeIosChrome();
+}
 
 /**
  * 💰 הגדרות מחירים - מעודכן

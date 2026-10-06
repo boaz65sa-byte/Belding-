@@ -1290,7 +1290,7 @@
         let currentEditUserId = null;
         let allUsers = [];
 
-        // הגנת גישה - רק סופר אדמין (boaz65sa@gmail.com)
+        // הגנת גישה - רק מי ש-role שלו super_admin ב-user_profiles
         (async function() {
             try {
                 await initSupabase();
@@ -1301,24 +1301,14 @@
                 
                 if (!user) {
                     console.log('❌ לא מחובר - מעביר לדף התחברות');
-                    window.location.href = 'admin-login.html';
+                    window.location.href = 'login.html';
                     return;
                 }
-                
-                // בדיקה ישירה לפי אימייל - הכי אמין
-                const userEmail = user.email;
-                console.log('📧 אימייל משתמש:', userEmail);
-                
-                const isSuperAdminByEmail = userEmail === 'boaz65sa@gmail.com';
-                
-                // קבל פרופיל גם כן
+
                 const profile = await getUserProfile(user.id);
-                console.log('👤 פרופיל משתמש:', profile);
-                
                 const isSuperAdminByRole = profile && profile.role === 'super_admin';
-                
-                // אפשר גישה אם אחד מהתנאים מתקיים
-                if (!isSuperAdminByEmail && !isSuperAdminByRole) {
+
+                if (!isSuperAdminByRole) {
                     console.log('❌ אין הרשאות סופר אדמין');
                     alert('אין לך הרשאות גישה לפאנל זה. רק מנהל ראשי יכול לגשת.');
                     window.location.href = 'index.html';

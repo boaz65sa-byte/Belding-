@@ -4,11 +4,9 @@
  * ========================================
  */
 
-// משתמשי מנהל על — גישה מלאה אוטומטית
-const SUPER_ADMIN_EMAILS = ['boaz65sa@gmail.com', 'chef@roxoneilat.co.il'];
-
-function isSuperAdminEmail(email) {
-    return SUPER_ADMIN_EMAILS.includes(String(email || '').trim().toLowerCase());
+// תפקיד מנהל ראשי מגיע מ-user_profiles.role בלבד, לא מרשימת אימיילים בקוד.
+function isSuperAdminEmail() {
+    return false;
 }
 
 // משתנה גלובלי ללקוח Supabase
@@ -79,10 +77,10 @@ function getSimpleAuthConfig() {
     if (typeof SIMPLE_AUTH !== 'undefined' && SIMPLE_AUTH) return SIMPLE_AUTH;
     return {
         enabled: false,
-        username: 'vaad',
-        password: 'vaad2025',
+        ownerPasswordEnabled: false,
+        username: '',
         displayName: 'מנהל הועד',
-        displayEmail: 'vaad@local'
+        displayEmail: ''
     };
 }
 
@@ -93,7 +91,7 @@ function isSimpleAuthEnabled() {
 
 function isOwnerPasswordEnabled() {
     const cfg = getSimpleAuthConfig();
-    return !!(cfg && cfg.ownerPasswordEnabled !== false && cfg.password);
+    return !!(cfg && cfg.ownerPasswordEnabled === true && cfg.password);
 }
 
 function isOwnerLoginId(usernameOrEmail) {
@@ -101,9 +99,6 @@ function isOwnerLoginId(usernameOrEmail) {
     if (!u) return false;
     const cfg = getSimpleAuthConfig();
     if (cfg.username && u === String(cfg.username).trim().toLowerCase()) return true;
-    const emails = Array.isArray(cfg.ownerEmails) ? cfg.ownerEmails : [];
-    if (emails.some(function (email) { return String(email || '').trim().toLowerCase() === u; })) return true;
-    if (typeof isSuperAdminEmail === 'function' && isSuperAdminEmail(u)) return true;
     return false;
 }
 
@@ -193,7 +188,7 @@ function getSimpleAuthProfile() {
     const cfg = getSimpleAuthConfig();
     const session = readSimpleAuthSession();
     const raw = session && session.username ? String(session.username).trim() : '';
-    const email = raw.indexOf('@') !== -1 ? raw : (cfg.displayEmail || 'chef@roxoneilat.co.il');
+    const email = raw.indexOf('@') !== -1 ? raw : (cfg.displayEmail || '');
     return {
         id: 'owner-local',
         email: email,
@@ -275,9 +270,6 @@ async function checkUserAccess() {
         if (error || !profile) {
             console.log('📝 יוצר פרופיל חדש למשתמש...');
             
-            // בדוק אם זה הסופר אדמין
-            const isSuperAdmin = isSuperAdminEmail(session.user.email);
-            
             const { data: newProfile, error: insertError } = await supabase
                 .from('user_profiles')
                 .upsert({
@@ -285,10 +277,10 @@ async function checkUserAccess() {
                     email: session.user.email,
                     full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
                     phone: session.user.user_metadata?.phone || '',
-                    role: isSuperAdmin ? 'super_admin' : 'user',
-                    status: isSuperAdmin ? 'active' : 'trial',
-                    has_lifetime_access: isSuperAdmin ? true : false,
-                    subscription_type: isSuperAdmin ? 'lifetime' : null,
+                    role: 'user',
+                    status: 'trial',
+                    has_lifetime_access: false,
+                    subscription_type: null,
                     created_at: new Date().toISOString()
                 })
                 .select()
@@ -311,32 +303,6 @@ async function checkUserAccess() {
                 daysLeft: 14,
                 profile: newProfile
             };
-        }
-
-        // תיקון: אם זה boaz65sa@gmail.com ואין לו role של super_admin, עדכן
-        if (isSuperAdminEmail(session.user.email) && profile.role !== 'super_admin') {
-            console.log('🔧 מעדכן הרשאות סופר אדמין...');
-            const { data: updatedProfile, error: updateError } = await supabase
-                .from('user_profiles')
-                .update({
-                    role: 'super_admin',
-                    status: 'active',
-                    has_lifetime_access: true,
-                    subscription_type: 'lifetime'
-                })
-                .eq('id', session.user.id)
-                .select()
-                .single();
-            
-            if (!updateError && updatedProfile) {
-                console.log('✅ הרשאות סופר אדמין עודכנו');
-                return {
-                    hasAccess: true,
-                    status: 'active',
-                    daysLeft: null,
-                    profile: updatedProfile
-                };
-            }
         }
 
         // בדוק סטטוס מנוי
@@ -602,7 +568,7 @@ async function signInWithOAuthProvider(provider) {
         const msg = (error && error.message) ? String(error.message) : 'שגיאה לא ידועה';
         return {
             success: false,
-            error: msg + ' — בדוק ב-Supabase: Authentication → Providers → ' + label + ', ו-Redirect URLs כוללים את כתובת האתר המדויקת.'
+            error: 'לא ניתן להתחבר עם ' + label + ' כרגע. התחברו עם אימייל וסיסמה.'
         };
     }
 }
@@ -655,9 +621,9 @@ async function getUserProfile(userId) {
                     email: user.email,
                     full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
                     phone: user.user_metadata?.phone || '',
-                    role: isSuperAdminEmail(user.email) ? 'super_admin' : 'user',
-                    status: isSuperAdminEmail(user.email) ? 'active' : 'trial',
-                    subscription_type: isSuperAdminEmail(user.email) ? 'lifetime' : null,
+                    role: 'user',
+                    status: 'trial',
+                    subscription_type: null,
                     created_at: new Date().toISOString()
                 };
                 
