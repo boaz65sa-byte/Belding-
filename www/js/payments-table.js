@@ -29,6 +29,23 @@ function switchTenantTab(tabName) {
         selectedBtn.classList.add('active');
     }
 
+    const heroCopy = {
+        tenantsList: { title: 'דיירים', sub: 'רשימת הדיירים בבניין', icon: 'fa-users', tone: 'ds-hero--blue' },
+        paymentsTable: { title: 'טבלת תשלומים', sub: 'מעקב שנתי לפי חודש', icon: 'fa-calendar-check', tone: 'ds-hero--teal' },
+        paymentsHistory: { title: 'תשלומים', sub: 'היסטוריה, קבלות וחובות', icon: 'fa-shekel-sign', tone: 'ds-hero--violet' }
+    };
+    const hero = document.getElementById('tenantsHero');
+    const copy = heroCopy[tabName];
+    if (hero && copy) {
+        hero.className = 'ds-hero ' + copy.tone;
+        const title = document.getElementById('tenantsHeroTitle');
+        const sub = document.getElementById('tenantsHeroSub');
+        const icon = document.getElementById('tenantsHeroIcon');
+        if (title) title.textContent = copy.title;
+        if (sub) sub.textContent = copy.sub;
+        if (icon) icon.className = 'fas ' + copy.icon;
+    }
+
     if (tabName === 'paymentsTable') {
         setTimeout(function () {
             if (typeof initializePaymentsTableDates === 'function') {

@@ -30,7 +30,11 @@ function initFabLogic() {
 
         switch (sectionId) {
             case 'dashboardSection':
-                currentFab.style.display = 'none';
+                currentIcon.className = 'fas fa-plus';
+                currentFab.setAttribute('aria-label', 'הוסף דייר');
+                currentFab.onclick = () => {
+                    if (typeof addTenant === 'function') addTenant();
+                };
                 break;
             case 'tenantsSection': {
                 const paymentsTab = document.getElementById('paymentsHistoryTab');
@@ -170,14 +174,15 @@ function renderMobilePaymentsCards(tenantId = null) {
         const tenantName = tenant ? tenant.name : 'דייר לא נמצא';
         
         return `
-            <div class="mobile-card">
+            <div class="mobile-card mobile-card--${paymentStatus}">
                 <div class="mobile-card-header">
+                    <div class="ds-icon-tile" aria-hidden="true"><i class="fas fa-file-invoice-dollar"></i></div>
                     <div class="mobile-card-title">
-                        <i class="fas fa-file-invoice-dollar text-primary"></i>
                         ₪${payment.amount}
                     </div>
                     <span class="status-badge status-${paymentStatus}">${getStatusText(paymentStatus)}</span>
                 </div>
+                <div class="ds-meta"><i class="fas fa-calendar-alt" aria-hidden="true"></i> ${formatDate(payment.date)}</div>
                 <div class="mobile-card-body">
                     <div class="mobile-card-row">
                         <span class="mobile-card-label">דייר:</span>
@@ -235,20 +240,25 @@ function renderMobileExpensesCards(category = null) {
     }
     
     container.innerHTML = sortedExpenses.map(expense => {
-        const catInfo = getCategoryInfo(expense.category);
+        const catInfo = typeof getCategoryInfo === 'function'
+            ? getCategoryInfo(expense.category)
+            : {
+                icon: 'fas fa-receipt',
+                name: typeof getCategoryNameHe === 'function' ? getCategoryNameHe(expense.category) : (expense.category || ''),
+                color: '#5b46e8'
+            };
         const hasReceipt = expense.receiptUrl ? true : false;
         
         return `
             <div class="mobile-card">
                 <div class="mobile-card-header">
+                    <div class="ds-icon-tile" aria-hidden="true"><i class="${catInfo.icon}"></i></div>
                     <div class="mobile-card-title truncate max-w-[70%]">
-                        <div style="width: 24px; height: 24px; border-radius: 6px; background: ${catInfo.color}; color: white; display: inline-flex; justify-content: center; align-items: center; margin-left: 6px; font-size: 10px;">
-                            <i class="${catInfo.icon}"></i>
-                        </div>
                         ₪${expense.amount}
                     </div>
-                    <span class="text-xs text-gray-500">${formatDate(expense.date)}</span>
+                    <span class="status-badge status-pending">${catInfo.name || ''}</span>
                 </div>
+                <div class="ds-meta"><i class="fas fa-calendar-alt" aria-hidden="true"></i> ${formatDate(expense.date)}</div>
                 <div class="mobile-card-body">
                     <div class="mobile-card-row">
                         <span class="mobile-card-label">תיאור:</span>

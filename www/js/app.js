@@ -402,6 +402,7 @@ function renderDashboard() {
     updateStatistics();
     renderCharts();
     renderRecentActivity();
+    renderDashboardAlerts();
 }
 
 function updateStatistics() {
@@ -488,7 +489,7 @@ function renderPaymentStatusChart() {
                     position: 'bottom',
                     rtl: true,
                     labels: {
-                        color: document.documentElement.getAttribute('data-theme') === 'light' ? '#10203a' : '#f6f1e4',
+                        color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f5f6fb' : '#1c2030',
                         font: { family: 'Heebo', size: 14 },
                         padding: 12,
                         boxWidth: 14,
@@ -520,7 +521,7 @@ function renderMonthlyRevenueChart() {
             datasets: [{
                 label: 'הכנסות (₪)',
                 data: monthsData.values,
-                backgroundColor: '#2563eb',
+                backgroundColor: '#5b46e8',
                 borderRadius: 8,
             }]
         },
@@ -536,14 +537,14 @@ function renderMonthlyRevenueChart() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        color: document.documentElement.getAttribute('data-theme') === 'light' ? '#10203a' : '#f6f1e4',
+                        color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f5f6fb' : '#1c2030',
                         font: { family: 'Heebo', size: 12 },
                         callback: (value) => `₪${value}`
                     }
                 },
                 x: {
                     ticks: {
-                        color: document.documentElement.getAttribute('data-theme') === 'light' ? '#10203a' : '#f6f1e4',
+                        color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f5f6fb' : '#1c2030',
                         font: { family: 'Heebo', size: 12 }
                     }
                 }
@@ -589,7 +590,7 @@ function renderRecentActivity() {
     }
     
     container.innerHTML = recentActivities.map(activity => `
-        <div class="activity-item">
+        <div class="activity-item activity-${activity.type || 'info'}">
             <div class="activity-icon">
                 <i class="fas fa-${getActivityIcon(activity.type)}"></i>
             </div>
@@ -599,6 +600,31 @@ function renderRecentActivity() {
             </div>
         </div>
     `).join('');
+}
+
+function renderDashboardAlerts() {
+    const list = document.getElementById('dashboardAlerts');
+    if (!list || typeof collectAppNotifications !== 'function') return;
+    const items = collectAppNotifications();
+    if (!items.length) {
+        list.innerHTML = '<div class="ds-alert-row ds-alert-row--calm"><span>אין התראות פתוחות</span></div>';
+        return;
+    }
+    list.innerHTML = items.map(item => {
+        const tone = item.title === 'חוב פתוח' ? 'rose' : 'amber';
+        return `<button type="button" class="ds-alert-row ds-alert-row--${tone}" data-section="${item.section}">
+            <i class="fas fa-${tone === 'rose' ? 'exclamation-circle' : 'clock'}" aria-hidden="true"></i>
+            <span><strong></strong><span class="ds-alert-body"></span></span>
+        </button>`;
+    }).join('');
+    list.querySelectorAll('button').forEach((btn, index) => {
+        const item = items[index];
+        btn.querySelector('strong').textContent = item.title;
+        btn.querySelector('.ds-alert-body').textContent = item.body;
+        btn.addEventListener('click', () => {
+            if (typeof showTab === 'function') showTab(item.section);
+        });
+    });
 }
 
 // ===================================
@@ -715,15 +741,18 @@ function renderTenantCards(tenants) {
         const balance = totalPaid - totalExpected;
         const balanceColor = balance >= 0 ? '#34c759' : '#ff3b30';
         
+        const paidPct = Math.max(0, Math.min(100, Math.round((paidMonths / totalMonths) * 100)));
         return `
             <div class="tenant-card tenant-card-unified" onclick="openTenantHub('${tenant.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTenantHub('${tenant.id}')}">
                 <div class="tenant-card-header">
+                    <div class="ds-icon-tile" aria-hidden="true"><i class="fas fa-user"></i></div>
                     <div class="tenant-card-info">
                         <div class="tenant-card-name">${tenant.name}</div>
-                        <div class="tenant-card-apartment">דירה ${tenant.apartment}</div>
+                        <div class="tenant-card-apartment"><i class="fas fa-building" aria-hidden="true"></i> דירה ${tenant.apartment}</div>
                     </div>
                     <div class="tenant-card-status"><span class="status-badge status-${badgeClass}">${statusLabel}</span></div>
                 </div>
+                <div class="ds-meter" role="img" aria-label="${paidMonths} מתוך ${totalMonths} חודשים שולמו"><span style="width:${paidPct}%"></span></div>
                 
                 <div class="tenant-card-details">
                     <div class="tenant-card-detail-item">
@@ -1887,11 +1916,11 @@ function saveNotificationSettings() {
 }
 
 function applyVaadTheme(mode) {
-    const theme = mode === 'light' ? 'light' : 'dark';
+    const theme = mode === 'dark' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', theme);
     document.body.classList.toggle('dark-theme', theme === 'dark');
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? '#071422' : '#0c1b33');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#12131a' : '#f3f1fb');
     const btn = document.getElementById('themeToggle');
     if (btn) {
         const goingLight = theme === 'dark';
@@ -1905,7 +1934,7 @@ function applyVaadTheme(mode) {
 
 function applySettings() {
     const savedTheme = localStorage.getItem('theme');
-    applyVaadTheme(savedTheme === 'light' ? 'light' : 'dark');
+    applyVaadTheme(savedTheme === 'dark' ? 'dark' : 'light');
 }
 
 function toggleTheme() {
@@ -1913,7 +1942,7 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
     applyVaadTheme(next);
     if (typeof showToast === 'function') {
-        showToast(next === 'dark' ? 'מצב כהה: כחול וזהב' : 'מצב בהיר הופעל', 'info');
+        showToast(next === 'dark' ? 'מצב כהה הופעל' : 'מצב בהיר הופעל', 'info');
     }
 }
 
@@ -2566,12 +2595,13 @@ function renderNotificationsPanel() {
         list.innerHTML = '<p class="px-4 py-6 text-sm text-gray-500">אין התראות חדשות</p>';
         return;
     }
-    list.innerHTML = items.map(item =>
-        `<button type="button" class="w-full text-right px-4 py-3 hover:bg-gray-50 border-b border-gray-100" data-section="${item.section}">
-            <div class="font-semibold text-sm text-gray-900"></div>
-            <div class="text-xs text-gray-500 mt-1"></div>
-        </button>`
-    ).join('');
+    list.innerHTML = items.map(item => {
+        const tone = item.title === 'חוב פתוח' ? 'rose' : 'amber';
+        return `<button type="button" class="ds-alert-row ds-alert-row--${tone}" data-section="${item.section}">
+            <div class="font-semibold text-sm"></div>
+            <div class="text-xs mt-1"></div>
+        </button>`;
+    }).join('');
     list.querySelectorAll('button').forEach((btn, index) => {
         const item = items[index];
         btn.querySelector('.font-semibold').textContent = item.title;
@@ -4199,6 +4229,7 @@ function saveNoticeToHistory(type, subject, content) {
 function renderNoticesHistory() {
     const tbody = document.getElementById('noticesHistoryTableBody');
     
+    const cards = document.getElementById('noticesCardsContainer');
     if (!appState.notices || appState.notices.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -4207,6 +4238,7 @@ function renderNoticesHistory() {
                 </td>
             </tr>
         `;
+        if (cards) cards.innerHTML = '<div class="ds-alert-row ds-alert-row--calm"><span>אין הודעות קודמות</span></div>';
         return;
     }
     
@@ -4235,6 +4267,26 @@ function renderNoticesHistory() {
             </td>
         </tr>
     `).join('');
+
+    if (cards) {
+        cards.hidden = false;
+        cards.innerHTML = appState.notices.map(notice => `
+            <article class="ds-list-card ds-list-card--${notice.type || 'general'}">
+                <div class="ds-list-head">
+                    <div class="ds-icon-tile" aria-hidden="true"><i class="fas fa-bullhorn"></i></div>
+                    <div style="flex:1;min-width:0">
+                        <h3>${notice.subject}</h3>
+                        <span class="status-badge status-${notice.type === 'urgent' ? 'overdue' : notice.type === 'payment' ? 'paid' : 'pending'}">${typeNames[notice.type] || notice.type}</span>
+                    </div>
+                </div>
+                <div class="ds-meta"><i class="fas fa-calendar-alt" aria-hidden="true"></i> ${formatDate(notice.date)}</div>
+                <div class="tenant-card-actions" style="margin-top:12px">
+                    <button type="button" class="tenant-card-action-btn monthly" onclick="viewNotice('${notice.id}')"><i class="fas fa-eye"></i> צפייה</button>
+                    <button type="button" class="tenant-card-action-btn secondary" onclick="deleteNotice('${notice.id}')"><i class="fas fa-trash"></i> מחיקה</button>
+                </div>
+            </article>
+        `).join('');
+    }
 }
 
 // View saved notice
