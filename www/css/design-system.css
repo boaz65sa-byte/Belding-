@@ -377,6 +377,11 @@ html[data-theme="dark"] header.sticky .bg-emerald-600 i {
 .ds-status--teal { background: var(--ds-grad-teal) !important; }
 
 /* === Segmented pills === */
+#tenantsSection.is-payments-view .tenant-section-tools,
+#tenantsSection.is-payments-view .ds-segments {
+    display: none !important;
+}
+
 .ds-segments {
     display: flex;
     gap: 4px;
@@ -976,9 +981,64 @@ html[data-theme="dark"] .mobile-bottom-nav .nav-item.active {
     outline-offset: 3px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1366px) {
+    :root {
+        --bottom-nav-offset: calc(69px + env(safe-area-inset-bottom, 0px));
+    }
+
     .mobile-bottom-nav {
         display: flex !important;
+        position: fixed !important;
+        inset-inline: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: space-evenly !important;
+        align-items: stretch !important;
+        align-self: stretch !important;
+        gap: 4px !important;
+    }
+
+    .mobile-bottom-nav .nav-item {
+        flex: 1 1 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        white-space: nowrap;
+    }
+
+    .mobile-bottom-nav .nav-item i,
+    .mobile-bottom-nav .nav-item span {
+        position: static !important;
+        display: block !important;
+        line-height: 1.2 !important;
+        transform: none !important;
+    }
+
+    .sidebar {
+        transform: translateX(100%) !important;
+    }
+
+    .sidebar.active {
+        transform: translateX(0) !important;
+    }
+
+    .content-area {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        max-width: 100% !important;
     }
 
     .mobile-menu-toggle {
@@ -1012,7 +1072,7 @@ html[data-theme="dark"] .mobile-bottom-nav .nav-item.active {
         flex: 0 0 auto;
     }
 
-    /* Scroll between the header and a reserved band for the FAB and tab bar. */
+    /* The scroller ends at the tab bar. Extra padding is only after the last card, so it can scroll clear of the FAB. */
     .main-container {
         display: block;
         flex: 1 1 auto;
@@ -1021,12 +1081,12 @@ html[data-theme="dark"] .mobile-bottom-nav .nav-item.active {
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        margin-bottom: calc(var(--bottom-nav-offset) + 72px) !important;
+        margin-bottom: var(--bottom-nav-offset) !important;
         padding-bottom: 0 !important;
     }
 
     .content-area {
-        padding-bottom: 12px !important;
+        padding-bottom: 88px !important;
     }
 
     .app-footer {
@@ -1052,7 +1112,7 @@ html[data-theme="dark"] .mobile-bottom-nav .nav-item.active {
     }
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 1367px) {
     .mobile-bottom-nav,
     #globalFab.fab-container,
     .tenants-cards-container,

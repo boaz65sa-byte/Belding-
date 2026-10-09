@@ -46,6 +46,11 @@ function switchTenantTab(tabName) {
         if (icon) icon.className = 'fas ' + copy.icon;
     }
 
+    const tenantsSection = document.getElementById('tenantsSection');
+    if (tenantsSection) {
+        tenantsSection.classList.toggle('is-payments-view', tabName === 'paymentsHistory');
+    }
+
     if (tabName === 'paymentsTable') {
         setTimeout(function () {
             if (typeof initializePaymentsTableDates === 'function') {

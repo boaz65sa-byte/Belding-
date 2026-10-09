@@ -248,6 +248,79 @@ function loadDemoData() {
             notes: 'תשלום דרך העברה בנקאית',
         }
     ];
+
+    const sampleMonth = String(currentMonth).padStart(2, '0');
+    appState.expenses = [
+        {
+            id: generateId(),
+            date: currentYear + '-' + sampleMonth + '-02',
+            category: 'cleaning',
+            description: 'ניקיון חדר מדרגות (דוגמה)',
+            amount: 450,
+            paidBy: 'ועד הבית',
+            notes: 'נתוני דוגמה',
+            isRecurring: true,
+            frequency: 'monthly',
+            startDate: null,
+            reminder: false,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: generateId(),
+            date: currentYear + '-' + sampleMonth + '-05',
+            category: 'elevator',
+            description: 'תחזוקת מעלית (דוגמה)',
+            amount: 320,
+            paidBy: 'ועד הבית',
+            notes: 'נתוני דוגמה',
+            isRecurring: true,
+            frequency: 'monthly',
+            startDate: null,
+            reminder: false,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: generateId(),
+            date: currentYear + '-' + sampleMonth + '-08',
+            category: 'electricity',
+            description: 'חשמל לובי ומדרגות (דוגמה)',
+            amount: 280,
+            paidBy: 'ועד הבית',
+            notes: 'נתוני דוגמה',
+            isRecurring: false,
+            frequency: null,
+            startDate: null,
+            reminder: false,
+            createdAt: new Date().toISOString()
+        }
+    ];
+
+    appState.notices = [
+        {
+            id: generateId(),
+            type: 'maintenance',
+            subject: 'תחזוקת מעלית (דוגמה)',
+            content: 'ביום שלישי בין 9:00 ל-12:00 תתבצע בדיקה תקופתית של המעלית. נא להשתמש במדרגות בשעות האלה.',
+            date: new Date().toISOString(),
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: generateId(),
+            type: 'general',
+            subject: 'ניקיון חדר המדרגות (דוגמה)',
+            content: 'הניקיון השבועי יתקיים ביום חמישי בבוקר. נא לא להשאיר חפצים בחדר המדרגות.',
+            date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+            id: generateId(),
+            type: 'meeting',
+            subject: 'אסיפת דיירים (דוגמה)',
+            content: 'אסיפת הדיירים תתקיים ביום ראשון בשעה 19:00 בחדר הישיבות. נא לאשר הגעה.',
+            date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+            createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        }
+    ];
     
     appState.isSampleData = true;
     addActivity('נטענו נתוני דוגמה להמחשה', 'info');
@@ -294,6 +367,8 @@ function refreshAfterLocalDataChange() {
     renderTenantsTable();
     if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
     if (typeof renderAnnualPaymentsMatrix === 'function') renderAnnualPaymentsMatrix();
+    if (typeof renderExpensesTable === 'function') renderExpensesTable();
+    if (typeof renderNoticesHistory === 'function') renderNoticesHistory();
     updateAllStatistics();
     updateNotificationBadge();
     refreshLocalDataNotices();
@@ -1041,6 +1116,8 @@ function switchTab(tabName) {
     if (tabName === 'payments') {
         tabName = 'tenants';
         tenantSubTab = 'paymentsHistory';
+    } else if (tabName === 'tenants') {
+        tenantSubTab = 'tenantsList';
     }
 
     document.querySelectorAll('.menu-item[data-section]').forEach(function (mi) {
@@ -3214,6 +3291,7 @@ function renderExpensesTable() {
     
     if (filteredExpenses.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem;">אין הוצאות רשומות</td></tr>`;
+        updateExpenseSummary();
         return;
     }
     
