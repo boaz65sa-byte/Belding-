@@ -109,6 +109,11 @@ html[data-theme="dark"] .border-gray-200 {
 }
 
 .app-footer {
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
     flex: 1 0 100%;
     width: 100%;
     box-sizing: border-box;
@@ -1221,7 +1226,7 @@ html[data-theme="dark"] header.sticky {
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Toasts sit under the header, never on the tab bar or the FAB, and fade out. */
+/* Toasts sit under the header, never on the tab bar or the FAB, and disappear when dismissed. */
 .toast {
     position: fixed !important;
     top: calc(env(safe-area-inset-top, 0px) + 68px) !important;
@@ -1238,11 +1243,17 @@ html[data-theme="dark"] header.sticky {
     border: 1px solid #e6e8f2 !important;
     border-radius: 16px !important;
     box-shadow: 0 12px 28px rgba(48, 42, 92, 0.16) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
     transform: translateX(-50%) translateY(-10px) !important;
+    transition: none !important;
 }
 
 .toast.show {
     opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
     transform: translateX(-50%) translateY(0) !important;
 }
 

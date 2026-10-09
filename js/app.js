@@ -93,36 +93,15 @@ function initializeApp() {
     refreshLocalDataNotices();
     checkAutoBackup();
     
+    const footerCredit = document.getElementById('appFooterCredit');
+    if (footerCredit) {
+        footerCredit.textContent = `מערכת ניהול דיירים v${APP_CONFIG.version} | ${APP_CONFIG.author}`;
+    }
+
     // Show loading animation
     showLoading();
     setTimeout(() => {
         hideLoading();
-        
-        // Check if this is a new version
-        const lastSeenVersion = localStorage.getItem('lastSeenVersion');
-        const currentVersion = APP_CONFIG.version;
-        
-        if (lastSeenVersion !== currentVersion) {
-            // This is a new version or first time
-            localStorage.setItem('lastSeenVersion', currentVersion);
-            
-            if (lastSeenVersion && (currentVersion === '2.4.7' || currentVersion === '2.4.8')) {
-                // Show special message for new features
-                const featureMessage = currentVersion === '2.4.8' ? 
-                    'סנכרון אוטומטי בין דיירים ← → תשלומים!' :
-                    'קבלות PDF מקצועיות זמינות עכשיו!';
-                showToast(`🎉 עדכון חדש! גרסה ${currentVersion} - ${featureMessage}`, 'success', 5000);
-                
-                // Show detailed notification after 2 seconds
-                setTimeout(() => {
-                    showNewFeatureNotification();
-                }, 2000);
-            } else {
-                showToast(`מערכת ניהול דיירים v${currentVersion} | ${APP_CONFIG.author}`, 'success');
-            }
-        } else {
-            showToast(`מערכת ניהול דיירים v${currentVersion} | ${APP_CONFIG.author}`, 'success');
-        }
     }, 1000);
 }
 
