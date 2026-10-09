@@ -1088,7 +1088,14 @@ function switchTab(tabName) {
             switchTenantTab(tenantSubTab);
         }
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollPageToTop();
+}
+
+function scrollPageToTop() {
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    window.scrollTo({ top: 0, behavior: behavior });
+    const scroller = document.querySelector('.main-container');
+    if (scroller) scroller.scrollTo({ top: 0, behavior: behavior });
 }
 
 // Alias for mobile bottom navigation
@@ -3091,11 +3098,13 @@ function showToast(message, type = 'info', duration = 3000) {
     toast.className = `toast ${type}`;
     toastIcon.innerHTML = icons[type];
     toastMessage.textContent = message;
-    
+
     toast.classList.add('show');
-    
-    setTimeout(() => {
+
+    if (toast._hideTimer) clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => {
         toast.classList.remove('show');
+        toast._hideTimer = null;
     }, duration);
 }
 
@@ -4302,8 +4311,7 @@ function viewNotice(id) {
     // Preview
     previewNotice();
     
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollPageToTop();
 }
 
 // Delete notice

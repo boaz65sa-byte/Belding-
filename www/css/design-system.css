@@ -101,34 +101,51 @@ html[data-theme="dark"] .border-gray-200 {
     border-color: var(--ds-line) !important;
 }
 
+/* Header is in normal flow (sticky). Do not add a second offset under it. */
+.main-container {
+    margin-top: 0 !important;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.app-footer {
+    flex: 1 0 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .content-area {
-    padding-top: 16px !important;
+    padding-top: 8px !important;
     padding-inline: max(16px, env(safe-area-inset-left, 0px)) !important;
     padding-bottom: 32px !important;
 }
 
 /* === Top bar === */
-header.sticky {
+header.sticky,
+html[data-theme="light"] header.sticky {
     height: auto !important;
-    min-height: calc(60px + env(safe-area-inset-top, 0px));
+    min-height: calc(56px + env(safe-area-inset-top, 0px));
     padding-top: env(safe-area-inset-top, 0px);
-    background: rgba(255, 255, 255, 0.94) !important;
-    color: var(--ds-text) !important;
-    border-color: var(--ds-line) !important;
-    box-shadow: 0 1px 0 var(--ds-line) !important;
+    background: #ffffff !important;
+    color: #1c2030 !important;
+    border-color: #e6e8f2 !important;
+    box-shadow: 0 1px 0 #e6e8f2 !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
 
-html[data-theme="light"] header h1,
-html[data-theme="light"] header .text-gray-900,
-html[data-theme="light"] header .text-gray-700,
-html[data-theme="light"] header i,
-html[data-theme="dark"] header h1,
-html[data-theme="dark"] header .text-gray-900,
-html[data-theme="dark"] header .text-gray-700,
-html[data-theme="dark"] header i {
-    color: var(--ds-text) !important;
+html[data-theme="light"] header.sticky h1,
+html[data-theme="light"] header.sticky .text-gray-900,
+html[data-theme="light"] header.sticky .text-gray-700,
+html[data-theme="light"] header.sticky i {
+    color: #1c2030 !important;
+}
+
+html[data-theme="dark"] header.sticky h1,
+html[data-theme="dark"] header.sticky .text-gray-900,
+html[data-theme="dark"] header.sticky .text-gray-700,
+html[data-theme="dark"] header.sticky i {
+    color: #f5f6fb !important;
 }
 
 html[data-theme="light"] header .text-gray-500,
@@ -145,7 +162,13 @@ header .bg-blue-600 {
 }
 
 header .bg-blue-600,
-header .bg-blue-600 i {
+header .bg-blue-600 i,
+html[data-theme="light"] header.sticky .bg-blue-600 i,
+html[data-theme="dark"] header.sticky .bg-blue-600 i,
+html[data-theme="light"] header.sticky .bg-emerald-600,
+html[data-theme="dark"] header.sticky .bg-emerald-600,
+html[data-theme="light"] header.sticky .bg-emerald-600 i,
+html[data-theme="dark"] header.sticky .bg-emerald-600 i {
     color: #fff !important;
 }
 
@@ -877,7 +900,8 @@ textarea,
 }
 
 /* === Bottom tab bar + FAB === */
-.mobile-bottom-nav {
+.mobile-bottom-nav,
+html[data-theme="light"] .mobile-bottom-nav {
     background: rgba(255, 255, 255, 0.96) !important;
     color: var(--ds-muted) !important;
     border-top: 1px solid var(--ds-line) !important;
@@ -960,9 +984,49 @@ html[data-theme="dark"] .mobile-bottom-nav .nav-item.active {
         display: block !important;
     }
 
-    .content-area,
+    html,
+    body {
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow: hidden;
+    }
+
+    body,
+    body.min-h-screen {
+        display: flex;
+        flex-direction: column;
+        min-height: 0 !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+    }
+
+    header.sticky {
+        position: relative !important;
+        flex: 0 0 auto;
+    }
+
+    /* Scroll between the header and a reserved band for the FAB and tab bar. */
     .main-container {
-        padding-bottom: var(--bottom-nav-offset) !important;
+        display: block;
+        flex: 1 1 auto;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: calc(var(--bottom-nav-offset) + 72px) !important;
+        padding-bottom: 0 !important;
+    }
+
+    .content-area {
+        padding-bottom: 12px !important;
+    }
+
+    .app-footer {
+        margin-top: 8px !important;
+        padding-bottom: 12px !important;
     }
 
     #tenantsSection #tenantsListTab > .table-container,
@@ -1151,7 +1215,59 @@ html[data-theme="dark"] .fab-button i {
 }
 
 html[data-theme="dark"] header.sticky {
-    background: rgba(18, 19, 26, 0.94) !important;
+    background: #1c1e2a !important;
+    color: #f5f6fb !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Toasts sit under the header, never on the tab bar or the FAB, and fade out. */
+.toast {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top, 0px) + 68px) !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    z-index: 1200 !important;
+    width: min(420px, calc(100% - 24px));
+    min-width: 0 !important;
+    max-width: calc(100% - 24px);
+    margin: 0 !important;
+    background: #ffffff !important;
+    color: #1c2030 !important;
+    border: 1px solid #e6e8f2 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 28px rgba(48, 42, 92, 0.16) !important;
+    transform: translateX(-50%) translateY(-10px) !important;
+}
+
+.toast.show {
+    opacity: 1 !important;
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+.toast-message {
+    color: #1c2030 !important;
+}
+
+html[data-theme="dark"] .toast {
+    background: #1c1e2a !important;
+    color: #f5f6fb !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="dark"] .toast-message {
+    color: #f5f6fb !important;
+}
+
+/* Purchase and install links stay hidden inside the iOS app (guideline 3.1.1). */
+html[data-native-ios] [data-ios-hide],
+html[data-native-ios] #pricingBtnTop,
+html[data-native-ios] a[href="pricing.html"],
+html[data-native-ios] a[href^="pricing.html"],
+html[data-native-ios] a[href="install.html"],
+html[data-native-ios] a[href^="install.html"] {
+    display: none !important;
 }
 
 html[data-theme="dark"] .mobile-bottom-nav {
