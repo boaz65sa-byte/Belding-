@@ -20,7 +20,7 @@
     <meta name="description" content="מערכת מתקדמת לניהול דיירים, תשלומים, קבלות PDF, דוחות והוצאות.">
     <meta name="keywords" content="ניהול דיירים, ועד בית, תשלומים, קבלות, דוחות, WhatsApp">
     
-    <meta name="theme-color" content="#071422">
+    <meta name="theme-color" content="#f3f1fb">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,16 +28,16 @@
     <script>
         (function () {
             var saved = localStorage.getItem('theme');
-            var theme = saved === 'light' ? 'light' : 'dark';
+            var theme = saved === 'dark' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', theme);
             var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', theme === 'dark' ? '#071422' : '#0c1b33');
+            if (meta) meta.setAttribute('content', theme === 'dark' ? '#12131a' : '#f3f1fb');
         })();
     </script>
     
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-    <link rel="apple-touch-icon" href="icon-180.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-512.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -78,7 +78,7 @@
         .content-section { display: none; }
         .content-section.active { display: block; }
         .tenant-tab.active { background: var(--primary-color) !important; color: white !important; border: none; }
-        .tenant-tab:not(.active) { background: #f3f4f6; color: #374151; }
+        .tenant-tab:not(.active) { background: transparent; color: #1c2030; }
         .modal-content { border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
         /* Mobile touch targets - 44px minimum */
         @media (max-width: 768px) {
@@ -86,6 +86,7 @@
             .nav-item { min-height: 56px; }
         }
     </style>
+    <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body class="font-sans antialiased bg-gray-50 text-gray-900 min-h-screen" dir="rtl">
     <a class="skip-link" href="#mainContent">דלג לתוכן</a>
@@ -179,20 +180,20 @@
     </aside>
 
     <!-- Main Content -->
-    <main id="mainContent" tabindex="-1" class="content-area md:mr-64 pt-4 pb-24 md:pb-8 px-4 md:px-6 max-w-7xl mx-auto">
+    <main id="mainContent" tabindex="-1" class="content-area md:mr-64 pb-24 md:pb-8 px-4 md:px-6 max-w-7xl mx-auto">
             <!-- Dashboard Section -->
             <section id="dashboardSection" class="content-section active">
-                <div class="mb-6">
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2">
-                        <i class="fas fa-chart-line text-blue-600"></i>
-                        לוח מחוונים
-                    </h1>
-                    <p class="text-gray-500 mt-1">סקירה כללית של מצב הבניין</p>
+                <div class="ds-hero ds-hero--violet">
+                    <div>
+                        <h1>לוח מחוונים</h1>
+                        <p>סקירה כללית של מצב הבניין</p>
+                    </div>
+                    <div class="ds-hero-icon" aria-hidden="true"><i class="fas fa-chart-line"></i></div>
                 </div>
 
                 <div id="quickAccessButtons" class="hidden"></div>
 
-                <div id="localEmptyState" class="hidden mb-6 bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <div id="localEmptyState" class="ds-note hidden mb-6 bg-white rounded-xl shadow-md p-6 border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-900 mb-2">הבניין עדיין ריק</h2>
                     <p class="text-gray-600 mb-4">הוסיפו דייר, תשלום או הוצאה. הכל נשמר במכשיר הזה, בלי חשבון ובלי שרת. אפשר גם לטעון נתוני דוגמה מסומנים, רק כדי לראות איך המסכים נראים.</p>
                     <div class="flex flex-wrap gap-2">
@@ -200,7 +201,7 @@
                         <button type="button" id="loadSampleDataBtn" class="px-4 py-3 min-h-[44px] bg-white border border-gray-300 text-gray-800 font-semibold rounded-lg">טען נתוני דוגמה</button>
                     </div>
                 </div>
-                <div id="sampleDataBanner" class="hidden mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div id="sampleDataBanner" class="ds-note hidden mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <p class="text-amber-900 m-0"><strong>נתוני דוגמה.</strong> השמות והסכומים כאן להמחשה בלבד, לא דיירים אמיתיים.</p>
                     <button type="button" id="clearSampleDataBtn" class="px-4 py-3 min-h-[44px] bg-white border border-amber-300 text-amber-900 font-semibold rounded-lg">מחק נתוני דוגמה</button>
                 </div>
@@ -222,8 +223,92 @@
                     </div>
                 </div>
 
-                <!-- System Info -->
-                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+                <div class="ds-kpi-grid">
+                    <div class="stat-card ds-kpi ds-kpi--blue cursor-pointer" role="button" tabindex="0" aria-label="עבור לניהול דיירים" onclick="typeof showTab==='function'&&showTab('tenants')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('tenants');}">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h3 id="totalTenants" class="text-2xl font-bold text-gray-900">0</h3>
+                                <p class="text-sm text-gray-500">סך דיירים</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card ds-kpi ds-kpi--green cursor-pointer" role="button" tabindex="0" aria-label="עבור לדיירים ששילמו החודש" onclick="typeof showTab==='function'&&showTab('tenants')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('tenants');}">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                                <h3 id="paidTenants" class="text-2xl font-bold text-gray-900">0</h3>
+                                <p class="text-sm text-gray-500">שילמו החודש</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card ds-kpi ds-kpi--rose cursor-pointer" role="button" tabindex="0" aria-label="עבור לתשלומים ממתינים" onclick="typeof showTab==='function'&&showTab('payments')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('payments');}">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <h3 id="pendingTenants" class="text-2xl font-bold text-gray-900">0</h3>
+                                <p class="text-sm text-gray-500">ממתינים לתשלום</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card ds-kpi ds-kpi--amber cursor-pointer" role="button" tabindex="0" aria-label="עבור לתשלומים והכנסות" onclick="typeof showTab==='function'&&showTab('payments')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('payments');}">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600">
+                                <i class="fas fa-shekel-sign"></i>
+                            </div>
+                            <div>
+                                <h3 id="totalRevenue" class="text-2xl font-bold text-gray-900">₪0</h3>
+                                <p class="text-sm text-gray-500">הכנסות החודש</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ds-alerts" id="dashboardAlertsCard">
+                    <h3><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> התראות</h3>
+                    <div id="dashboardAlerts"></div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-blue-600"></i>
+                            סטטוס תשלומים
+                        </h3>
+                        <div class="chart-container h-[300px]">
+                            <canvas id="paymentStatusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-bar text-blue-600"></i>
+                            הכנסות לפי חודשים
+                        </h3>
+                        <div class="chart-container h-[300px]">
+                            <canvas id="monthlyRevenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="ds-alerts bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                    <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-history"></i>
+                        פעילות אחרונה
+                    </h3>
+                    <div id="recentActivity" class="activity-list space-y-2">
+                        <!-- Activity items will be added dynamically -->
+                    </div>
+                </div>
+
+                <div class="ds-quiet bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl">
                             <i class="fas fa-building"></i>
@@ -235,7 +320,6 @@
                     </div>
                 </div>
 
-                <!-- Action Cards Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
                     <div id="installHomeCard" data-ios-hide="pwa" class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white shadow-md">
                         <div class="flex items-center gap-3">
@@ -262,97 +346,20 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Statistics Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-blue-600 cursor-pointer hover:shadow-lg transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" role="button" tabindex="0" aria-label="עבור לניהול דיירים" onclick="typeof showTab==='function'&&showTab('tenants')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('tenants');}">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div>
-                                <h3 id="totalTenants" class="text-2xl font-bold text-gray-900">0</h3>
-                                <p class="text-sm text-gray-500">סך דיירים</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-emerald-500 cursor-pointer hover:shadow-lg transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600" role="button" tabindex="0" aria-label="עבור לדיירים ששילמו החודש" onclick="typeof showTab==='function'&&showTab('tenants')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('tenants');}">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div>
-                                <h3 id="paidTenants" class="text-2xl font-bold text-gray-900">0</h3>
-                                <p class="text-sm text-gray-500">שילמו החודש</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-amber-500 cursor-pointer hover:shadow-lg transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600" role="button" tabindex="0" aria-label="עבור לתשלומים ממתינים" onclick="typeof showTab==='function'&&showTab('payments')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('payments');}">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div>
-                                <h3 id="pendingTenants" class="text-2xl font-bold text-gray-900">0</h3>
-                                <p class="text-sm text-gray-500">ממתינים לתשלום</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card bg-white rounded-xl shadow-md p-6 border-r-4 border-cyan-500 cursor-pointer hover:shadow-lg transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600" role="button" tabindex="0" aria-label="עבור לתשלומים והכנסות" onclick="typeof showTab==='function'&&showTab('payments')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();typeof showTab==='function'&&showTab('payments');}">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600">
-                                <i class="fas fa-shekel-sign"></i>
-                            </div>
-                            <div>
-                                <h3 id="totalRevenue" class="text-2xl font-bold text-gray-900">₪0</h3>
-                                <p class="text-sm text-gray-500">הכנסות החודש</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                        <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
-                            <i class="fas fa-chart-pie text-blue-600"></i>
-                            סטטוס תשלומים
-                        </h3>
-                        <div class="chart-container h-[300px]">
-                            <canvas id="paymentStatusChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                        <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
-                            <i class="fas fa-chart-bar text-blue-600"></i>
-                            הכנסות לפי חודשים
-                        </h3>
-                        <div class="chart-container h-[300px]">
-                            <canvas id="monthlyRevenueChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                    <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-history text-blue-600"></i>
-                        פעילות אחרונה
-                    </h3>
-                    <div id="recentActivity" class="activity-list space-y-2">
-                        <!-- Activity items will be added dynamically -->
-                    </div>
-                </div>
             </section>
 
             <!-- Tenants Section -->
             <section id="tenantsSection" class="content-section">
+                <div class="ds-hero ds-hero--blue" id="tenantsHero">
+                    <div>
+                        <h1 id="tenantsHeroTitle">דיירים</h1>
+                        <p id="tenantsHeroSub">רשימת הדיירים בבניין</p>
+                    </div>
+                    <div class="ds-hero-icon" aria-hidden="true"><i id="tenantsHeroIcon" class="fas fa-users"></i></div>
+                </div>
                 <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
                     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-users text-blue-600"></i> דיירים ותשלומים
-                        </h1>
-                        <p class="text-sm text-gray-500 w-full">לחץ על שם דייר או ⋮ → מרכז דייר · תשלום חודשי/שנתי והודעות במקום אחד</p>
+                        <p class="text-sm text-gray-500 w-full m-0">לחץ על שם דייר או ⋮ → מרכז דייר · תשלום חודשי/שנתי והודעות במקום אחד</p>
                         <div class="flex flex-wrap gap-2">
                             <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition" id="addTenantBtn">
                                 <i class="fas fa-plus"></i> הוסף דייר
@@ -368,7 +375,7 @@
                 </div>
 
                 <!-- Tenant Section Tabs -->
-                <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+                <div class="ds-segments" role="tablist" aria-label="דיירים ותשלומים">
                     <button class="tenant-tab active flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-lg font-semibold whitespace-nowrap" data-tab="tenantsList" onclick="switchTenantTab('tenantsList')">
                         <i class="fas fa-users"></i> רשימת דיירים
                     </button>
@@ -384,23 +391,23 @@
                 <div id="tenantsListTab" class="tenant-tab-content active">
 
                 <!-- Summary (same layout as payments section) -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                        <p class="text-sm text-gray-500 mb-1">סה"כ דיירים</p>
-                        <p class="text-2xl font-bold text-gray-900" id="tenantsSummaryTotal">0</p>
+                <div class="ds-kpi-grid ds-kpi-compact mb-6">
+                    <div class="ds-kpi ds-kpi--blue">
+                        <p class="ds-kpi__label">סה"כ דיירים</p>
+                        <p class="ds-kpi__value" id="tenantsSummaryTotal">0</p>
                     </div>
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-emerald-500">
-                        <p class="text-sm text-gray-500 mb-1">סטטוס שולם</p>
-                        <p class="text-2xl font-bold text-emerald-600" id="tenantsSummaryPaid">0</p>
+                    <div class="ds-kpi ds-kpi--green">
+                        <p class="ds-kpi__label">סטטוס שולם</p>
+                        <p class="ds-kpi__value" id="tenantsSummaryPaid">0</p>
                     </div>
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-amber-500">
-                        <p class="text-sm text-gray-500 mb-1">ממתין / באיחור</p>
-                        <p class="text-2xl font-bold text-amber-600" id="tenantsSummaryPending">0</p>
+                    <div class="ds-kpi ds-kpi--rose">
+                        <p class="ds-kpi__label">ממתין / באיחור</p>
+                        <p class="ds-kpi__value" id="tenantsSummaryPending">0</p>
                     </div>
                 </div>
 
                 <!-- Search and Filter Bar (aligned with payments filters) -->
-                <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
+                <div class="ds-filters bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
                     <div class="flex flex-col sm:flex-row gap-3 flex-wrap items-start sm:items-center">
                         <div class="flex-1 relative min-w-[200px]">
                             <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -517,18 +524,13 @@
 
                 <div id="paymentsHistoryTab" class="tenant-tab-content hidden">
                 <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
-                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <h2 class="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-money-bill-wave text-blue-600"></i> היסטוריית תשלומים
-                        </h2>
-                        <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2">
                             <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition" id="recordPaymentBtn">
                                 <i class="fas fa-plus"></i> רשום תשלום
                             </button>
                             <button class="btn btn-success inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md transition" id="recordAnnualPaymentBtn">
                                 <i class="fas fa-calendar-check"></i> תשלום שנתי
                             </button>
-                        </div>
                     </div>
                     <p class="text-sm text-gray-600 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 mt-4">
                         סימון חודשי בלשונית <strong>דיירים</strong> הוא מקור האמת. רישום תשלום ותשלום שנתי כאן מסונכרנים לאותם חודשים.
@@ -536,23 +538,23 @@
                 </div>
 
                 <!-- Payment Summary -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                        <p class="text-sm text-gray-500 mb-1">סה"כ צפוי</p>
-                        <p class="text-2xl font-bold text-gray-900" id="expectedTotal">₪0</p>
+                <div class="ds-status-stack mb-6">
+                    <div class="ds-status ds-status--violet">
+                        <p class="ds-kpi__label">סה"כ צפוי</p>
+                        <p class="ds-kpi__value" id="expectedTotal">₪0</p>
                     </div>
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-emerald-500">
-                        <p class="text-sm text-gray-500 mb-1">סה"כ התקבל</p>
-                        <p class="text-2xl font-bold text-emerald-600" id="receivedTotal">₪0</p>
+                    <div class="ds-status ds-status--green">
+                        <p class="ds-kpi__label">סה"כ התקבל</p>
+                        <p class="ds-kpi__value" id="receivedTotal">₪0</p>
                     </div>
-                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 border-r-4 border-r-red-500">
-                        <p class="text-sm text-gray-500 mb-1">סה"כ חובות</p>
-                        <p class="text-2xl font-bold text-red-600" id="debtTotal">₪0</p>
+                    <div class="ds-status ds-status--rose">
+                        <p class="ds-kpi__label">סה"כ חובות</p>
+                        <p class="ds-kpi__value" id="debtTotal">₪0</p>
                     </div>
                 </div>
 
                 <!-- Tenant Selection for Bulk Actions -->
-                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+                <div class="ds-filters bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
                     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                         <label class="font-semibold text-gray-700">בחר דייר לפעולות:</label>
                         <select id="paymentTenantFilter" class="px-4 py-3 border border-gray-200 rounded-lg bg-white min-w-[200px] min-h-[44px]">
@@ -611,11 +613,16 @@
 
             <!-- Expenses Section -->
             <section id="expensesSection" class="content-section">
+                <div class="ds-hero ds-hero--rose">
+                    <div>
+                        <h1>הוצאות</h1>
+                        <p>מעקב הוצאות הבניין לפי קטגוריה</p>
+                    </div>
+                    <div class="ds-hero-icon" aria-hidden="true"><i class="fas fa-receipt"></i></div>
+                </div>
                 <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
                     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-receipt text-blue-600"></i> ניהול הוצאות
-                        </h1>
+                        <h2 class="text-lg font-bold text-gray-900 m-0">הוספת הוצאה</h2>
                         <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition" id="addExpenseBtn">
                             <i class="fas fa-plus"></i> הוסף הוצאה חדשה
                         </button>
@@ -685,7 +692,7 @@
                 </div>
 
                 <!-- Filter Bar -->
-                <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+                <div class="ds-filters bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
                     <div class="flex flex-col sm:flex-row gap-3">
                         <div class="flex-1 relative">
                             <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -732,25 +739,26 @@
                 </div>
 
                 <!-- Total Expenses -->
-                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                        <span class="text-gray-600 font-medium">סה"כ הוצאות החודש</span>
-                        <strong class="text-xl font-bold text-gray-900" id="monthlyExpenseTotal">₪0</strong>
+                <div class="ds-status-stack mt-6">
+                    <div class="ds-status ds-status--rose">
+                        <p class="ds-kpi__label">סה"כ הוצאות החודש</p>
+                        <p class="ds-kpi__value" id="monthlyExpenseTotal">₪0</p>
                     </div>
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                        <span class="text-gray-600 font-medium">סה"כ הוצאות שנתי</span>
-                        <strong class="text-xl font-bold text-gray-900" id="yearlyExpenseTotal">₪0</strong>
+                    <div class="ds-status ds-status--violet">
+                        <p class="ds-kpi__label">סה"כ הוצאות שנתי</p>
+                        <p class="ds-kpi__value" id="yearlyExpenseTotal">₪0</p>
                     </div>
                 </div>
             </section>
 
             <!-- Notices Section (הודעות לדיירים) -->
             <section id="noticesSection" class="content-section">
-                <div class="mb-6">
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <i class="fas fa-bullhorn text-blue-600"></i> הודעות לדיירים
-                    </h1>
-                    <p class="text-gray-500 mt-1">צור הודעות למען הדיירים להדפסה על לוח המודעות</p>
+                <div class="ds-hero ds-hero--violet">
+                    <div>
+                        <h1>הודעות לדיירים</h1>
+                        <p>הודעות להדפסה על לוח המודעות</p>
+                    </div>
+                    <div class="ds-hero-icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></div>
                 </div>
 
                 <!-- Create Notice Card -->
@@ -856,17 +864,23 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div id="noticesCardsContainer" class="notices-cards" hidden></div>
                     </div>
                 </div>
             </section>
 
             <!-- Reports Section -->
             <section id="reportsSection" class="content-section">
+                <div class="ds-hero ds-hero--teal">
+                    <div>
+                        <h1>דוחות</h1>
+                        <p>סיכומים, ייצוא ורשימת חייבים</p>
+                    </div>
+                    <div class="ds-hero-icon" aria-hidden="true"><i class="fas fa-file-alt"></i></div>
+                </div>
                 <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6 border border-gray-100">
                     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-file-alt text-blue-600"></i> דוחות וסטטיסטיקות
-                        </h1>
+                        <h2 class="text-lg font-bold text-gray-900 m-0">ייצוא</h2>
                         <div class="flex gap-2">
                             <button class="btn btn-primary inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg" id="exportPdfBtn">
                                 <i class="fas fa-file-pdf"></i> ייצא PDF
@@ -879,7 +893,7 @@
                 </div>
 
                 <!-- Report Filters -->
-                <div class="report-filters bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100 flex flex-col sm:flex-row gap-3 flex-wrap">
+                <div class="ds-filters report-filters bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100 flex flex-col sm:flex-row gap-3 flex-wrap">
                     <div class="filter-item">
                         <label>תאריך התחלה:</label>
                         <input type="date" id="reportStartDate" class="form-input">
@@ -912,10 +926,12 @@
 
             <!-- Settings Section -->
             <section id="settingsSection" class="content-section">
-                <div class="mb-6">
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <i class="fas fa-cog text-blue-600"></i> הגדרות
-                    </h1>
+                <div class="ds-hero ds-hero--blue">
+                    <div>
+                        <h1>הגדרות</h1>
+                        <p>פרטי הבניין, הוועד והגיבוי</p>
+                    </div>
+                    <div class="ds-hero-icon" aria-hidden="true"><i class="fas fa-cog"></i></div>
                 </div>
 
                 <div class="settings-grid grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1117,6 +1133,17 @@
                 </div>
             </section>
         </main>
+        <footer class="app-footer">
+            <div class="footer-content">
+                <p id="appFooterCredit">מערכת ניהול דיירים v2.10.2 | בועז סעדה</p>
+                <p>
+                    © 2024 <strong>בועז סעדה</strong> | כל הזכויות שמורות
+                </p>
+                <p class="footer-subtitle">
+                    נבנה עם ❤️ בישראל | Tenant Management Pro
+                </p>
+            </div>
+        </footer>
     </div>
     <!-- /main-container -->
 
@@ -1817,20 +1844,6 @@
         <p>טוען נתונים...</p>
     </div>
 
-    <!-- Footer with Copyright -->
-    <footer class="app-footer">
-        <div class="footer-content">
-            <p>
-                <strong>מערכת ניהול דיירים מתקדמת</strong> | גרסה 2.4.8
-            </p>
-            <p>
-                © 2024 <strong>בועז סעדה</strong> | כל הזכויות שמורות
-            </p>
-            <p class="footer-subtitle">
-                נבנה עם ❤️ בישראל | Tenant Management Pro
-            </p>
-        </div>
-    </footer>
 
     <!-- Modal: Edit Expenses by Category -->
     <div class="modal modal-large" id="categoryExpensesModal">
