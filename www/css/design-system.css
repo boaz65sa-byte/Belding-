@@ -1492,14 +1492,20 @@ html.onboarding-open .main-container {
     box-sizing: border-box;
 }
 
+.onboarding-panel:focus {
+    outline: none;
+}
+
 .onboarding-top {
     flex: none;
     display: flex;
     justify-content: flex-end;
-    padding: 8px 16px 0;
+    padding: 12px 16px 0;
 }
 
 .onboarding-skip {
+    appearance: none;
+    -webkit-appearance: none;
     min-width: 44px;
     min-height: 44px;
     padding: 0 18px;
@@ -1507,6 +1513,7 @@ html.onboarding-open .main-container {
     border-radius: 999px;
     background: #ffffff;
     color: #1c2030;
+    box-shadow: none;
     font-family: inherit;
     font-size: 1rem;
     font-weight: 800;
@@ -1514,10 +1521,24 @@ html.onboarding-open .main-container {
     cursor: pointer;
 }
 
+.onboarding-skip:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.onboarding-skip:focus-visible {
+    outline: 3px solid #1e1b4b !important;
+    outline-offset: 2px;
+    box-shadow: none !important;
+}
+
 .onboarding-viewport {
     flex: 1 1 auto;
     min-height: 0;
+    min-width: 0;
+    width: 100%;
     overflow: hidden;
+    direction: ltr;
     touch-action: pan-y;
 }
 
@@ -1525,16 +1546,16 @@ html.onboarding-open .main-container {
     display: flex;
     direction: ltr;
     height: 100%;
-    width: 100%;
+    width: max-content;
     transition: transform 0.35s ease;
     will-change: transform;
+    transform: translate3d(0, 0, 0);
 }
 
 .onboarding-slide {
-    flex: 0 0 100%;
-    width: 100%;
-    min-width: 100%;
+    flex: 0 0 auto;
     height: 100%;
+    overflow: hidden;
     direction: rtl;
     box-sizing: border-box;
 }
