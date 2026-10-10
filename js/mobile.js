@@ -9,17 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initFabLogic() {
-    const fabBtn = document.getElementById('fabBtn');
-    if (!fabBtn) return;
+    if (!document.getElementById('fabBtn')) return;
 
-    // Listen to changes in the active section to update the FAB
+    // Listen to changes in the active section to update the FAB.
+    // The button is replaced on each update, so it has to be read again.
     const updateFab = () => {
+        const fabBtn = document.getElementById('fabBtn');
         const activeSection = document.querySelector('.content-section.active');
-        if (!activeSection) return;
+        if (!fabBtn || !fabBtn.parentNode || !activeSection) return;
 
         const sectionId = activeSection.id;
-        const icon = fabBtn.querySelector('i');
-        
+
         // Remove old click listeners safely
         const newFabBtn = fabBtn.cloneNode(true);
         fabBtn.parentNode.replaceChild(newFabBtn, fabBtn);

@@ -1,4 +1,4 @@
-const APP_VERSION = '2.15.1';
+const APP_VERSION = '2.16.0';
 const STATIC_CACHE = `tenant-management-static-${APP_VERSION}`;
 const RUNTIME_CACHE = `tenant-management-runtime-${APP_VERSION}`;
 
@@ -9,6 +9,7 @@ const ASSETS_TO_PRECACHE = [
     './install.html',
     './manifest.json',
     './css/style.css',
+    './css/design-system.css',
     './css/belding-theme.css',
     './css/vaad-prestige.css',
     './css/mobile-native.css',
@@ -19,6 +20,7 @@ const ASSETS_TO_PRECACHE = [
     './js/app.js',
     './js/payments-table.js',
     './js/mobile.js',
+    './js/onboarding.js',
     './js/auth.js',
     './js/config.js',
     './js/supabase-client.js',

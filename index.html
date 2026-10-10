@@ -172,6 +172,10 @@
                 <i class="fas fa-cog w-5"></i>
                 <span>הגדרות</span>
             </a>
+            <button type="button" id="openOnboardingSidebar" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-medium">
+                <i class="fas fa-book-open w-5" aria-hidden="true"></i>
+                <span>הדרכה</span>
+            </button>
             <a href="#" data-account-hide onclick="return false;" class="menu-item flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition font-medium mt-4">
                 <i class="fas fa-sign-out-alt w-5"></i>
                 <span>התנתק</span>
@@ -204,6 +208,21 @@
                 <div id="sampleDataBanner" class="ds-note hidden mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <p class="text-amber-900 m-0"><strong>נתוני דוגמה.</strong> השמות והסכומים כאן להמחשה בלבד, לא דיירים אמיתיים.</p>
                     <button type="button" id="clearSampleDataBtn" class="px-4 py-3 min-h-[44px] bg-white border border-amber-300 text-amber-900 font-semibold rounded-lg">מחק נתוני דוגמה</button>
+                </div>
+                <div id="gettingStartedCard" class="getting-started" hidden>
+                    <div class="getting-started-head">
+                        <h2>שלושה צעדים להתחלה</h2>
+                        <button type="button" id="dismissGettingStarted" class="getting-started-dismiss" aria-label="סגור את כרטיס ההתחלה">
+                            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                                <path d="M6 6l12 12M18 6L6 18"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <ol class="getting-started-steps">
+                        <li><button type="button" class="getting-started-step" data-start-step="tenant"><span>1</span>הוסיפו דייר</button></li>
+                        <li><button type="button" class="getting-started-step" data-start-step="payment"><span>2</span>רשמו תשלום</button></li>
+                        <li><button type="button" class="getting-started-step" data-start-step="expense"><span>3</span>הוסיפו הוצאה</button></li>
+                    </ol>
                 </div>
 
                 <!-- Subscription Banner -->
@@ -935,6 +954,11 @@
                 </div>
 
                 <div class="settings-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3><i class="fas fa-book-open" aria-hidden="true"></i> מדריך להתחלה</h3>
+                        <p>הסבר קצר על דיירים, תשלומים, הוצאות והודעות ללוח המודעות.</p>
+                        <button type="button" class="btn btn-primary" id="openOnboardingFromSettings" style="min-height:44px">הדרכה</button>
+                    </div>
                     <!-- General Settings -->
                     <div class="settings-card bg-white rounded-xl shadow-md p-6 border border-gray-100">
                         <h3><i class="fas fa-sliders-h"></i> הגדרות כלליות</h3>
@@ -1890,6 +1914,107 @@
         </div>
     </div>
 
+    <div id="onboarding" class="onboarding tone-violet" hidden aria-hidden="true">
+        <div class="onboarding-panel" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+            <div class="onboarding-top">
+                <button type="button" class="onboarding-skip" id="onboardingSkip">דלג</button>
+            </div>
+            <div class="onboarding-viewport" id="onboardingViewport">
+                <div class="onboarding-track" id="onboardingTrack">
+                    <section class="onboarding-slide" data-slide="0">
+                        <div class="onboarding-slide-body">
+                            <div class="onboarding-icon" aria-hidden="true">
+                                <svg viewBox="0 0 72 72" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 32L36 14l24 18"></path>
+                                    <path d="M18 30v26h36V30"></path>
+                                    <path d="M30 56V40h12v16"></path>
+                                    <path d="M26 36h4M42 36h4M26 44h4M42 44h4"></path>
+                                </svg>
+                            </div>
+                            <p class="onboarding-kicker">ברוכים הבאים</p>
+                            <h2 id="onboardingTitle">ניהול ועד בית</h2>
+                            <p class="onboarding-lead">דיירים, תשלומים, הוצאות והודעות ללוח המודעות, במקום אחד.</p>
+                            <ul class="onboarding-points">
+                                <li>בלי חשבון ובלי הרשמה</li>
+                                <li>הנתונים נשמרים רק במכשיר הזה</li>
+                            </ul>
+                        </div>
+                    </section>
+                    <section class="onboarding-slide" data-slide="1">
+                        <div class="onboarding-slide-body">
+                            <div class="onboarding-icon" aria-hidden="true">
+                                <svg viewBox="0 0 72 72" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="26" cy="24" r="8"></circle>
+                                    <circle cx="46" cy="26" r="6"></circle>
+                                    <path d="M12 54c1.5-8 7-12 14-12s12.5 4 14 12"></path>
+                                    <path d="M40 50c1.2-5 4.5-8 8.5-8 4.2 0 7.6 3 9.5 8"></path>
+                                    <path d="M50 42l4 4 8-9"></path>
+                                </svg>
+                            </div>
+                            <p class="onboarding-kicker">דיירים</p>
+                            <h2>דיירים ותשלומים</h2>
+                            <p class="onboarding-lead">הוסיפו דייר, סמנו תשלום חודשי או תשלום שנתי, וראו מי באיחור.</p>
+                        </div>
+                    </section>
+                    <section class="onboarding-slide" data-slide="2">
+                        <div class="onboarding-slide-body">
+                            <div class="onboarding-icon" aria-hidden="true">
+                                <svg viewBox="0 0 72 72" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 14h22l10 10v34a4 4 0 0 1-4 4H22a4 4 0 0 1-4-4V18a4 4 0 0 1 4-4z"></path>
+                                    <path d="M42 14v12h12"></path>
+                                    <path d="M26 38h20M26 46h14M26 54h18"></path>
+                                </svg>
+                            </div>
+                            <p class="onboarding-kicker">הוצאות</p>
+                            <h2>הוצאות הבניין</h2>
+                            <p class="onboarding-lead">תעדו כל הוצאה לפי קטגוריה, למשל ניקיון, מעלית, חשמל, גינון או תחזוקה.</p>
+                        </div>
+                    </section>
+                    <section class="onboarding-slide" data-slide="3">
+                        <div class="onboarding-slide-body">
+                            <div class="onboarding-icon" aria-hidden="true">
+                                <svg viewBox="0 0 72 72" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 28h22l10-8v32l-10-8H16a4 4 0 0 1-4-4V32a4 4 0 0 1 4-4z"></path>
+                                    <path d="M54 30c4 4 4 12 0 16"></path>
+                                    <path d="M22 50l-4 10 12-6"></path>
+                                </svg>
+                            </div>
+                            <p class="onboarding-kicker">הודעות</p>
+                            <h2>הודעות ותזכורת</h2>
+                            <p class="onboarding-lead">כתבו הודעה ללוח המודעות. לדייר עם מספר טלפון אפשר לפתוח תזכורת תשלום בוואטסאפ.</p>
+                        </div>
+                    </section>
+                    <section class="onboarding-slide" data-slide="4">
+                        <div class="onboarding-slide-body">
+                            <div class="onboarding-icon" aria-hidden="true">
+                                <svg viewBox="0 0 72 72" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="36" cy="36" r="20"></circle>
+                                    <path d="M36 24v14l8 5"></path>
+                                </svg>
+                            </div>
+                            <p class="onboarding-kicker">מתחילים</p>
+                            <h2>איך מתחילים</h2>
+                            <p class="onboarding-lead">טענו נתוני דוגמה מסומנים כדי לראות את המסכים, או התחילו עם בניין ריק.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="onboarding-footer">
+                <div class="onboarding-start" id="onboardingStart" hidden>
+                    <p class="onboarding-note">הנתונים נשמרים רק במכשיר הזה. בהגדרות יש כפתור «צור גיבוי» כדי לשמור עותק של הקובץ.</p>
+                    <button type="button" class="onboarding-btn onboarding-btn-sample" id="onboardingSample">התחל עם נתוני דוגמה</button>
+                    <button type="button" class="onboarding-btn onboarding-btn-empty" id="onboardingEmpty">התחל מאפס</button>
+                </div>
+                <div class="onboarding-dots" id="onboardingDots" role="tablist" aria-label="שקופיות ההדרכה"></div>
+                <div class="onboarding-nav" id="onboardingNav">
+                    <button type="button" class="onboarding-btn onboarding-btn-back" id="onboardingBack">הקודם</button>
+                    <button type="button" class="onboarding-btn onboarding-btn-next" id="onboardingNext">הבא</button>
+                </div>
+            </div>
+            <p class="onboarding-live" id="onboardingLive" aria-live="polite"></p>
+        </div>
+    </div>
+
     <!-- Mobile Bottom Navigation (visible only on mobile) -->
     <nav class="mobile-bottom-nav" aria-label="ניווט ראשי">
         <button type="button" class="nav-item" onclick="showTab('dashboard')" data-tab="dashboard" aria-label="ראשי">
@@ -1924,6 +2049,11 @@
             </button>
         </div>
         <div class="more-menu-items">
+            <button type="button" class="more-menu-item" id="openOnboardingFromMenu">
+                <i class="fas fa-book-open" aria-hidden="true"></i>
+                <span>הדרכה</span>
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
             <button class="more-menu-item" onclick="showTab('notices'); closeMoreMenu();">
                 <i class="fas fa-bullhorn"></i>
                 <span>הודעות</span>
@@ -1957,6 +2087,7 @@
     <script src="js/app.js"></script>
     <script src="js/payments-table.js"></script>
     <script src="js/mobile.js"></script>
+    <script src="js/onboarding.js"></script>
     
     <!-- PWA Service Worker Registration -->
     <script>
